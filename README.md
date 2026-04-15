@@ -1,11 +1,11 @@
-# 📘 Gramática BNF 
-## 👨‍🎓 Estudiantes
+#  Gramática BNF 
+##  Estudiantes
 - Elder León  
 - Quiriat Mata  
 
 ---
 
-## 📌 Descripción
+##  Descripción
 
 Diseño e implementación de una **gramática BNF** para un lenguaje imperativo, la cual será utilizada como base para el desarrollo de un **analizador léxico y sintáctico** utilizando JFlex y CUP.
 
@@ -13,7 +13,7 @@ El proyecto contempla la validación de estructuras del lenguaje, así como el r
 
 ---
 
-## ⚙️ Alcance del Proyecto
+##  Alcance del Proyecto
 
 El sistema a desarrollar deberá ser capaz de:
 
