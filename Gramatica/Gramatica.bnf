@@ -32,6 +32,7 @@ Operadores aritmeticos:
 "-"
 "*"
 "/"
+"//"
 "%"
 "^"
 
@@ -67,6 +68,8 @@ Palabras reservadas:
 "false"
 "empty"
 "__main__"
+"do"
+"while"
 
 -------------------------No terminales-------------------------
 
@@ -89,6 +92,12 @@ Palabras reservadas:
 <elemento>
 <tipo>
 <tipo_funcion>
+<char>
+<char_caracter>
+<factorNegativo>
+<case_default>
+<resto_expresiones>
+<resto_params>
 
 -- Identificadores --
 <ID>
@@ -192,7 +201,7 @@ Palabras reservadas:
 -- Sentencias y bloques --
 <break>
 <return>
-<lista_elementos>
+
 <bloque>
 <sentencia>
 <lista_sentencias>
@@ -213,28 +222,40 @@ Palabras reservadas:
 
 -- Lexicos base --
 <letra>::= [a-zA-Z]
-<texto> ::= <letra><texto>| <digito><texto>| " " <texto> | ε
+<texto> ::= <letra><texto>| <digito><texto>| <texto> | ε | <char><texto>
 
 -- Literales y tipos --
+<char> ::= " " | "!" | "@" | "#" | "$" | "%" 
+                   | "^" | "&" | "*" | "(" | ")" | "-" | "_" | "=" | "+"
+                   | "[" | "]" | "{" | "}" | ";" | ":" | "'" | "<" | ">"
+                   | "," | "." | "/" | "?" | "|" | "\\" | "`" | "~" 
+<char_caracter> ::= <letra> | <digito> | " " | "!" | "@" | "#" | "$" | "%" 
+                  | "^" | "&" | "*" | "-" | "_" | "=" | "+" | "." | "/"
+                  | "?" | ";" | ":" | "<" | ">" | "," | "|" | "\\"
+
 <digito> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <digitoSincero> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <lista_digitos> ::= <digito> <lista_digitos> | ε
 <entero> ::= "0" | <digitoSincero> <lista_digitos>
 <flotante> ::= <entero> "." <entero>
 <exponencial> ::= <entero> "e" <entero>
-<fraccion> ::= <entero> "/" <entero>
+<fraccion> ::= <entero> "//" <entero>
 <bool> ::= "true" | "false"
 <cadena> ::= "\"" <texto> "\""
-<caracter> ::= "'" <letra> "'"
+<caracter> ::= "'" <char_caracter> "'"
 <elemento_numerico> ::= <entero> | <flotante> | <exponencial> | <fraccion>
 <elemento> ::= <elemento_numerico> | <bool> | <cadena> | <caracter>
 <tipo> ::= "int" | "bool" | "float" | "string" | "char"
-<tipo_funcion> ::= "int" | "bool" | "float" | "char"
+<tipo_funcion> ::= "int" | "bool" | "float" | "char" | "string"
 
 -- Identificadores --
 <ID> ::= <letra> <resto_id>
-<resto_id> ::= <letra> <resto_id> | <digito> <resto_id> | ε
+       | "_" <resto_id>
 
+<resto_id> ::= <letra> <resto_id>
+             | <digito> <resto_id>
+             | "_" <resto_id>
+             | ε
 -- Delimitadores y operadores --
 <abrir_bloque> ::= "|:"
 <cerrar_bloque> ::= ":|"
@@ -256,7 +277,8 @@ Palabras reservadas:
 <comentario> ::= <comentario_linea> | <comentario_bloque>
 
 -- Expresiones aritmeticas --
-<factor> ::= <elemento_numerico> | <ID> | <cadena> | <parentesis_apertura> <expresion> <parentesis_cierre> | <acceder_arreglo> | "++" <ID> | "--" <ID> | "-" <factor> | <llamada_funcion>
+<factorNegativo> ::= "-" <elemento_numerico> | "-" <ID> | "-" <parentesis_apertura> <expresion_aritmetica> <parentesis_cierre>
+<factor> ::= <elemento_numerico> | <ID> | <cadena> | <parentesis_apertura> <expresion> <parentesis_cierre> | <acceder_arreglo> | "++" <ID> | "--" <ID> | <factorNegativo> | <llamada_funcion>
 <potencia> ::= <factor> <resto_potencia>
 <resto_potencia> ::= "^" <factor> <resto_potencia> | ε
 <termino> ::= <potencia> <resto_termino>
@@ -275,17 +297,21 @@ Palabras reservadas:
 <expresion_relacional> ::= <equal> | <n_equal>| <less_t> | <less_te> | <greather_t> | <greather_te>
 
 -- Expresiones logicas --
-<factor_logico> ::= "$" <factor_logico> | <expresion_relacional> | <bool> | <parentesis_apertura> <expresion_logica> <parentesis_cierre>|<ID>|<llamada_funcion>|<acceder_arreglo>
+<factor_logico> ::= "$" <factor_logico> | <expresion_aritmetica>| <expresion_relacional> | <bool> | <parentesis_apertura> <expresion_logica> <parentesis_cierre>|<ID>
 <resto_termino_logico> ::= "@" <factor_logico> <resto_termino_logico> | ε
 <termino_logico> ::= <factor_logico> <resto_termino_logico>
 <resto_logico> ::= "#" <termino_logico> <resto_logico> | ε
 <expresion_logica> ::= <termino_logico> <resto_logico>
 
 -- Expresiones generales y llamadas --
-<lista_expresiones> ::= <expresion> | <expresion> <coma> <lista_expresiones> | ε
-<llamada_funcion> ::= <ID> <parentesis_apertura> <lista_expresiones> <parentesis_cierre>
-<expresion> ::= <expresion_logica> | <expresion_aritmetica>
+<lista_expresiones> ::= <expresion> <resto_expresiones> | ε
+<resto_expresiones> ::= <coma> <expresion> <resto_expresiones> | ε
+<param> ::= <tipo> <separador> <ID>
+<lista_params> ::= <param> <resto_params> | ε
+<resto_params> ::= <coma> <param> <resto_params> | ε
 
+<llamada_funcion> ::= <ID> <parentesis_apertura> <lista_expresiones> <parentesis_cierre>
+<expresion> ::= <expresion_logica> 
 -- Variables --
 <declarar_variable> ::= <tipo> <separador> <ID> | <tipo> <separador> <ID> <asignacion> <expresion>
 <asignar_variable> ::= <ID> <asignacion> <expresion>
@@ -323,25 +349,24 @@ Palabras reservadas:
 
 -- Estructuras de control --
 <else> ::= "else" <bloque> | ε
-<if>::= "if"  <parentesis_apertura> <expresion_logica> <parentesis_cierre> <bloque> <else>
-<do-while> ::= "do" <bloque> "while" <separador> <parentesis_apertura> <expresion_logica> <parentesis_cierre> <fin_sentencia>
+<if>::= "if"  <parentesis_apertura> <expresion> <parentesis_cierre> <bloque> <else>
+<do-while> ::= "do" <bloque> "while" <separador> <parentesis_apertura> <expresion> <parentesis_cierre> <fin_sentencia>
 <cases> ::= <case_item> <cases>| ε
-<case_item> ::="case"<separador><elemento>":"<lista_sentencias>|"default" ":"<lista_sentencias>
-<switch> ::= "switch"  <parentesis_apertura> <expresion> <parentesis_cierre> <abrir_bloque> <cases> <cerrar_bloque>
+<case_item> ::="case"<separador><elemento>":"<lista_sentencias>
+<case_default> ::= "default" ":" <lista_sentencias>| ε
+<switch> ::= "switch"  <parentesis_apertura> <expresion> <parentesis_cierre> <abrir_bloque> <cases> <case_default><cerrar_bloque>
 <instrucion> ::= <if> | <do-while> | <switch>
 
 -- Sentencias y bloques --
 <break> ::= "break"
 <return> ::= "return" <separador> <expresion>
-<lista_elementos> ::= <elemento> | <elemento> <coma> <lista_elementos> | ε
 <bloque> ::= <abrir_bloque> <lista_sentencias> <cerrar_bloque>
 <sentencia> ::= <variable><fin_sentencia>|<arreglo><fin_sentencia>| <instrucion>| <bloque> | <return> <fin_sentencia>| <break> <fin_sentencia> | <LecturaEscritura>| <expresion> <fin_sentencia>
-<lista_sentencias> ::= <sentencia> <lista_sentencias> | <comentario> <lista_sentencias> | ε
+<lista_sentencias> ::= <sentencia> <lista_sentencias> | ε
 
 -- Funciones y programa --
-<param> ::= <tipo> <separador> <ID>
-<lista_params> ::= <param> | <param> <coma> <lista_params> | ε
+
 <funcion> ::= <tipo_funcion> <separador> <ID> <parentesis_apertura> <lista_params> <parentesis_cierre> <bloque>
-<lista_funciones> ::= <funcion> <lista_funciones> | <comentario> <lista_funciones> | ε
+<lista_funciones> ::= <funcion> <lista_funciones> | ε
 <main> ::= "empty"<separador>"__main__"<parentesis_apertura><parentesis_cierre><abrir_bloque><lista_sentencias><cerrar_bloque>
 <programa> ::= <lista_funciones> <main>
