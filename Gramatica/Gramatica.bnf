@@ -238,6 +238,8 @@ Palabras reservadas:
 <bool> ::= "true" | "false"
 <cadena> ::= "\"" <texto> "\""
 <caracter> ::= "'" <char_caracter> "'"
+
+
 <elemento_numerico> ::= <entero> | <flotante> | <exponencial> | <fraccion>
 <elemento> ::= <elemento_numerico> | <bool> | <cadena> | <caracter>
 <tipo> ::= "int" | "bool" | "float" | "string" | "char"
@@ -267,6 +269,7 @@ Palabras reservadas:
 <comentario_inicio_linea> ::= "¡¡"
 <comentario_inicio_bloque> ::= "{-"
 <comentario_fin_bloque> ::= "-}"
+
 <comentario_linea> ::= <comentario_inicio_linea> <texto>
 <comentario_bloque> ::= <comentario_inicio_bloque> <texto> <comentario_fin_bloque>
 <comentario> ::= <comentario_linea> | <comentario_bloque>

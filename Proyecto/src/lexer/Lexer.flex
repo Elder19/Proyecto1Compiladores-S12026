@@ -24,6 +24,7 @@ DIGITO_SINCERO     = [1-9]
 
 ID                 = ({LETRA}|"_")({LETRA}|{DIGITO}|"_")*
 
+
 ENTERO             = 0|{DIGITO_SINCERO}{DIGITO}*
 FLOTANTE           = {ENTERO}"."{ENTERO}
 EXPONENCIAL        = {ENTERO}"e"{ENTERO}
@@ -37,7 +38,11 @@ COMENTARIO_LINEA   = "¡¡"[^\r\n]*
 COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 %%
-
+%{
+    public Lexer(java.io.Reader in) {
+        this.zzReader = in;
+    }
+%}
 <YYINITIAL> {ESPACIO}           { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_LINEA}  { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_BLOQUE} { /* ignorar */ }
@@ -45,6 +50,7 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 
 <YYINITIAL> "int"        { return symbol(sym.INT, yytext()); }
+
 <YYINITIAL> "bool"       { return symbol(sym.BOOL, yytext()); }
 <YYINITIAL> "float"      { return symbol(sym.FLOAT, yytext()); }
 <YYINITIAL> "string"     { return symbol(sym.STRING, yytext()); }
