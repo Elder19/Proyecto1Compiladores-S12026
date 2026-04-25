@@ -35,6 +35,8 @@ Operadores aritmeticos:
 "//"
 "%"
 "^"
+"++"
+"--"
 
 Operadores Logicos:
 "@" (and)
@@ -102,7 +104,7 @@ Palabras reservadas:
 -- Identificadores --
 <ID>
 <resto_id>
-
+<dos_puntos>
 -- Delimitadores y operadores --
 <abrir_bloque>
 <cerrar_bloque>
@@ -166,21 +168,11 @@ Palabras reservadas:
 <fila_flotantes>
 <filas_enteros>
 <filas_flotantes>
-<vector_enteros>
-<vector_flotantes>
 <matriz_enteros>
 <matriz_flotantes>
-<declarar_arreglo_lista>
-<declarar_arreglo_matriz>
 <declarar_arreglo>
-<crear_arreglo_lista>
-<crear_arreglo_matriz>
 <crear_arreglo>
-<acceder_arreglo_lista>
-<acceder_arreglo_matriz>
 <acceder_arreglo>
-<modificar_arreglo_lista>
-<modificar_arreglo_matriz>
 <modificar_arreglo>
 <arreglo>
 
@@ -192,7 +184,7 @@ Palabras reservadas:
 -- Estructuras de control --
 <else>
 <if>
-<do-while>
+<do_while>
 <cases>
 <case_item>
 <switch>
@@ -213,7 +205,8 @@ Palabras reservadas:
 <lista_funciones>
 <main>
 <programa>
-
+<incremento>
+<decremento>
 -------------------------Simbolo inicial-------------------------
 
 <programa>
@@ -223,7 +216,9 @@ Palabras reservadas:
 -- Lexicos base --
 <letra>::= [a-zA-Z]
 <texto> ::= <letra><texto>| <digito><texto>| <texto> | ε | <char><texto>
-
+<dos_puntos> ::= ":"
+<incremento> ::= "++"
+<decremento> ::= "--"
 -- Literales y tipos --
 <char> ::= " " | "!" | "@" | "#" | "$" | "%" 
                    | "^" | "&" | "*" | "(" | ")" | "-" | "_" | "=" | "+"
@@ -278,7 +273,7 @@ Palabras reservadas:
 
 -- Expresiones aritmeticas --
 <factorNegativo> ::= "-" <elemento_numerico> | "-" <ID> | "-" <parentesis_apertura> <expresion_aritmetica> <parentesis_cierre>
-<factor> ::= <elemento_numerico> | <ID> | <cadena> | <parentesis_apertura> <expresion> <parentesis_cierre> | <acceder_arreglo> | "++" <ID> | "--" <ID> | <factorNegativo> | <llamada_funcion>
+<factor> ::= <elemento_numerico> | <ID> | <cadena> | <parentesis_apertura> <expresion> <parentesis_cierre> | <acceder_arreglo> | <incremento> <ID> | <decremento> <ID> | <factorNegativo> | <llamada_funcion>
 <potencia> ::= <factor> <resto_potencia>
 <resto_potencia> ::= "^" <factor> <resto_potencia> | ε
 <termino> ::= <potencia> <resto_termino>
@@ -318,29 +313,29 @@ Palabras reservadas:
 <variable>::= <declarar_variable> | <asignar_variable>
 
 -- Arreglos --
-<lista_enteros> ::= <entero>| <entero> <coma> <lista_enteros>
+<lista_enteros> ::= <entero> | <entero> <coma> <lista_enteros>
 <lista_flotantes> ::= <flotante> | <flotante> <coma> <lista_flotantes>
+
 <fila_enteros> ::= <abrir_bloque> <lista_enteros> <cerrar_bloque>
 <fila_flotantes> ::= <abrir_bloque> <lista_flotantes> <cerrar_bloque>
-<filas_enteros> ::= <fila_enteros>| <fila_enteros> <coma> <filas_enteros>
-<filas_flotantes> ::= <fila_flotantes>| <fila_flotantes> <coma> <filas_flotantes>
-<vector_enteros> ::= <abrir_bloque> <lista_enteros> <cerrar_bloque>
-<vector_flotantes> ::= <abrir_bloque> <lista_flotantes> <cerrar_bloque>
+
+<filas_enteros> ::= <fila_enteros> | <fila_enteros> <coma> <filas_enteros>
+<filas_flotantes> ::= <fila_flotantes> | <fila_flotantes> <coma> <filas_flotantes>
+
 <matriz_enteros> ::= <abrir_bloque> <filas_enteros> <cerrar_bloque>
 <matriz_flotantes> ::= <abrir_bloque> <filas_flotantes> <cerrar_bloque>
-<declarar_arreglo_lista> ::= "int" <separador> <ID> <abrirParentesis_cuadrado> <entero> <cerrarParentesis_cuadrado>| "float" <separador> <ID> <abrirParentesis_cuadrado> <entero> <cerrarParentesis_cuadrado>
-<declarar_arreglo_matriz> ::= "int" <separador> <ID> <abrirParentesis_cuadrado> <entero> <coma> <entero> <cerrarParentesis_cuadrado>| "float" <separador> <ID> <abrirParentesis_cuadrado> <entero> <coma> <entero> <cerrarParentesis_cuadrado>
-<declarar_arreglo> ::= <declarar_arreglo_lista>| <declarar_arreglo_matriz>
-<crear_arreglo_lista> ::= "int" <separador> <ID> <asignacion> <vector_enteros>| "float" <separador> <ID> <asignacion> <vector_flotantes>
-<crear_arreglo_matriz> ::= "int" <separador> <ID> <asignacion> <matriz_enteros>| "float" <separador> <ID> <asignacion> <matriz_flotantes>
-<crear_arreglo> ::= <crear_arreglo_matriz>| <crear_arreglo_lista>
-<acceder_arreglo_lista> ::= <ID> <abrirParentesis_cuadrado> <expresion> <cerrarParentesis_cuadrado>
-<acceder_arreglo_matriz> ::= <ID> <abrirParentesis_cuadrado> <expresion> <coma> <expresion> <cerrarParentesis_cuadrado>
-<acceder_arreglo> ::= <acceder_arreglo_lista>| <acceder_arreglo_matriz>
-<modificar_arreglo_lista> ::= <ID> <abrirParentesis_cuadrado> <expresion> <cerrarParentesis_cuadrado> <asignacion> <expresion>
-<modificar_arreglo_matriz> ::= <ID> <abrirParentesis_cuadrado> <expresion> <coma> <expresion> <cerrarParentesis_cuadrado> <asignacion> <expresion>
-<modificar_arreglo> ::= <modificar_arreglo_lista>| <modificar_arreglo_matriz>
-<arreglo>::= <declarar_arreglo>| <modificar_arreglo>| <crear_arreglo>
+
+<declarar_arreglo> ::= "int" <separador> <ID> <abrirParentesis_cuadrado> <entero> <coma> <entero> <cerrarParentesis_cuadrado>
+                     | "float" <separador> <ID> <abrirParentesis_cuadrado> <entero> <coma> <entero> <cerrarParentesis_cuadrado>
+
+<crear_arreglo> ::= "int" <separador> <ID> <asignacion> <matriz_enteros>
+                  | "float" <separador> <ID> <asignacion> <matriz_flotantes>
+
+<acceder_arreglo> ::= <ID> <abrirParentesis_cuadrado> <expresion> <coma> <expresion> <cerrarParentesis_cuadrado>
+
+<modificar_arreglo> ::= <ID> <abrirParentesis_cuadrado> <expresion> <coma> <expresion> <cerrarParentesis_cuadrado> <asignacion> <expresion>
+
+<arreglo> ::= <declarar_arreglo> | <modificar_arreglo> | <crear_arreglo>
 
 -- Entrada y salida --
 <cin> ::= "cin" <separador> <ID> | "cin" <separador> <acceder_arreglo>
@@ -350,12 +345,12 @@ Palabras reservadas:
 -- Estructuras de control --
 <else> ::= "else" <bloque> | ε
 <if>::= "if"  <parentesis_apertura> <expresion> <parentesis_cierre> <bloque> <else>
-<do-while> ::= "do" <bloque> "while" <separador> <parentesis_apertura> <expresion> <parentesis_cierre> <fin_sentencia>
+<do_while> ::= "do" <bloque> "while" <separador> <parentesis_apertura> <expresion> <parentesis_cierre> <fin_sentencia>
 <cases> ::= <case_item> <cases>| ε
-<case_item> ::="case"<separador><elemento>":"<lista_sentencias>
-<case_default> ::= "default" ":" <lista_sentencias>| ε
+<case_item> ::="case"<separador><elemento><dos_puntos><lista_sentencias>
+<case_default> ::= "default" <dos_puntos> <lista_sentencias>| ε
 <switch> ::= "switch"  <parentesis_apertura> <expresion> <parentesis_cierre> <abrir_bloque> <cases> <case_default><cerrar_bloque>
-<instrucion> ::= <if> | <do-while> | <switch>
+<instrucion> ::= <if> | <do_while> | <switch>
 
 -- Sentencias y bloques --
 <break> ::= "break"
