@@ -1,14 +1,19 @@
 import java_cup.runtime.Symbol;
+import java.util.List;
+import java.util.ArrayList;
 
 %%
 
 %cup
+%public
 %class Lexer
 %unicode
 %line
 %column
 
 %{
+    public static List<String> erroresLexicos = new ArrayList<>();
+
     private Symbol symbol(int type) {
         return new Symbol(type, yyline + 1, yycolumn + 1);
     }
@@ -24,7 +29,6 @@ DIGITO_SINCERO     = [1-9]
 
 ID                 = ({LETRA}|"_")({LETRA}|{DIGITO}|"_")*
 
-
 ENTERO             = 0|{DIGITO_SINCERO}{DIGITO}*
 FLOTANTE           = {ENTERO}"."{ENTERO}
 EXPONENCIAL        = {ENTERO}"e"{ENTERO}
@@ -38,19 +42,12 @@ COMENTARIO_LINEA   = "¡¡"[^\r\n]*
 COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 %%
-%{
-    public Lexer(java.io.Reader in) {
-        this.zzReader = in;
-    }
-%}
+
 <YYINITIAL> {ESPACIO}           { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_LINEA}  { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_BLOQUE} { /* ignorar */ }
 
-
-
 <YYINITIAL> "int"        { return symbol(sym.INT, yytext()); }
-
 <YYINITIAL> "bool"       { return symbol(sym.BOOL, yytext()); }
 <YYINITIAL> "float"      { return symbol(sym.FLOAT, yytext()); }
 <YYINITIAL> "string"     { return symbol(sym.STRING, yytext()); }
@@ -77,16 +74,12 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> "do"         { return symbol(sym.DO, yytext()); }
 <YYINITIAL> "while"      { return symbol(sym.WHILE, yytext()); }
 
-
-
 <YYINITIAL> "equal"        { return symbol(sym.EQUAL, yytext()); }
 <YYINITIAL> "n_equal"      { return symbol(sym.N_EQUAL, yytext()); }
 <YYINITIAL> "less_t"       { return symbol(sym.LESS_T, yytext()); }
 <YYINITIAL> "less_te"      { return symbol(sym.LESS_TE, yytext()); }
 <YYINITIAL> "greather_t"   { return symbol(sym.GREATHER_T, yytext()); }
 <YYINITIAL> "greather_te"  { return symbol(sym.GREATHER_TE, yytext()); }
-
-
 
 <YYINITIAL> "|:"   { return symbol(sym.ABRIR_BLOQUE, yytext()); }
 <YYINITIAL> ":|"   { return symbol(sym.CERRAR_BLOQUE, yytext()); }
@@ -102,14 +95,10 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> "++"   { return symbol(sym.INCREMENTO, yytext()); }
 <YYINITIAL> "--"   { return symbol(sym.DECREMENTO, yytext()); }
 
-
-
 <YYINITIAL> "!"   { return symbol(sym.FIN_SENTENCIA, yytext()); }
 <YYINITIAL> "~"   { return symbol(sym.SEPARADOR, yytext()); }
 <YYINITIAL> ","   { return symbol(sym.COMA, yytext()); }
 <YYINITIAL> ":"   { return symbol(sym.DOS_PUNTOS, yytext()); }
-
-
 
 <YYINITIAL> "+"   { return symbol(sym.SUMA, yytext()); }
 <YYINITIAL> "-"   { return symbol(sym.RESTA, yytext()); }
@@ -118,12 +107,9 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> "%"   { return symbol(sym.MODULO, yytext()); }
 <YYINITIAL> "^"   { return symbol(sym.POTENCIA, yytext()); }
 
-
-
 <YYINITIAL> "@"   { return symbol(sym.AND, yytext()); }
 <YYINITIAL> "#"   { return symbol(sym.OR, yytext()); }
 <YYINITIAL> "$"   { return symbol(sym.NOT, yytext()); }
-
 
 <YYINITIAL> {EXPONENCIAL}  { return symbol(sym.EXPONENCIAL, yytext()); }
 <YYINITIAL> {FLOTANTE}     { return symbol(sym.FLOTANTE, yytext()); }
@@ -135,17 +121,13 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> {CADENA}       { return symbol(sym.CADENA, yytext()); }
 <YYINITIAL> {CARACTER}     { return symbol(sym.CARACTER, yytext()); }
 
-
-
 <YYINITIAL> {ID} { return symbol(sym.ID, yytext()); }
 
-
 <YYINITIAL> [^] {
-    System.out.println(
-        "Error lexico: '" + yytext() +
-        "' en linea " + (yyline + 1) +
-        ", columna " + (yycolumn + 1)
-    );
+    String msg = "Error léxico: carácter inesperado '" + yytext() +
+                 "' en línea " + (yyline + 1) +
+                 ", columna " + (yycolumn + 1);
+    erroresLexicos.add(msg);
+    System.err.println(msg);
     return symbol(sym.ERROR, yytext());
-
 }
