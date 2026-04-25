@@ -1,0 +1,383 @@
+import java_cup.runtime.*;
+import java.util.*;
+
+
+/*Terminales*/
+
+ terminal ID;
+ terminal CADENA;
+ terminal CARACTER;
+ terminal ENTERO;
+ terminal FLOTANTE;
+ terminal FRACCION;
+ terminal BOOL;
+ terminal EXPONENCIAL;
+ terminal ERROR;
+ terminal FLOAT;
+ terminal STRING;
+ terminal CHAR;
+ terminal IF;
+ terminal ELSE;
+ terminal SWITCH;
+ terminal CASE;
+ terminal DEFAULT;
+ terminal RETURN;
+ terminal BREAK;
+ terminal CIN;
+ terminal COUT;
+ terminal TRUE;
+ terminal FALSE;
+ terminal EMPTY;
+ terminal DO;
+ terminal WHILE;
+ terminal EQUAL;
+ terminal N_EQUAL;
+ terminal LESS_T;
+ terminal LESS_TE;
+ terminal GREATHER_T;
+ terminal GREATHER_TE;
+ terminal ABRIR_BLOQUE;
+ terminal CERRAR_BLOQUE;
+ terminal ASIGNACION;
+ terminal PARENTESIS_APERTURA;
+ terminal PARENTESIS_CIERRE;
+ terminal ABRIR_PARENTESIS_CUADRADO;
+ terminal CERRAR_PARENTESIS_CUADRADO;
+ terminal INCREMENTO;
+ terminal DECREMENTO;
+ terminal FIN_SENTENCIA;
+ terminal SEPARADOR;
+ terminal COMA;
+ terminal DOS_PUNTOS;
+ terminal SUMA;
+ terminal RESTA;
+ terminal MULTIPLICACION;
+ terminal DIVISION;
+ terminal POTENCIA;
+ terminal MODULO;
+ terminal AND;
+ terminal OR;
+ terminal NOT;
+ terminal MAIN;
+ terminal INT;
+terminal DIVISION_ENTERA;
+
+
+
+/*no terminales*/
+non terminal elemento_numerico;
+non terminal elemento;      
+non terminal tipo;
+non terminal tipo_funcion;
+non terminal programa;
+non terminal lista_funciones;
+non terminal funcion;
+non terminal main;
+non terminal lista_params;
+non terminal resto_params;
+non terminal param;
+non terminal bool_literal;
+non terminal lista_sentencias;
+non terminal sentencia;
+non terminal bloque;
+non terminal break_sentencia;
+non terminal return_sentencia;
+non terminal acceder_arreglo;
+non terminal modificar_arreglo;
+non terminal lista_enteros;
+non terminal lista_flotantes;
+non terminal fila_enteros;
+non terminal fila_flotantes;
+non terminal filas_enteros;
+non terminal filas_flotantes;
+non terminal matriz_enteros;
+non terminal matriz_flotantes;
+non terminal lectura_escritura;
+non terminal cin_sentencia;
+non terminal cout_sentencia;
+non terminal instruccion;
+non terminal if_sentencia;
+non terminal else_bloque;
+non terminal do_while;
+non terminal switch_sentencia;
+non terminal cases;
+non terminal case_item;
+non terminal case_default;
+non terminal expresion;
+non terminal expresion_aritmetica;
+non terminal resto_aritmetica;
+non terminal termino;
+non terminal resto_termino;
+non terminal potencia;
+non terminal resto_potencia;
+non terminal factor;
+non terminal factor_negativo;
+non terminal expresion_relacional;
+non terminal operando_relacional_eq;
+non terminal expresion_logica;
+non terminal resto_logico;
+non terminal termino_logico;
+non terminal resto_termino_logico;
+non terminal factor_logico;
+non terminal llamada_funcion;
+non terminal lista_expresiones;
+non terminal resto_expresiones;
+non terminal tipo_completo;
+non terminal asignar_variable ;
+non terminal declaracion_int;
+non terminal declaracion_float;
+/*producciones*/
+
+start with programa;
+programa ::= lista_funciones main;
+lista_funciones ::= funcion lista_funciones
+                  | /* vacio */
+;
+
+funcion ::= tipo_funcion SEPARADOR ID PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
+;
+
+main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+;
+
+lista_params ::= param resto_params
+               | /* vacio */
+;
+
+resto_params ::= COMA param resto_params
+               | /* vacio */
+;
+
+
+tipo ::=BOOL
+       | STRING
+       | CHAR
+;
+
+tipo_funcion ::= INT
+               | BOOL
+               | FLOAT
+               | CHAR
+               | STRING
+;
+bool_literal ::= TRUE
+               | FALSE
+;
+
+elemento_numerico ::= ENTERO
+                    | FLOTANTE
+                    | EXPONENCIAL
+                    | FRACCION
+;
+
+elemento ::= elemento_numerico
+           | bool_literal
+           | CADENA
+           | CARACTER
+;
+
+
+lista_sentencias ::= sentencia lista_sentencias
+                   | /* vacio */
+;
+sentencia ::= declaracion_int FIN_SENTENCIA
+            | declaracion_float FIN_SENTENCIA
+            | tipo SEPARADOR ID FIN_SENTENCIA                          // bool, string, char sin asignacion
+            | tipo SEPARADOR ID ASIGNACION expresion FIN_SENTENCIA     // bool, string, char con asignacion
+            | asignar_variable FIN_SENTENCIA
+            | modificar_arreglo FIN_SENTENCIA
+            | instruccion
+            | bloque
+            | return_sentencia FIN_SENTENCIA
+            | break_sentencia FIN_SENTENCIA
+            | lectura_escritura
+            | expresion FIN_SENTENCIA
+;
+
+bloque ::= ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+;
+
+break_sentencia ::= BREAK
+;
+tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR;
+
+param ::= tipo_completo SEPARADOR ID;
+return_sentencia ::= RETURN SEPARADOR expresion
+;
+asignar_variable ::= ID ASIGNACION expresion
+;
+
+acceder_arreglo ::= ID ABRIR_PARENTESIS_CUADRADO expresion COMA expresion CERRAR_PARENTESIS_CUADRADO
+;
+
+modificar_arreglo ::= ID ABRIR_PARENTESIS_CUADRADO expresion COMA expresion CERRAR_PARENTESIS_CUADRADO ASIGNACION expresion
+;
+
+lista_enteros ::= ENTERO
+                | ENTERO COMA lista_enteros
+;
+
+lista_flotantes ::= FLOTANTE
+                  | FLOTANTE COMA lista_flotantes
+;
+
+fila_enteros  ::= ABRIR_BLOQUE lista_enteros  CERRAR_BLOQUE
+;
+fila_flotantes ::= ABRIR_BLOQUE lista_flotantes CERRAR_BLOQUE
+;
+
+filas_enteros  ::= fila_enteros
+                 | fila_enteros COMA filas_enteros
+;
+filas_flotantes ::= fila_flotantes
+                  | fila_flotantes COMA filas_flotantes
+;
+
+matriz_enteros  ::= ABRIR_BLOQUE filas_enteros  CERRAR_BLOQUE
+;
+matriz_flotantes ::= ABRIR_BLOQUE filas_flotantes CERRAR_BLOQUE
+;
+
+
+lectura_escritura ::= cin_sentencia  FIN_SENTENCIA
+                    | cout_sentencia FIN_SENTENCIA
+;
+
+cin_sentencia  ::= CIN SEPARADOR ID
+                 | CIN SEPARADOR acceder_arreglo
+;
+
+cout_sentencia ::= COUT PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
+;
+
+instruccion ::= if_sentencia
+              | do_while
+              | switch_sentencia
+;
+
+if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE bloque else_bloque
+;
+
+else_bloque ::= ELSE bloque
+              | /* vacio */
+;
+
+do_while ::= DO bloque WHILE SEPARADOR PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
+;
+
+switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
+;
+
+cases ::= case_item cases
+        | /* vacio */
+;
+
+case_item ::= CASE SEPARADOR elemento DOS_PUNTOS lista_sentencias
+;
+
+case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
+               | /* vacio */
+;
+
+expresion ::= expresion_logica
+;
+
+expresion_aritmetica ::= termino resto_aritmetica
+;
+
+resto_aritmetica ::= SUMA   termino resto_aritmetica
+                   | RESTA  termino resto_aritmetica
+                   | /* vacio */
+;
+
+termino ::= potencia resto_termino
+;
+
+resto_termino ::= MULTIPLICACION potencia resto_termino
+                | DIVISION       potencia resto_termino
+                | MODULO         potencia resto_termino
+                | /* vacio */
+;
+
+potencia ::= factor resto_potencia
+;
+
+resto_potencia ::= POTENCIA factor resto_potencia
+                 | /* vacio */
+;
+
+factor ::= elemento_numerico
+         | ID
+         | CADENA
+         | PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
+         | acceder_arreglo
+         | INCREMENTO ID
+         | DECREMENTO ID
+         | factor_negativo
+         | llamada_funcion
+;
+
+factor_negativo ::= RESTA elemento_numerico
+                  | RESTA ID
+                  | RESTA PARENTESIS_APERTURA expresion_aritmetica PARENTESIS_CIERRE
+;
+
+
+expresion_relacional ::= EQUAL      PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
+                       | N_EQUAL    PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
+                       | LESS_T     PARENTESIS_APERTURA expresion_aritmetica   COMA expresion_aritmetica   PARENTESIS_CIERRE
+                       | LESS_TE    PARENTESIS_APERTURA expresion_aritmetica   COMA expresion_aritmetica   PARENTESIS_CIERRE
+                       | GREATHER_T  PARENTESIS_APERTURA expresion_aritmetica  COMA expresion_aritmetica   PARENTESIS_CIERRE
+                       | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica  COMA expresion_aritmetica   PARENTESIS_CIERRE
+;
+
+operando_relacional_eq ::= expresion_aritmetica
+                         | bool_literal
+                        
+;
+
+expresion_logica ::= termino_logico resto_logico
+;
+
+resto_logico ::= OR termino_logico resto_logico
+               | /* vacio */
+;
+
+termino_logico ::= factor_logico resto_termino_logico
+;
+
+resto_termino_logico ::= AND factor_logico resto_termino_logico
+                       | /* vacio */
+;
+
+factor_logico ::= NOT factor_logico
+                | expresion_aritmetica
+                | expresion_relacional
+                | bool_literal
+;
+declaracion_int ::= INT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
+                  | INT SEPARADOR ID ASIGNACION matriz_enteros
+                  | INT SEPARADOR ID ASIGNACION expresion
+                  | INT SEPARADOR ID
+;
+
+declaracion_float ::= FLOAT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
+                    | FLOAT SEPARADOR ID ASIGNACION matriz_flotantes
+                    | FLOAT SEPARADOR ID ASIGNACION expresion
+                    | FLOAT SEPARADOR ID
+;
+
+llamada_funcion ::= ID PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
+;
+
+lista_expresiones ::= expresion resto_expresiones
+                    | /* vacio */
+;
+
+resto_expresiones ::= COMA expresion resto_expresiones
+                    | /* vacio */
+;
+
+
+
+                
