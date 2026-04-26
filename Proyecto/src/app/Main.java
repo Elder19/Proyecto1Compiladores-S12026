@@ -43,7 +43,7 @@ public class Main {
 
     // ─────────────────────────────────────────────────────────────
     private static void ejecutarEjemplos(String carpeta) throws Exception {
-
+      
         URLClassLoader loader = new URLClassLoader(new URL[]{
                 new File("src/lexer").toURI().toURL(),
                 new File("src/parser").toURI().toURL(),
@@ -56,8 +56,6 @@ public class Main {
 
         int      EOF           = symClass.getField("EOF").getInt(null);
         String[] terminalNames = (String[]) symClass.getField("terminalNames").get(null);
-        Field    campoErrores  = lexerClass.getField("erroresLexicos");
-        campoErrores.setAccessible(true);
 
         File   dir      = new File(carpeta);
         File[] archivos = dir.listFiles((d, name) -> name.endsWith(".txt"));
@@ -72,13 +70,13 @@ public class Main {
             System.out.println("  Archivo: " + archivo.getName());
             System.out.println("══════════════════════════════════════");
 
-            // ── Limpiar errores del archivo anterior ──────────────
-            List<?> erroresLexicos = (List<?>) campoErrores.get(null);
-            erroresLexicos.clear();
+         
 
             // ── Análisis léxico ───────────────────────────────────
             System.out.println("\n[ TOKENS ]");
-            System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA");
+            File archivoSalida = new File(carpeta, "tokens_" + archivo.getName());
+            PrintWriter escritor = new PrintWriter(new FileWriter(archivoSalida));;
+            System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA", "COLUMNA");
             System.out.println("──────────────────────────────────────────────────────");
 
             Object lexer = lexerClass
@@ -94,26 +92,23 @@ public class Main {
 
                 Object value = token.getClass().getField("value").get(token);
                 int    line  = (int) token.getClass().getField("left").get(token);
-                int    col   = (int) token.getClass().getField("right").get(token);
+              int column = token.getClass().getField("right").getInt(token);
 
-                String etiqueta = (symNum < terminalNames.length)
-                        ? terminalNames[symNum]
-                        : String.valueOf(symNum);
+               String nombreToken = (symNum >= 0 && symNum < terminalNames.length) ? terminalNames[symNum]: "UNKNOWN(" + symNum + ")";
+                String lexema = value != null ? value.toString() : "";
 
-                String prefijo = etiqueta.equals("ERROR") ? "  ✘ " : "    ";
-                System.out.printf("%s%-20s %-25s %-8d%n",
-                        prefijo, etiqueta, value, line);
+                System.out.printf("%-20s %-25s %-8d %-8d%n",
+                        nombreToken, lexema, line, column);
+
+                escritor.printf("%-20s %-25s %-8d %-8d%n",
+                        nombreToken, lexema, line, column);
+
             }
+            escritor.close();
 
             // ── Resumen léxico ────────────────────────────────────
             System.out.println("──────────────────────────────────────────────────────");
-            if (erroresLexicos.isEmpty()) {
-                System.out.println("✔ Sin errores léxicos.\n");
-            } else {
-                System.out.println("✘ Errores léxicos encontrados: " + erroresLexicos.size());
-                erroresLexicos.forEach(e -> System.out.println("  " + e));
-                System.out.println();
-            }
+        
 
             //── Analisis sintactico ────────────────────────────────────
             System.out.println("\n[ PARSER ]");
