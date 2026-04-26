@@ -125,8 +125,7 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 <YYINITIAL> [^] {
     String msg = "Error léxico: carácter inesperado '" + yytext() +
-                 "' en línea " + (yyline + 1) +
-                 ", columna " + (yycolumn + 1);
+                 "' en línea " + (yyline + 1);
     erroresLexicos.add(msg);
     System.err.println(msg);
     return symbol(sym.ERROR, yytext());

@@ -858,8 +858,7 @@ public class Lexer implements java_cup.runtime.Scanner {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
             { String msg = "Error léxico: carácter inesperado '" + yytext() +
-                 "' en línea " + (yyline + 1) +
-                 ", columna " + (yycolumn + 1);
+                 "' en línea " + (yyline + 1);
     erroresLexicos.add(msg);
     System.err.println(msg);
     return symbol(sym.ERROR, yytext());

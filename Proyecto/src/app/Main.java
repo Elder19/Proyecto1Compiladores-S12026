@@ -115,27 +115,53 @@ public class Main {
                 System.out.println();
             }
 
-/*
-            // ── Análisis sintáctico ───────────────────────────────
+            //── Analisis sintactico ────────────────────────────────────
             System.out.println("\n[ PARSER ]");
+
+            // Limpia errores sintacticos del archivo anterior
+            Field campoErroresSint = parserClass.getField("erroresSintacticos");
+            campoErroresSint.setAccessible(true);
+            List<?> erroresSintacticos = (List<?>) campoErroresSint.get(null);
+            erroresSintacticos.clear();
+
             try {
-                Object lexerParser = lexerClass
-                        .getConstructor(Reader.class)
-                        .newInstance(new FileReader(archivo));
+                // Crear nuevo lexer para el parser (el anterior ya se consumió)
+                Constructor<?> lexerConstructor = null;
+                for (Constructor<?> c : lexerClass.getConstructors()) {
+                    if (c.getParameterCount() == 1 &&
+                        c.getParameterTypes()[0].getName().equals("java.io.Reader")) {
+                        lexerConstructor = c;
+                        break;
+                    }
+                }
 
-                Object parser = parserClass
-                        .getConstructor(java_cup.runtime.Scanner.class)
-                        .newInstance(lexerParser);
+                Object lexerParser = lexerConstructor.newInstance(new FileReader(archivo));
 
-                parserClass.getMethod("parse").invoke(parser);
-                System.out.println("✔ Análisis sintáctico exitoso.");
+                // Buscar constructor del parser que recibe un Scanner
+                Constructor<?> parserConstructor = null;
+                for (Constructor<?> c : parserClass.getConstructors()) {
+                    if (c.getParameterCount() == 1) {
+                        parserConstructor = c;
+                        break;
+                    }
+                }
+
+                Object parserObj = parserConstructor.newInstance(lexerParser);
+                parserClass.getMethod("parse").invoke(parserObj);
 
             } catch (InvocationTargetException e) {
-                System.out.println("✘ Error sintáctico: " + e.getCause().getMessage());
+                // El unrecovered_syntax_error ya agregó el mensaje a la lista
             }
 
-            System.out.println("\n  Archivo procesado: " + archivo.getName());
-*/
+            // ── Resumen sintáctico ────────────────────────────────
+            System.out.println("──────────────────────────────────────────────────────");
+            if (erroresSintacticos.isEmpty()) {
+                System.out.println("✔ Sin errores sintácticos.\n");
+            } else {
+                System.out.println("✘ Errores sintácticos encontrados: " + erroresSintacticos.size());
+                erroresSintacticos.forEach(e -> System.out.println("  " + e));
+                System.out.println();
+            }
         }
     }
 

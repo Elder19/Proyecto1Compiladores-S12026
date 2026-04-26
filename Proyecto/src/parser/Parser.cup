@@ -1,6 +1,29 @@
 import java_cup.runtime.*;
 import java.util.*;
 
+parser code {:
+    public static List<String> erroresSintacticos = new ArrayList<>();
+
+    @Override
+    public void syntax_error(Symbol cur_token) {
+        String lexema = cur_token.value != null ? cur_token.value.toString() : "desconocido";
+        String msg = "Error sintáctico en línea " + cur_token.left +
+                     ": token inesperado '" + lexema + "'";
+        erroresSintacticos.add(msg);
+        System.err.println(msg);
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
+        String msg = "Error sintáctico irrecuperable en línea " + cur_token.left +
+                     ". No se pudo continuar el análisis.";
+        erroresSintacticos.add(msg);
+        System.err.println(msg);
+    }
+:};
+
+
+
 
 /*Terminales*/
 
@@ -176,14 +199,10 @@ elemento ::= elemento_numerico
            | CARACTER
 ;
 
-
-lista_sentencias ::= sentencia lista_sentencias
-                   | /* vacio */
-;
 sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
-            | tipo SEPARADOR ID FIN_SENTENCIA                          // bool, string, char sin asignacion
-            | tipo SEPARADOR ID ASIGNACION expresion FIN_SENTENCIA     // bool, string, char con asignacion
+            | tipo SEPARADOR ID FIN_SENTENCIA
+            | tipo SEPARADOR ID ASIGNACION expresion FIN_SENTENCIA
             | asignar_variable FIN_SENTENCIA
             | modificar_arreglo FIN_SENTENCIA
             | instruccion
@@ -192,10 +211,27 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             | break_sentencia FIN_SENTENCIA
             | lectura_escritura
             | expresion FIN_SENTENCIA
+            | error FIN_SENTENCIA
+            {:
+                parser.erroresSintacticos.add(
+                    "  → Recuperado: se omitió sentencia inválida hasta '!'"
+                );
+            :}
 ;
 
 bloque ::= ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
 ;
+
+lista_sentencias ::= sentencia lista_sentencias
+                   | /* vacio */
+                   | error lista_sentencias
+                   {:
+                       parser.erroresSintacticos.add(
+                           "  → Recuperado: se omitió sentencia inválida hasta '!'"
+                       );
+                   :}
+;
+
 
 break_sentencia ::= BREAK
 ;
