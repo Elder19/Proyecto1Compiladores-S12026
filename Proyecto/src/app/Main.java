@@ -78,7 +78,7 @@ public class Main {
 
             // ── Análisis léxico ───────────────────────────────────
             System.out.println("\n[ TOKENS ]");
-            System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA", "COLUMNA");
+            System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA");
             System.out.println("──────────────────────────────────────────────────────");
 
             Object lexer = lexerClass
@@ -101,8 +101,8 @@ public class Main {
                         : String.valueOf(symNum);
 
                 String prefijo = etiqueta.equals("ERROR") ? "  ✘ " : "    ";
-                System.out.printf("%s%-20s %-25s %-8d %-8d%n",
-                        prefijo, etiqueta, value, line, col);
+                System.out.printf("%s%-20s %-25s %-8d%n",
+                        prefijo, etiqueta, value, line);
             }
 
             // ── Resumen léxico ────────────────────────────────────
