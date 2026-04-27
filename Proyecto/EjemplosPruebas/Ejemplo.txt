@@ -1,4 +1,1 @@
-int~x<-10!
-float~y<-5.2!
-int~x<-10!
-¿
+empty~__main__<||>|:int~x!int~y<-5!if<|equal<|x,y|>|>|:bool~sergioG!if<|equal<|x,5|>|>|:int~z!:|:|int~contador!:|

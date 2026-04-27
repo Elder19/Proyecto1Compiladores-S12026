@@ -861,7 +861,6 @@ public class Lexer implements java_cup.runtime.Scanner {
                  "' en línea " + (yyline + 1);
     erroresLexicos.add(msg);
     System.err.println(msg);
-    return symbol(sym.ERROR, yytext());
             }
           // fall through
           case 59: break;

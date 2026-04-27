@@ -27,7 +27,7 @@ public class Main {
                     "-destdir", "src/parser",
                     rutaCup);
 
-            System.out.println("Compilando generados...");
+           
             ejecutar("javac",
                     "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/lexer" + SEP + "src/parser",
                     "src/lexer/Lexer.java",
@@ -58,7 +58,7 @@ public class Main {
         String[] terminalNames = (String[]) symClass.getField("terminalNames").get(null);
 
         File   dir      = new File(carpeta);
-        File[] archivos = dir.listFiles((d, name) -> name.endsWith(".txt"));
+        File[] archivos = dir.listFiles((d, name) -> name.endsWith(".txt") && !name.startsWith("tokens_"));
 
         if (archivos == null || archivos.length == 0) {
             System.out.println("No hay ejemplos .txt en " + carpeta);
@@ -73,12 +73,12 @@ public class Main {
          
 
             // ── Análisis léxico ───────────────────────────────────
-            System.out.println("\n[ TOKENS ]");
+          
             File archivoSalida = new File(carpeta, "tokens_" + archivo.getName());
             PrintWriter escritor = new PrintWriter(new FileWriter(archivoSalida));;
-            System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA", "COLUMNA");
+           /*  System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA", "COLUMNA");
             System.out.println("──────────────────────────────────────────────────────");
-
+*/
             Object lexer = lexerClass
                     .getConstructor(Reader.class)
                     .newInstance(new FileReader(archivo));
@@ -96,19 +96,18 @@ public class Main {
 
                String nombreToken = (symNum >= 0 && symNum < terminalNames.length) ? terminalNames[symNum]: "UNKNOWN(" + symNum + ")";
                 String lexema = value != null ? value.toString() : "";
-
+                /* 
                 System.out.printf("%-20s %-25s %-8d %-8d%n",
-                        nombreToken, lexema, line, column);
+                        nombreToken, lexema, line, column);*/
 
-                escritor.printf("%-20s %-25s %-8d %-8d%n",
-                        nombreToken, lexema, line, column);
-
+                escritor.printf("%-20s %-25s%n",
+                "Token: " + nombreToken,
+                "Lexema: " + lexema
+);
             }
             escritor.close();
 
-            // ── Resumen léxico ────────────────────────────────────
-            System.out.println("──────────────────────────────────────────────────────");
-        
+         
 
             //── Analisis sintactico ────────────────────────────────────
             System.out.println("\n[ PARSER ]");
