@@ -159,14 +159,27 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 
-funcion ::= tipo_funcion:tf SEPARADOR ID:id PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
+funcion ::= tipo_funcion:tf SEPARADOR ID:id
     {:
-        /* TablaSimbolos.agregar(id.toString(), "FUNCION", tf.toString(), String.valueOf(idleft)); */
+        TablaSimbolos.agregar(id.toString(), "FUNCION",
+            String.valueOf(idleft), String.valueOf(idright));
+        TablaSimbolos.entrarScope(id.toString());
+    :}
+    PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
+    {:
+        TablaSimbolos.salirScope();
     :}
 ;
 
 
-main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE 
+{:
+        TablaSimbolos.entrarScope("__main__");
+    :}
+    ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+      {:
+        TablaSimbolos.salirScope();
+    :}
 ;
 
 lista_params ::= param resto_params
@@ -208,12 +221,14 @@ elemento ::= elemento_numerico
 sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
             | tipo:t SEPARADOR ID:id FIN_SENTENCIA
-            {:
-                /* TablaSimbolos.agregar(id.toString(), t.toString(), String.valueOf(idleft)); */
-            :}
+           {:
+    TablaSimbolos.agregar(id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright));
+:}
             | tipo:t SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
             {:
-                /* TablaSimbolos.agregar(id.toString(), t.toString(), String.valueOf(idleft)); */
+                 TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
+    String.valueOf(idright)); 
             :}
             | asignar_variable FIN_SENTENCIA
             | modificar_arreglo FIN_SENTENCIA
@@ -231,17 +246,15 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             :}
 ;
 
-bloque ::= ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+bloque ::= ABRIR_BLOQUE 
+  
+    lista_sentencias 
+    CERRAR_BLOQUE
+   
 ;
 
 lista_sentencias ::= sentencia lista_sentencias
                    | /* vacio */
-                   | error lista_sentencias
-                   {:
-                       parser.erroresSintacticos.add(
-                           "  → Recuperado: se omitió sentencia inválida hasta '!'"
-                       );
-                   :}
 ;
 
 
@@ -253,20 +266,25 @@ tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR
 
 param ::= tipo_completo:tc SEPARADOR ID:id
     {:
-        /* TablaSimbolos.agregar(id.toString(), "PARAMETRO", tc.toString(), String.valueOf(idleft)); */
+         TablaSimbolos.agregar(id.toString(), "PARAMETRO",  String.valueOf(idleft),
+    String.valueOf(idright)); 
     :}
 ;
 
 return_sentencia ::= RETURN SEPARADOR expresion
 ;
-asignar_variable ::= ID ASIGNACION expresion
+asignar_variable ::= ID:id ASIGNACION expresion
 ;
 
-acceder_arreglo ::= ID ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
-                  | ID ABRIR_PARENTESIS_CUADRADO expresion COMA expresion CERRAR_PARENTESIS_CUADRADO
+acceder_arreglo ::=
+      ID ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
+         ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
 ;
-modificar_arreglo ::= ID ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO ASIGNACION expresion
-                    | ID ABRIR_PARENTESIS_CUADRADO expresion COMA expresion CERRAR_PARENTESIS_CUADRADO ASIGNACION expresion
+
+modificar_arreglo ::=
+      ID:id ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
+         ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
+         ASIGNACION expresion
 ;
 
 lista_enteros ::= ENTERO
@@ -311,17 +329,24 @@ instruccion ::= if_sentencia
               | switch_sentencia
 ;
 
-if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE bloque else_bloque
+if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE 
+ {:  TablaSimbolos.entrarScope("if");  :}
+    bloque
+    {:  TablaSimbolos.salirScope();       :}
+    else_bloque
+ 
 ;
 
-else_bloque ::= ELSE bloque
-              | /* vacio */
+else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
+    bloque
+    {: TablaSimbolos.salirScope(); :}| /* vacio */
 ;
 
-do_while ::= DO bloque WHILE SEPARADOR PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
+do_while ::= DO {: TablaSimbolos.entrarScope("do_while"); :}bloque  {: TablaSimbolos.salirScope();            :} WHILE PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
 ;
 
-switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
+switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE {: TablaSimbolos.entrarScope("switch"); :} ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
+ {: TablaSimbolos.salirScope();          :}
 ;
 
 cases ::= case_item cases
@@ -352,6 +377,7 @@ termino ::= potencia resto_termino
 resto_termino ::= MULTIPLICACION potencia resto_termino
                 | DIVISION       potencia resto_termino
                 | MODULO         potencia resto_termino
+                | DIVISION_ENTERA potencia resto_termino 
                 | /* vacio */
 ;
 
@@ -372,11 +398,14 @@ factor ::= elemento_numerico
          | DECREMENTO ID
          | factor_negativo
          | llamada_funcion
+        
 ;
 
 factor_negativo ::= RESTA elemento_numerico
                   | RESTA ID
                   | RESTA PARENTESIS_APERTURA expresion_aritmetica PARENTESIS_CIERRE
+                   | RESTA RESTA elemento_numerico 
+                
 ;
 
 
@@ -412,46 +441,65 @@ factor_logico ::= NOT factor_logico
                 | expresion_relacional
                 | bool_literal
 ;
-
-declaracion_int ::= INT SEPARADOR ID:id ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
-                    {:
-                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
-                    :}
-                  | INT SEPARADOR ID:id ASIGNACION matriz_enteros
-                    {:
-                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
-                    :}
-                  | INT SEPARADOR ID:id ASIGNACION expresion
-                    {:
-                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
-                    :}
-                  | INT SEPARADOR ID:id
-                    {:
-                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
-                    :}
+declaracion_int ::=
+      INT SEPARADOR ID:id
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+      {:
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | INT SEPARADOR ID:id
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ASIGNACION matriz_enteros
+      {:
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | INT SEPARADOR ID:id ASIGNACION expresion
+      {:
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | INT SEPARADOR ID:id
+      {:
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
 ;
 
-declaracion_float ::= FLOAT SEPARADOR ID:id ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
-                      {:
-                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
-                      :}
-                    | FLOAT SEPARADOR ID:id ASIGNACION matriz_flotantes
-                      {:
-                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
-                      :}
-                    | FLOAT SEPARADOR ID:id ASIGNACION expresion
-                      {:
-                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
-                      :}
-                    | FLOAT SEPARADOR ID:id
-                      {:
-                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
-                      :}
+declaracion_float ::=
+      FLOAT SEPARADOR ID:id
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+      {:
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | FLOAT SEPARADOR ID:id
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+        ASIGNACION matriz_flotantes
+      {:
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | FLOAT SEPARADOR ID:id ASIGNACION expresion
+      {:
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
+    | FLOAT SEPARADOR ID:id
+      {:
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright));
+      :}
 ;
-
 llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
     {:
-        /* TablaSimbolos.agregar(id.toString(), "LLAMADA", String.valueOf(idleft)); */
+         TablaSimbolos.agregar(id.toString(), "LLAMADA", String.valueOf(idleft),
+    String.valueOf(idright)); 
     :}
 ;
 

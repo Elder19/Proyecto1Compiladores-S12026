@@ -8,38 +8,62 @@ public class Main {
     static String SEP = System.getProperty("path.separator");
 
     public static void main(String[] args) {
-        try {
-            String rutaFlex        = "src/lexer/Lexer.flex";
-            String rutaCup         = "src/parser/Parser.cup";
-            String carpetaEjemplos = "EjemplosPruebas";
+    try {
+        String rutaFlex        = "src/lexer/Lexer.flex";
+        String rutaCup         = "src/parser/Parser.cup";
+        String carpetaEjemplos = "EjemplosPruebas";
 
-            borrar("src/lexer/Lexer.java");
-            borrar("src/parser/Parser.java");
-            borrar("src/parser/sym.java");
+        // 1. Limpiar archivos anteriores
+        borrar("src/lexer/Lexer.java");
+        borrar("src/parser/Parser.java");
+        borrar("src/parser/sym.java");
 
-            System.out.println("Generando Lexer...");
-            jflex.Main.generate(new String[]{rutaFlex});
+        // 2. Generar Lexer
+        System.out.println("Generando Lexer...");
+        ejecutarIgnorandoError("java", "-jar", "lib/jflex.jar", rutaFlex);
+        // 3. Generar Parser + sym
+        System.out.println("Generando Parser...");
+        ejecutar("java", "-jar", "lib/java-cup.jar",
+                "-parser", "Parser",
+                "-symbols", "sym",
+                "-destdir", "src/parser",
+                rutaCup);
 
-            System.out.println("Generando Parser...");
-            ejecutar("java", "-jar", "lib/java-cup.jar",
-                    "-parser", "Parser",
-                    "-symbols", "sym",
-                    "-destdir", "src/parser",
-                    rutaCup);
+        // 4. Compilar sym PRIMERO
+        System.out.println("Compilando sym...");
+        ejecutar("javac",
+                "-cp", "." + SEP + "lib/java-cup-runtime.jar",
+                "-d", "src/parser",
+                "src/parser/sym.java");
 
-            ejecutar("javac",
-                    "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/lexer" + SEP + "src/parser",
-                    "src/lexer/Lexer.java",
-                    "src/parser/Parser.java",
-                    "src/parser/sym.java");
+        // 5. Compilar TablaSimbolos
+        System.out.println("Compilando TablaSimbolos...");
+        ejecutar("javac",
+                "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/parser",
+                "-d", "src/parser",
+                "src/parser/TablaSimbolos.java");
 
-            ejecutarEjemplos(carpetaEjemplos);
+        // 6. Compilar Lexer (ya tiene sym disponible)
+        System.out.println("Compilando Lexer...");
+        ejecutar("javac",
+                "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/parser",
+                "-d", "src/lexer",
+                "src/lexer/Lexer.java");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 7. Compilar Parser
+        System.out.println("Compilando Parser...");
+        ejecutar("javac",
+                "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/lexer" + SEP + "src/parser",
+                "-d", "src/parser",
+                "src/parser/Parser.java");
+
+        // 8. Ejecutar ejemplos
+        ejecutarEjemplos(carpetaEjemplos);
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
-
+}
     // ─────────────────────────────────────────────────────────────
     private static void ejecutarEjemplos(String carpeta) throws Exception {
 
@@ -47,8 +71,10 @@ public class Main {
                 new File("src/lexer").toURI().toURL(),
                 new File("src/parser").toURI().toURL(),
                 new File("lib/java-cup-runtime.jar").toURI().toURL()
+        
         }, Main.class.getClassLoader());
-
+         Class<?> tablaClass = Class.forName("TablaSimbolos", true, loader);
+      
         Class<?> lexerClass  = Class.forName("Lexer",  true, loader);
         Class<?> parserClass = Class.forName("Parser", true, loader);
         Class<?> symClass    = Class.forName("sym",    true, loader);
@@ -69,6 +95,7 @@ public class Main {
         }
 
         for (File archivo : archivos) {
+            tablaClass.getMethod("limpiar").invoke(null);
             System.out.println("\n══════════════════════════════════════");
             System.out.println("  Archivo: " + archivo.getName());
             System.out.println("══════════════════════════════════════");
@@ -150,10 +177,13 @@ public class Main {
                 Object parserObj = parserConstructor.newInstance(lexerParser);
                 parserClass.getMethod("parse").invoke(parserObj);
 
+                
+
             } catch (InvocationTargetException e) {
                 // El unrecovered_syntax_error ya agregó el mensaje a la lista
             }
-
+             System.out.println("\n[ TABLA DE SÍMBOLOS ]");
+             tablaClass.getMethod("imprimir").invoke(null);
             // ── Resumen sintáctico ────────────────────────────────
             System.out.println("──────────────────────────────────────────────────────");
             if (erroresSintacticos.isEmpty()) {
@@ -166,10 +196,10 @@ public class Main {
             // ── Veredicto final ───────────────────────────────────
             System.out.println("──────────────────────────────────────────────────────");
             if (erroresLexicos.isEmpty() && erroresSintacticos.isEmpty()) {
-                System.out.println("✔ El archivo cumple con la gramatica y puede ser procesado.");
+                System.out.println("El archivo cumple con la gramatica y puede ser procesado.");
             } else {
                 int total = erroresLexicos.size() + erroresSintacticos.size();
-                System.out.println("✘ El archivo NO cumple con la gramatica. Total de errores: " + total);
+                System.out.println(" El archivo NO cumple con la gramatica. Total de errores: " + total);
             }
             System.out.println("══════════════════════════════════════\n");
         }
@@ -193,6 +223,13 @@ public class Main {
             throw new RuntimeException("Error ejecutando: " + Arrays.toString(comando));
         }
     }
+    private static void ejecutarIgnorandoError(String... comando) throws Exception {
+    ProcessBuilder pb = new ProcessBuilder(comando);
+    pb.redirectErrorStream(true);           // redirigir stderr a stdout
+    pb.redirectOutput(ProcessBuilder.Redirect.DISCARD); // descartar output
+    Process p = pb.start();
+    p.waitFor();
+}
 }
 /*
 cd Proyecto
