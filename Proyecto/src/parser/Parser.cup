@@ -20,6 +20,7 @@ parser code {:
         erroresSintacticos.add(msg);
         System.err.println(msg);
     }
+
 :};
 
 
@@ -158,9 +159,12 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 
-funcion ::= tipo_funcion SEPARADOR ID PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque{:
-tablaSimbolos.agregar:}
+funcion ::= tipo_funcion:tf SEPARADOR ID:id PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
+    {:
+        /* TablaSimbolos.agregar(id.toString(), "FUNCION", tf.toString(), String.valueOf(idleft)); */
+    :}
 ;
+
 
 main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
 ;
@@ -203,8 +207,14 @@ elemento ::= elemento_numerico
 
 sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
-            | tipo SEPARADOR ID FIN_SENTENCIA
-            | tipo SEPARADOR ID ASIGNACION expresion FIN_SENTENCIA
+            | tipo:t SEPARADOR ID:id FIN_SENTENCIA
+            {:
+                /* TablaSimbolos.agregar(id.toString(), t.toString(), String.valueOf(idleft)); */
+            :}
+            | tipo:t SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
+            {:
+                /* TablaSimbolos.agregar(id.toString(), t.toString(), String.valueOf(idleft)); */
+            :}
             | asignar_variable FIN_SENTENCIA
             | modificar_arreglo FIN_SENTENCIA
             | instruccion
@@ -237,9 +247,16 @@ lista_sentencias ::= sentencia lista_sentencias
 
 break_sentencia ::= BREAK
 ;
-tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR;
 
-param ::= tipo_completo SEPARADOR ID;
+tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR
+;
+
+param ::= tipo_completo:tc SEPARADOR ID:id
+    {:
+        /* TablaSimbolos.agregar(id.toString(), "PARAMETRO", tc.toString(), String.valueOf(idleft)); */
+    :}
+;
+
 return_sentencia ::= RETURN SEPARADOR expresion
 ;
 asignar_variable ::= ID ASIGNACION expresion
@@ -348,6 +365,7 @@ resto_potencia ::= POTENCIA factor resto_potencia
 factor ::= elemento_numerico
          | ID
          | CADENA
+         | CARACTER 
          | PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
          | acceder_arreglo
          | INCREMENTO ID
@@ -394,20 +412,47 @@ factor_logico ::= NOT factor_logico
                 | expresion_relacional
                 | bool_literal
 ;
-declaracion_int ::= INT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-                  | INT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
-                  | INT SEPARADOR ID ASIGNACION matriz_enteros
-                  | INT SEPARADOR ID ASIGNACION expresion
-                  | INT SEPARADOR ID
+
+declaracion_int ::= INT SEPARADOR ID:id ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
+                    {:
+                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
+                    :}
+                  | INT SEPARADOR ID:id ASIGNACION matriz_enteros
+                    {:
+                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
+                    :}
+                  | INT SEPARADOR ID:id ASIGNACION expresion
+                    {:
+                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
+                    :}
+                  | INT SEPARADOR ID:id
+                    {:
+                        /* TablaSimbolos.agregar(id.toString(), "int", String.valueOf(idleft)); */
+                    :}
 ;
 
-declaracion_float ::= FLOAT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-                    | FLOAT SEPARADOR ID ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
-                    | FLOAT SEPARADOR ID ASIGNACION matriz_flotantes
-                    | FLOAT SEPARADOR ID ASIGNACION expresion
-                    | FLOAT SEPARADOR ID
+declaracion_float ::= FLOAT SEPARADOR ID:id ABRIR_PARENTESIS_CUADRADO ENTERO COMA ENTERO CERRAR_PARENTESIS_CUADRADO
+                      {:
+                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
+                      :}
+                    | FLOAT SEPARADOR ID:id ASIGNACION matriz_flotantes
+                      {:
+                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
+                      :}
+                    | FLOAT SEPARADOR ID:id ASIGNACION expresion
+                      {:
+                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
+                      :}
+                    | FLOAT SEPARADOR ID:id
+                      {:
+                          /* TablaSimbolos.agregar(id.toString(), "float", String.valueOf(idleft)); */
+                      :}
 ;
-llamada_funcion ::= ID PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
+
+llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
+    {:
+        /* TablaSimbolos.agregar(id.toString(), "LLAMADA", String.valueOf(idleft)); */
+    :}
 ;
 
 lista_expresiones ::= expresion resto_expresiones

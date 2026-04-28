@@ -27,7 +27,6 @@ public class Main {
                     "-destdir", "src/parser",
                     rutaCup);
 
-           
             ejecutar("javac",
                     "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/lexer" + SEP + "src/parser",
                     "src/lexer/Lexer.java",
@@ -43,7 +42,7 @@ public class Main {
 
     // ─────────────────────────────────────────────────────────────
     private static void ejecutarEjemplos(String carpeta) throws Exception {
-      
+
         URLClassLoader loader = new URLClassLoader(new URL[]{
                 new File("src/lexer").toURI().toURL(),
                 new File("src/parser").toURI().toURL(),
@@ -56,6 +55,10 @@ public class Main {
 
         int      EOF           = symClass.getField("EOF").getInt(null);
         String[] terminalNames = (String[]) symClass.getField("terminalNames").get(null);
+
+        // ── Obtener campo erroresLexicos una sola vez ─────────────
+        Field campoErrores = lexerClass.getField("erroresLexicos");
+        campoErrores.setAccessible(true);
 
         File   dir      = new File(carpeta);
         File[] archivos = dir.listFiles((d, name) -> name.endsWith(".txt") && !name.startsWith("tokens_"));
@@ -70,15 +73,14 @@ public class Main {
             System.out.println("  Archivo: " + archivo.getName());
             System.out.println("══════════════════════════════════════");
 
-         
+            // ── Limpiar errores léxicos del archivo anterior ───────
+            List<?> erroresLexicos = (List<?>) campoErrores.get(null);
+            erroresLexicos.clear();
 
             // ── Análisis léxico ───────────────────────────────────
-          
             File archivoSalida = new File(carpeta, "tokens_" + archivo.getName());
-            PrintWriter escritor = new PrintWriter(new FileWriter(archivoSalida));;
-           /*  System.out.printf("%-20s %-25s %-8s %-8s%n", "TOKEN", "LEXEMA", "LÍNEA", "COLUMNA");
-            System.out.println("──────────────────────────────────────────────────────");
-*/
+            PrintWriter escritor = new PrintWriter(new FileWriter(archivoSalida));
+
             Object lexer = lexerClass
                     .getConstructor(Reader.class)
                     .newInstance(new FileReader(archivo));
@@ -90,36 +92,42 @@ public class Main {
                 int    symNum = (int) token.getClass().getField("sym").get(token);
                 if (symNum == EOF) break;
 
-                Object value = token.getClass().getField("value").get(token);
-                int    line  = (int) token.getClass().getField("left").get(token);
-              int column = token.getClass().getField("right").getInt(token);
+                Object value  = token.getClass().getField("value").get(token);
+                int    line   = (int) token.getClass().getField("left").get(token);
 
-               String nombreToken = (symNum >= 0 && symNum < terminalNames.length) ? terminalNames[symNum]: "UNKNOWN(" + symNum + ")";
+                String nombreToken = (symNum >= 0 && symNum < terminalNames.length)
+                        ? terminalNames[symNum]
+                        : "UNKNOWN(" + symNum + ")";
                 String lexema = value != null ? value.toString() : "";
-                /* 
-                System.out.printf("%-20s %-25s %-8d %-8d%n",
-                        nombreToken, lexema, line, column);*/
 
                 escritor.printf("%-20s %-25s%n",
-                "Token: " + nombreToken,
-                "Lexema: " + lexema
-);
+                        "Token: " + nombreToken,
+                        "Lexema: " + lexema);
             }
             escritor.close();
 
-         
+            // ── Resumen léxico ────────────────────────────────────
+            System.out.println("\n[ LÉXICO ]");
+            System.out.println("──────────────────────────────────────────────────────");
+            if (erroresLexicos.isEmpty()) {
+                System.out.println("✔ Sin errores léxicos.");
+            } else {
+                System.out.println("✘ Errores léxicos encontrados: " + erroresLexicos.size());
+                erroresLexicos.forEach(e -> System.out.println("  " + e));
+            }
 
-            //── Analisis sintactico ────────────────────────────────────
+            // ── Análisis sintáctico ───────────────────────────────
             System.out.println("\n[ PARSER ]");
 
-            // Limpia errores sintacticos del archivo anterior
             Field campoErroresSint = parserClass.getField("erroresSintacticos");
             campoErroresSint.setAccessible(true);
             List<?> erroresSintacticos = (List<?>) campoErroresSint.get(null);
             erroresSintacticos.clear();
 
+            // Limpiar léxicos antes del parser para evitar duplicados
+            erroresLexicos.clear();
+
             try {
-                // Crear nuevo lexer para el parser (el anterior ya se consumió)
                 Constructor<?> lexerConstructor = null;
                 for (Constructor<?> c : lexerClass.getConstructors()) {
                     if (c.getParameterCount() == 1 &&
@@ -131,7 +139,6 @@ public class Main {
 
                 Object lexerParser = lexerConstructor.newInstance(new FileReader(archivo));
 
-                // Buscar constructor del parser que recibe un Scanner
                 Constructor<?> parserConstructor = null;
                 for (Constructor<?> c : parserClass.getConstructors()) {
                     if (c.getParameterCount() == 1) {
@@ -150,12 +157,21 @@ public class Main {
             // ── Resumen sintáctico ────────────────────────────────
             System.out.println("──────────────────────────────────────────────────────");
             if (erroresSintacticos.isEmpty()) {
-                System.out.println("✔ Sin errores sintácticos.\n");
+                System.out.println("✔ Sin errores sintácticos.");
             } else {
                 System.out.println("✘ Errores sintácticos encontrados: " + erroresSintacticos.size());
                 erroresSintacticos.forEach(e -> System.out.println("  " + e));
-                System.out.println();
             }
+
+            // ── Veredicto final ───────────────────────────────────
+            System.out.println("──────────────────────────────────────────────────────");
+            if (erroresLexicos.isEmpty() && erroresSintacticos.isEmpty()) {
+                System.out.println("✔ El archivo cumple con la gramatica y puede ser procesado.");
+            } else {
+                int total = erroresLexicos.size() + erroresSintacticos.size();
+                System.out.println("✘ El archivo NO cumple con la gramatica. Total de errores: " + total);
+            }
+            System.out.println("══════════════════════════════════════\n");
         }
     }
 

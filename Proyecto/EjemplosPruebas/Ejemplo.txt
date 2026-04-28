@@ -1,1 +1,23 @@
-empty~__main__<||>|:int~x!int~y<-5!if<|equal<|x,y|>|>|:bool~sergioG!if<|equal<|x,5|>|>|:int~z!:|:|int~contador!:|
+¡¡ Programa con errores lexicos y sintacticos
+
+empty ~ __main__ <| |> |:
+
+    ¡¡ error lexico: '?' es invalido
+    int ~ x <- 5?!
+
+    ¡¡ error lexico: '`' es invalido  
+    float ~ y <- 3.14`!
+
+    ¡¡ error sintactico: falta '!' al final
+    int ~ z <- 10
+
+    ¡¡ esto se recupera y sigue
+    bool ~ activo <- true!
+
+    ¡¡ error sintactico: asignacion sin valor
+    int ~ w <- !
+
+    ¡¡ esto tambien se recupera
+    string ~ nombre <- "Ana"!
+
+:|
