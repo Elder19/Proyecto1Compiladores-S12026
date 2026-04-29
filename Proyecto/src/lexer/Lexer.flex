@@ -42,17 +42,17 @@ COMENTARIO_LINEA   = "¡¡"[^\r\n]*
 COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 %%
-
+/*Permite las gramticas con tab enter y demas*/
 <YYINITIAL> {ESPACIO}           { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_LINEA}  { /* ignorar */ }
 <YYINITIAL> {COMENTARIO_BLOQUE} { /* ignorar */ }
-
+/*tipos de dato*/
 <YYINITIAL> "int"        { return symbol(sym.INT, yytext()); }
 <YYINITIAL> "bool"       { return symbol(sym.BOOL, yytext()); }
 <YYINITIAL> "float"      { return symbol(sym.FLOAT, yytext()); }
 <YYINITIAL> "string"     { return symbol(sym.STRING, yytext()); }
 <YYINITIAL> "char"       { return symbol(sym.CHAR, yytext()); }
-
+/*estructuras de control*/
 <YYINITIAL> "if"         { return symbol(sym.IF, yytext()); }
 <YYINITIAL> "else"       { return symbol(sym.ELSE, yytext()); }
 <YYINITIAL> "switch"     { return symbol(sym.SWITCH, yytext()); }
@@ -113,10 +113,9 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 
 <YYINITIAL> {EXPONENCIAL}  { return symbol(sym.EXPONENCIAL, yytext()); }
 <YYINITIAL> {FLOTANTE}     { return symbol(sym.FLOTANTE, yytext()); }
-<YYINITIAL> {FRACCION}     { return symbol(sym.FRACCION, yytext()); }
+<YYINITIAL> {FRACCION}     { return symbol(sym.FRACCION, yytext()); }  
 <YYINITIAL> {ENTERO}       { return symbol(sym.ENTERO, yytext()); }
-
-<YYINITIAL> "//"           { return symbol(sym.DIVISION_ENTERA, yytext()); }
+<YYINITIAL> "//"           { return symbol(sym.DIVISION_ENTERA, yytext()); }  
 
 <YYINITIAL> {CADENA}       { return symbol(sym.CADENA, yytext()); }
 <YYINITIAL> {CARACTER}     { return symbol(sym.CARACTER, yytext()); }

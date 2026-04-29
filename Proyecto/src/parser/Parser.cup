@@ -154,12 +154,14 @@ non terminal declaracion_float;
 /*producciones*/
 
 start with programa;
+
 programa ::= lista_funciones main;
+/* lista_funciones acumula todas las funciones definidas antes del main. */
 lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
-
-funcion ::= tipo_funcion:tf SEPARADOR ID:id
+/*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
+funcion ::= tipo_funcion  SEPARADOR ID:id
     {:
         TablaSimbolos.agregar(id.toString(), "FUNCION",
             String.valueOf(idleft), String.valueOf(idright));
@@ -171,7 +173,8 @@ funcion ::= tipo_funcion:tf SEPARADOR ID:id
     :}
 ;
 
-
+/* El bloque principal del programa: "empty main() { ... }"
+   Abre su propio scope llamado __main__ al entrar y lo cierra al salir. */
 main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE 
 {:
         TablaSimbolos.entrarScope("__main__");
@@ -181,6 +184,7 @@ main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
         TablaSimbolos.salirScope();
     :}
 ;
+
 
 lista_params ::= param resto_params
                | /* vacio */
@@ -217,15 +221,15 @@ elemento ::= elemento_numerico
            | CADENA
            | CARACTER
 ;
-
+/*sentencia cubre los controles minimo deintriucciones que pueden generarse  */
 sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
-            | tipo:t SEPARADOR ID:id FIN_SENTENCIA
+            | tipo SEPARADOR ID:id FIN_SENTENCIA
            {:
     TablaSimbolos.agregar(id.toString(), "VARIABLE",
         String.valueOf(idleft), String.valueOf(idright));
 :}
-            | tipo:t SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
+            | tipo SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
             {:
                  TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
     String.valueOf(idright)); 
@@ -260,10 +264,11 @@ lista_sentencias ::= sentencia lista_sentencias
 
 break_sentencia ::= BREAK
 ;
-
+/* Tipos válidos tanto para parámetros como para variables locales. */
 tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR
 ;
-
+/* Un parámetro formal de función: tipo + nombre. Se registra como PARAMETRO en
+   la tabla de símbolos dentro del scope de la función. */
 param ::= tipo_completo:tc SEPARADOR ID:id
     {:
          TablaSimbolos.agregar(id.toString(), "PARAMETRO",  String.valueOf(idleft),
@@ -328,7 +333,8 @@ instruccion ::= if_sentencia
               | do_while
               | switch_sentencia
 ;
-
+/* Condicional if con else opcional.
+   Abre scope propio para el bloque then; el scope del else lo maneja else_bloque. */
 if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE 
  {:  TablaSimbolos.entrarScope("if");  :}
     bloque
@@ -336,15 +342,16 @@ if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
     else_bloque
  
 ;
-
+/*abre su propio scope si existe, o produce vacío. */
 else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
     bloque
     {: TablaSimbolos.salirScope(); :}| /* vacio */
 ;
-
+/* Ciclo do-while: ejecuta el bloque al menos una vez y repite mientras la condición sea verdadera. */
 do_while ::= DO {: TablaSimbolos.entrarScope("do_while"); :}bloque  {: TablaSimbolos.salirScope();            :} WHILE PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
 ;
-
+/* Switch: evalúa una expresión y salta al case correspondiente.
+   Abre scope propio para todo el cuerpo del switch. */
 switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE {: TablaSimbolos.entrarScope("switch"); :} ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
  {: TablaSimbolos.salirScope();          :}
 ;
@@ -365,7 +372,7 @@ expresion ::= expresion_logica
 
 expresion_aritmetica ::= termino resto_aritmetica
 ;
-
+/* Continúa sumando o restando términos de forma recursiva, o termina. */
 resto_aritmetica ::= SUMA   termino resto_aritmetica
                    | RESTA  termino resto_aritmetica
                    | /* vacio */
@@ -373,7 +380,7 @@ resto_aritmetica ::= SUMA   termino resto_aritmetica
 
 termino ::= potencia resto_termino
 ;
-
+/* Continúa con *, /, %, división entera de forma recursiva, o termina. */
 resto_termino ::= MULTIPLICACION potencia resto_termino
                 | DIVISION       potencia resto_termino
                 | MODULO         potencia resto_termino
@@ -383,11 +390,13 @@ resto_termino ::= MULTIPLICACION potencia resto_termino
 
 potencia ::= factor resto_potencia
 ;
-
+/* Continúa elevando a potencias de forma recursiva, o termina. */
 resto_potencia ::= POTENCIA factor resto_potencia
                  | /* vacio */
 ;
-
+/* 
+   literal, variable, expresión entre paréntesis, acceso a arreglo,
+   incremento/decremento prefijo, negación o llamada a función. */
 factor ::= elemento_numerico
          | ID
          | CADENA
