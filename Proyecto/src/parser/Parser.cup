@@ -36,7 +36,6 @@ parser code {:
  terminal FRACCION;
  terminal BOOL;
  terminal EXPONENCIAL;
- terminal ERROR;
  terminal FLOAT;
  terminal STRING;
  terminal CHAR;
