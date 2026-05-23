@@ -8,7 +8,8 @@ parser code {:
     public void syntax_error(Symbol cur_token) {
         String lexema = cur_token.value != null ? cur_token.value.toString() : "desconocido";
         String msg = "Error sintáctico en línea " + cur_token.left +
-                     ": token inesperado '" + lexema + "'";
+                    ", columna " + cur_token.right +
+                    ": token inesperado '" + lexema + "'";
         erroresSintacticos.add(msg);
         System.err.println(msg);
     }
@@ -16,7 +17,8 @@ parser code {:
     @Override
     public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
         String msg = "Error sintáctico irrecuperable en línea " + cur_token.left +
-                     ". No se pudo continuar el análisis.";
+                    ", columna " + cur_token.right +
+                    ". No se pudo continuar el análisis.";
         erroresSintacticos.add(msg);
         System.err.println(msg);
     }
