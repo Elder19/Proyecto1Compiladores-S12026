@@ -6,13 +6,13 @@
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int LESS_TE = 31;
+  public static final int LESS_TE = 30;
   public static final int PARENTESIS_CIERRE = 38;
-  public static final int CHAR = 13;
-  public static final int EMPTY = 25;
+  public static final int CHAR = 12;
+  public static final int EMPTY = 24;
   public static final int ENTERO = 5;
   public static final int CERRAR_BLOQUE = 35;
-  public static final int CASE = 17;
+  public static final int CASE = 16;
   public static final int DIVISION_ENTERA = 58;
   public static final int RESTA = 48;
   public static final int EXPONENCIAL = 9;
@@ -30,40 +30,40 @@ public class sym {
   public static final int SUMA = 47;
   public static final int MAIN = 56;
   public static final int ABRIR_PARENTESIS_CUADRADO = 39;
-  public static final int IF = 14;
+  public static final int IF = 13;
   public static final int ID = 2;
   public static final int ABRIR_BLOQUE = 34;
   public static final int EOF = 0;
-  public static final int RETURN = 19;
-  public static final int EQUAL = 28;
-  public static final int GREATHER_TE = 33;
-  public static final int TRUE = 23;
+  public static final int RETURN = 18;
+  public static final int EQUAL = 27;
+  public static final int GREATHER_TE = 32;
+  public static final int TRUE = 22;
   public static final int DECREMENTO = 42;
   public static final int error = 1;
   public static final int COMA = 45;
   public static final int CADENA = 3;
   public static final int MODULO = 52;
-  public static final int CIN = 21;
-  public static final int BREAK = 20;
-  public static final int ERROR = 10;
+  public static final int CIN = 20;
+  public static final int BREAK = 19;
+  public static final int ERROR = 33;
   public static final int ASIGNACION = 36;
-  public static final int SWITCH = 16;
+  public static final int SWITCH = 15;
   public static final int CERRAR_PARENTESIS_CUADRADO = 40;
   public static final int POTENCIA = 51;
-  public static final int ELSE = 15;
-  public static final int COUT = 22;
-  public static final int N_EQUAL = 29;
-  public static final int WHILE = 27;
-  public static final int DEFAULT = 18;
-  public static final int FLOAT = 11;
-  public static final int GREATHER_T = 32;
-  public static final int STRING = 12;
+  public static final int ELSE = 14;
+  public static final int COUT = 21;
+  public static final int N_EQUAL = 28;
+  public static final int WHILE = 26;
+  public static final int DEFAULT = 17;
+  public static final int FLOAT = 10;
+  public static final int GREATHER_T = 31;
+  public static final int STRING = 11;
   public static final int PARENTESIS_APERTURA = 37;
-  public static final int FALSE = 24;
+  public static final int FALSE = 23;
   public static final int DIVISION = 50;
-  public static final int LESS_T = 30;
+  public static final int LESS_T = 29;
   public static final int FLOTANTE = 6;
-  public static final int DO = 26;
+  public static final int DO = 25;
   public static final int MULTIPLICACION = 49;
   public static final String[] terminalNames = new String[] {
   "EOF",
@@ -76,7 +76,6 @@ public class sym {
   "FRACCION",
   "BOOL",
   "EXPONENCIAL",
-  "ERROR",
   "FLOAT",
   "STRING",
   "CHAR",
@@ -100,6 +99,7 @@ public class sym {
   "LESS_TE",
   "GREATHER_T",
   "GREATHER_TE",
+  "ERROR",
   "ABRIR_BLOQUE",
   "CERRAR_BLOQUE",
   "ASIGNACION",

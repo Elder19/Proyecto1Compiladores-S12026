@@ -30,7 +30,8 @@ DIGITO_SINCERO     = [1-9]
 ID                 = ({LETRA}|"_")({LETRA}|{DIGITO}|"_")*
 
 ENTERO             = 0|{DIGITO_SINCERO}{DIGITO}*
-FLOTANTE           = {ENTERO}"."{ENTERO}
+DECIMAL            = {DIGITO}+
+FLOTANTE           = {ENTERO}"."{DECIMAL}
 EXPONENCIAL        = {ENTERO}"e"{ENTERO}
 FRACCION           = {ENTERO}"//"{ENTERO}
 

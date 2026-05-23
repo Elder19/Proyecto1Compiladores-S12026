@@ -1,6 +1,8 @@
+¡¡ prueba flotantes
 empty ~ __main__ <| |> |:
-    int ~ x <- 5  ¡¡ falta fin de sentencia !
-    if <| x |> |:
-        cout <| x |>!
-    int ~ x <- 5!
-¡¡ falta :| al final
+    float ~ a <- 3.0!
+    float ~ b <- 3.07!
+    float ~ c <- 0.5!
+    float ~ d <- 0.05!
+    float ~ e <- 100.001!
+:|
