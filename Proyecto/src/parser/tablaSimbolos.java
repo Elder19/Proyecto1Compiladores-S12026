@@ -15,7 +15,7 @@ public class TablaSimbolos {
             this.tipoSimbolo = tipoSimbolo;
             this.fila = fila;
             this.columna = columna;
-             System.out.println("tokenm que lelgo +" +nombreToken+" "+tipoSimbolo+" "+fila+" "+columna+" "+tipoDato);
+             //System.out.println("tokenm que lelgo +" +nombreToken+" "+tipoSimbolo+" "+fila+" "+columna+" "+tipoDato);
            
         }
     }
@@ -51,27 +51,85 @@ public class TablaSimbolos {
         return scopes.isEmpty() ? "global" : scopes.peek();
     }
 
-    public static void agregar(String nombreToken, String tipoSimbolo, String fila, String columna, String tipoDato
-    ) {
-        if (tipoSimbolo.equals("LLAMADA")) return;  
+    public static void agregar(String nombreToken, String tipoSimbolo, String fila, String columna, String tipoDato) {
+    if (tipoSimbolo.equals("LLAMADA")) return;
 
-        String scope = scopeActual();
+    String scope = scopeActual();
 
-        if (!tablas.containsKey(scope)) {
-            tablas.put(scope, new ArrayList<>());
-        }
-
-        tablas.get(scope).add(
-            new Simbolo(nombreToken, tipoSimbolo, fila, columna,tipoDato)
-        );
+    if (!tablas.containsKey(scope)) {
+        tablas.put(scope, new ArrayList<>());
     }
+
+    if (existeEnScopeActual(nombreToken)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en fila " + fila + ", columna " + columna +
+            ": el identificador '" + nombreToken +
+            "' ya fue declarado en el scope '" + scope + "'."
+        );
+        return;
+    }
+
+    tablas.get(scope).add(
+        new Simbolo(nombreToken, tipoSimbolo, fila, columna, tipoDato)
+    );
+}
 
     public static void limpiar() {
         tablas.clear();
         scopes.clear();
         contadores.clear();
     }
+    public static boolean existeEnScopeActual(String nombreToken) {
+    String scope = scopeActual();
 
+    if (!tablas.containsKey(scope)) {
+        return false;
+    }
+
+    for (Simbolo s : tablas.get(scope)) {
+        if (s.nombreToken.equals(nombreToken)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+    public static Simbolo buscar(String nombreToken) {
+        // Busca desde el scope actual hacia los scopes padres
+        for (String scope : scopes) {
+            if (tablas.containsKey(scope)) {
+                for (Simbolo s : tablas.get(scope)) {
+                    if (s.nombreToken.equals(nombreToken)) {
+                        return s;
+                    }
+                }
+            }
+        }
+
+        // Busca también en global
+        if (tablas.containsKey("global")) {
+            for (Simbolo s : tablas.get("global")) {
+                if (s.nombreToken.equals(nombreToken)) {
+                    return s;
+                }
+            }
+        }
+
+        return null;
+    }
+    public static Simbolo buscarFuncion(String nombreToken) {
+    if (!tablas.containsKey("global")) {
+        return null;
+    }
+
+    for (Simbolo s : tablas.get("global")) {
+        if (s.nombreToken.equals(nombreToken) && s.tipoSimbolo.equals("FUNCION")) {
+            return s;
+        }
+    }
+
+    return null;
+}
     public static void imprimir() {
         for (Map.Entry<String, List<Simbolo>> entry : tablas.entrySet()) {
             System.out.println("\nScope: [ " + entry.getKey() + " ]");

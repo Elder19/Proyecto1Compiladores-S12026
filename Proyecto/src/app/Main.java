@@ -67,7 +67,8 @@ public class Main {
         ejecutar("javac",
                 "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/parser",
                 "-d", "src/parser",
-                "src/parser/TablaSimbolos.java");
+                "src/parser/TablaSimbolos.java",
+                "src/parser/ErroresSemanticos.java");
     }
 
     private static void compilarLexer() throws Exception {
@@ -88,11 +89,11 @@ public class Main {
 
     private static void ejecutarEjemplos(String carpeta) throws Exception {
         URLClassLoader loader = crearClassLoader();
-
         Class<?> tablaClass  = Class.forName("TablaSimbolos", true, loader);
-        Class<?> lexerClass  = Class.forName("Lexer",         true, loader);
-        Class<?> parserClass = Class.forName("MyParser",        true, loader);
-        Class<?> symClass    = Class.forName("sym",           true, loader);
+        Class<?> erroresSemanticosClass = Class.forName("ErroresSemanticos", true, loader);
+        Class<?> lexerClass  = Class.forName("Lexer", true, loader);
+        Class<?> parserClass = Class.forName("MyParser", true, loader);
+        Class<?> symClass    = Class.forName("sym", true, loader);
 
         int      EOF           = symClass.getField("EOF").getInt(null);
         String[] terminalNames = (String[]) symClass.getField("terminalNames").get(null);
@@ -102,33 +103,49 @@ public class Main {
         if (archivos == null) return;
 
         for (File archivo : archivos) {
-            procesarArchivo(archivo, carpeta, tablaClass, lexerClass, parserClass,
-                            EOF, terminalNames, campoErroresLex);
+            procesarArchivo(archivo, carpeta, tablaClass, erroresSemanticosClass,
+                lexerClass, parserClass, EOF, terminalNames, campoErroresLex);
         }
     }
 
     /** Procesa un único archivo: análisis léxico, sintáctico y tabla de símbolos. */
-    private static void procesarArchivo(File archivo, String carpeta,
-                                        Class<?> tablaClass, Class<?> lexerClass,
-                                        Class<?> parserClass,
-                                        int EOF, String[] terminalNames,
-                                        Field campoErroresLex) throws Exception {
-        tablaClass.getMethod("limpiar").invoke(null);
+  private static void procesarArchivo(
+        File archivo,
+        String carpeta,
+        Class<?> tablaClass,
+        Class<?> erroresSemanticosClass,
+        Class<?> lexerClass,
+        Class<?> parserClass,
+        int EOF,
+        String[] terminalNames,
+        Field campoErroresLex) throws Exception {
 
+        tablaClass.getMethod("limpiar").invoke(null);
+        erroresSemanticosClass.getMethod("limpiar").invoke(null);
         imprimirEncabezado(archivo.getName());
 
         List<?> erroresLexicos = limpiarLista(campoErroresLex, null);
-        realizarAnalisisLexico(archivo, carpeta, lexerClass, EOF, terminalNames);
+
+        realizarAnalisisLexico(
+            archivo,carpeta, lexerClass,EOF,terminalNames);
 
         mostrarResumenLexico(erroresLexicos);
 
-        List<?> erroresSintacticos = realizarAnalisisSintactico(archivo, lexerClass, parserClass, erroresLexicos);
-
+        List<?> erroresSintacticos = realizarAnalisisSintactico(archivo,lexerClass,parserClass,erroresLexicos);
         mostrarTablaSimbolos(tablaClass);
         mostrarResumenSintactico(erroresSintacticos);
-        mostrarVeredictoFinal(erroresLexicos, erroresSintacticos);
 
-        System.out.println("══════════════════════════════════════\n");
+        erroresSemanticosClass.getMethod("imprimir").invoke(null);
+
+        List<?> erroresSemanticos =(List<?>) erroresSemanticosClass.getMethod("obtenerErrores").invoke(null);
+
+        mostrarVeredictoFinal(
+            erroresLexicos,
+            erroresSintacticos,
+            erroresSemanticos.size()
+        );
+
+       
     }
 
     //  ANÁLISIS LÉXICO
@@ -192,9 +209,9 @@ public class Main {
         System.out.println("\n[ LÉXICO ]");
         System.out.println("──────────────────────────────────────────────────────");
         if (errores.isEmpty()) {
-            System.out.println("✔ Sin errores léxicos.");
+            System.out.println(" Sin errores léxicos.");
         } else {
-            System.out.println("✘ Errores léxicos encontrados: " + errores.size());
+            System.out.println(" Errores léxicos encontrados: " + errores.size());
             errores.forEach(e -> System.out.println("  " + e));
         }
     }
@@ -208,20 +225,23 @@ public class Main {
         System.out.println("\n[ PARSER ]");
         System.out.println("──────────────────────────────────────────────────────");
         if (errores.isEmpty()) {
-            System.out.println("✔ Sin errores sintácticos.");
+            System.out.println("Sin errores sintácticos.");
         } else {
-            System.out.println("✘ Errores sintácticos encontrados: " + errores.size());
+            System.out.println("Errores sintácticos encontrados: " + errores.size());
             errores.forEach(e -> System.out.println("  " + e));
         }
     }
 
-    private static void mostrarVeredictoFinal(List<?> erroresLex, List<?> erroresSint) {
+    private static void mostrarVeredictoFinal(List<?> erroresLex, List<?> erroresSint,int Errorsemantico) {
+
         System.out.println("──────────────────────────────────────────────────────");
-        if (erroresLex.isEmpty() && erroresSint.isEmpty()) {
+        if (erroresLex.isEmpty() && erroresSint.isEmpty()& Errorsemantico==0) {
             System.out.println(" El archivo cumple con la gramática y puede ser procesado.");
         } else {
             int total = erroresLex.size() + erroresSint.size();
-            System.out.println("El archivo NO cumple con la gramática. Total de errores: " + total);
+            System.out.println("Errores léxicos: " + erroresLex.size());
+            System.out.println("Errores sintácticos: " + erroresSint.size());
+            System.out.println("Errores semánticos: " + Errorsemantico);
         }
     }
 

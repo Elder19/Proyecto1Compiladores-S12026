@@ -158,6 +158,7 @@ non terminal declaracion_float;
 start with programa;
 
 programa ::= lista_funciones main;
+
 /* lista_funciones acumula todas las funciones definidas antes del main. */
 lista_funciones ::= funcion lista_funciones
                   | /* vacio */

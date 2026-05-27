@@ -1,7 +1,13 @@
-float~func1<|char~x22,char~x23|>|:
+float~func11<||>|:
+:|
+
+int~func1<||>|:
+:|
+
+float~func1<|char~x22,char~x22|>|:
 
 	float~x<-0.01!
-	char~x22<-'x'! {- semantico x22 -}
+	char~x2222<-'x'! {- semantico x22 -}
 	char~miChar<-'!'!
 	char~miChar2<-'!'!
 	int~x30<--1!
