@@ -171,8 +171,9 @@ public class Main {
             Object lexer  = crearLexer(lexerClass, archivo);
             Object parser = crearParser(parserClass, lexer);
             parserClass.getMethod("parse").invoke(parser);
-        } catch (InvocationTargetException e) {
-            
+       } catch (InvocationTargetException e) {
+            System.err.println("Error durante el parse:");
+            e.getCause().printStackTrace();
         }
 
         return erroresSintacticos;

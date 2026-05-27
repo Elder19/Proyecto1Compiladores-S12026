@@ -1,8 +1,93 @@
-¡¡ prueba flotantes
-empty ~ __main__ <| |> |:
-    float ~ a <- 3.0!
-    float ~ b <- 3.07!
-    float ~ c <- 0.5!
-    float ~ d <- 0.05!
-    float ~ e <- 100.001!
-:|
+float~func1<|char~x22,char~x23|>|:
+
+	float~x<-0.01!
+	char~x22<-'x'! {- semantico x22 -}
+	char~miChar<-'!'!
+	char~miChar2<-'!'!
+	int~x30<--1!
+	bool~x40<-false!
+
+	float~x50<<1000>><<1>>!
+
+	float~x51<<1000>><<6>><-|:|:4.0,5.0:|,|:4.0,5.0:|,|:4.0,5.0:|:|!
+	int~x52<<1000>><<67>><-|:|:4,5:|,|:4,5:|,|:4,5:|:|!
+
+	int~x53<-100e10+-100e10!
+	float~x54<--5//6+9//16!
+
+	string~x55<-"Hola a todos los $ que est<<a>> haciendo un compilador nuevo|:n"!
+
+	if<|less_te<|x22,45|>@greather_t<|var,5//6|>|>|:
+		int~y!
+		x22<-10!
+		char~ch33<-'a'!
+	:|
+	else |: 
+		int~y!
+		string~str2<-"sdff"!
+	:| 
+
+	do|:
+		cout<|i|>!
+	:|
+	while<|equal<|1*id,2/f<||>|>@less_te<|var,f1<|1,'c',"d",f1<|x|>|>|>#$<|false|>|>!
+
+	cout<|"Hola mundo"|>!
+	cout<|Holamundo|>!
+
+	return~-5.6!
+
+:|  
+
+
+bool~func2<|bool~b1,int~i1|>|: 
+
+	int~valor!
+	return~b1!
+
+:|  
+
+
+string~func3<||>|:
+
+	string~b1!
+	return~b1!
+
+:| 
+
+
+empty~__main__<||>|: 
+
+{-
+Comentario 1
+-}
+
+	char~miChar<-'!'!
+	char~miChar2<-'!'!
+
+	string~str1<-"Mi string 1"!
+
+	float~fl1!
+	float~fl1<-56.6 / 6//8!
+
+	int~in1<-fl1-14+in1 % 7 / 15!
+
+	float~fl2<-3.7 ^ fl1 + 45.6 % 76!
+	
+{-
+Comentario 2
+-}
+
+	arr<<67>><<67*f<||>>><-1//1!
+
+	fl1<-4.5%miChar^-0.005!
+
+	miFunc<|miFunc<||>,'a'|>!
+
+	bool~bl0<-n_equal<|6.7,8//9|>!
+
+	bl0<-$<|n_equal<|1,2|>|>!
+
+	bool~bl1<-greather_t<|in1,fl1|>#false@$<|greather_te<|func2<|true,in1|>,56|>|>!
+
+:| 

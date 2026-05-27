@@ -7,12 +7,16 @@ public class TablaSimbolos {
         public String tipoSimbolo;
         public String fila;
         public String columna;
+        public String tipoDato;
 
-        public Simbolo(String nombreToken, String tipoSimbolo, String fila, String columna) {
+        public Simbolo(String nombreToken, String tipoSimbolo, String fila, String columna, String tipoDato) {
             this.nombreToken = nombreToken;
+            this.tipoDato= tipoDato;
             this.tipoSimbolo = tipoSimbolo;
             this.fila = fila;
             this.columna = columna;
+             System.out.println("tokenm que lelgo +" +nombreToken+" "+tipoSimbolo+" "+fila+" "+columna+" "+tipoDato);
+           
         }
     }
 
@@ -47,7 +51,8 @@ public class TablaSimbolos {
         return scopes.isEmpty() ? "global" : scopes.peek();
     }
 
-    public static void agregar(String nombreToken, String tipoSimbolo, String fila, String columna) {
+    public static void agregar(String nombreToken, String tipoSimbolo, String fila, String columna, String tipoDato
+    ) {
         if (tipoSimbolo.equals("LLAMADA")) return;  
 
         String scope = scopeActual();
@@ -57,7 +62,7 @@ public class TablaSimbolos {
         }
 
         tablas.get(scope).add(
-            new Simbolo(nombreToken, tipoSimbolo, fila, columna)
+            new Simbolo(nombreToken, tipoSimbolo, fila, columna,tipoDato)
         );
     }
 
@@ -72,8 +77,8 @@ public class TablaSimbolos {
             System.out.println("\nScope: [ " + entry.getKey() + " ]");
             System.out.println("─".repeat(60));
 
-            System.out.printf("%-20s %-18s %-10s %-10s%n",
-                    "TOKEN", "TIPO", "FILA", "COLUMNA");
+           System.out.printf("%-20s %-18s %-12s %-10s %-10s%n",
+        "TOKEN", "TIPO", "TIPO_DATO", "FILA", "COLUMNA");
 
             System.out.println("─".repeat(60));
 
@@ -81,13 +86,14 @@ public class TablaSimbolos {
                 System.out.println("(sin identificadores)");
             } else {
                 for (Simbolo s : entry.getValue()) {
-                    System.out.printf("%-20s %-18s %-10s %-10s%n",
-                            s.nombreToken,
-                            s.tipoSimbolo,
-                            s.fila,
-                            s.columna);
-                }
+                  System.out.printf("%-20s %-18s %-12s %-10s %-10s%n",
+                    s.nombreToken,
+                    s.tipoSimbolo,
+                    s.tipoDato,
+                    s.fila,
+                    s.columna);
             }
         }
     }
+}
 }

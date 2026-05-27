@@ -94,8 +94,9 @@ terminal DIVISION_ENTERA;
 /*no terminales*/
 non terminal elemento_numerico;
 non terminal elemento;      
-non terminal tipo;
-non terminal tipo_funcion;
+non terminal String tipo;
+non terminal String tipo_funcion;
+non terminal String tipo_completo;
 non terminal programa;
 non terminal lista_funciones;
 non terminal funcion;
@@ -140,6 +141,7 @@ non terminal resto_potencia;
 non terminal factor;
 non terminal factor_negativo;
 non terminal expresion_relacional;
+non terminal operando_relacional_eq;
 non terminal expresion_logica;
 non terminal resto_logico;
 non terminal termino_logico;
@@ -148,7 +150,6 @@ non terminal factor_logico;
 non terminal llamada_funcion;
 non terminal lista_expresiones;
 non terminal resto_expresiones;
-non terminal tipo_completo;
 non terminal asignar_variable ;
 non terminal declaracion_int;
 non terminal declaracion_float;
@@ -162,10 +163,10 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 /*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
-funcion ::= tipo_funcion  SEPARADOR ID:id
+funcion ::= tipo_funcion:datotype  SEPARADOR ID:id
     {:
         TablaSimbolos.agregar(id.toString(), "FUNCION",
-            String.valueOf(idleft), String.valueOf(idright));
+            String.valueOf(idleft), String.valueOf(idright),datotype);
         TablaSimbolos.entrarScope(id.toString());
     :}
     PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
@@ -196,16 +197,23 @@ resto_params ::= COMA param resto_params
 ;
 
 
-tipo ::=BOOL
+tipo ::= BOOL
+        {: RESULT = "bool"; :}
        | STRING
+        {: RESULT = "string"; :}
        | CHAR
+        {: RESULT = "char"; :}
 ;
-
 tipo_funcion ::= INT
+                {: RESULT = "int"; :}
                | BOOL
+                {: RESULT = "bool"; :}
                | FLOAT
+                {: RESULT = "float"; :}
                | CHAR
+                {: RESULT = "char"; :}
                | STRING
+                {: RESULT = "string"; :}
 ;
 bool_literal ::= TRUE
                | FALSE
@@ -225,15 +233,15 @@ elemento ::= elemento_numerico
 /*sentencia cubre los controles minimo deintriucciones que pueden generarse  */
 sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
-            | tipo SEPARADOR ID:id FIN_SENTENCIA
+            | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
            {:
     TablaSimbolos.agregar(id.toString(), "VARIABLE",
-        String.valueOf(idleft), String.valueOf(idright));
+        String.valueOf(idleft), String.valueOf(idright),datotype);
 :}
-            | tipo SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
+            | tipo:datotype SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
             {:
                  TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
-    String.valueOf(idright)); 
+    String.valueOf(idright),datotype); 
             :}
             | asignar_variable FIN_SENTENCIA
             | modificar_arreglo FIN_SENTENCIA
@@ -266,14 +274,23 @@ lista_sentencias ::= sentencia lista_sentencias
 break_sentencia ::= BREAK
 ;
 /* Tipos válidos tanto para parámetros como para variables locales. */
-tipo_completo ::= INT | BOOL | FLOAT | STRING | CHAR
+tipo_completo ::= INT
+                 {: RESULT = "int"; :}
+                | BOOL
+                 {: RESULT = "bool"; :}
+                | FLOAT
+                 {: RESULT = "float"; :}
+                | STRING
+                 {: RESULT = "string"; :}
+                | CHAR
+                 {: RESULT = "char"; :}
 ;
 /* Un parámetro formal de función: tipo + nombre. Se registra como PARAMETRO en
    la tabla de símbolos dentro del scope de la función. */
 param ::= tipo_completo:tc SEPARADOR ID:id
     {:
          TablaSimbolos.agregar(id.toString(), "PARAMETRO",  String.valueOf(idleft),
-    String.valueOf(idright)); 
+    String.valueOf(idright),tc.toString()); 
     :}
 ;
 
@@ -419,14 +436,18 @@ factor_negativo ::= RESTA elemento_numerico
 ;
 
 
-expresion_relacional ::= EQUAL      PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-                       | N_EQUAL    PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-                       | LESS_T     PARENTESIS_APERTURA expresion_aritmetica   COMA expresion_aritmetica   PARENTESIS_CIERRE
-                       | LESS_TE    PARENTESIS_APERTURA expresion_aritmetica   COMA expresion_aritmetica   PARENTESIS_CIERRE
-                       | GREATHER_T  PARENTESIS_APERTURA expresion_aritmetica  COMA expresion_aritmetica   PARENTESIS_CIERRE
-                       | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica  COMA expresion_aritmetica   PARENTESIS_CIERRE
-;
 
+expresion_relacional ::= EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
+                       | N_EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
+                       | LESS_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+                       | LESS_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+                       | GREATHER_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+                       | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+;
+operando_relacional_eq ::= expresion_aritmetica
+                         | bool_literal
+                         | expresion_relacional
+;
 
 expresion_logica ::= termino_logico resto_logico
 ;
@@ -453,7 +474,7 @@ declaracion_int ::=
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
           TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright), "int");
       :}
     | INT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
@@ -461,17 +482,17 @@ declaracion_int ::=
         ASIGNACION matriz_enteros
       {:
           TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright),"int");
       :}
     | INT SEPARADOR ID:id ASIGNACION expresion
       {:
           TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright), "int");
       :}
     | INT SEPARADOR ID:id
       {:
           TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright), "int");
       :}
 ;
 
@@ -481,7 +502,7 @@ declaracion_float ::=
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
           TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright),"float");
       :}
     | FLOAT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
@@ -489,23 +510,23 @@ declaracion_float ::=
         ASIGNACION matriz_flotantes
       {:
           TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright),"float");
       :}
     | FLOAT SEPARADOR ID:id ASIGNACION expresion
       {:
           TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright),"float");
       :}
     | FLOAT SEPARADOR ID:id
       {:
           TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright));
+              String.valueOf(idleft), String.valueOf(idright),"float");
       :}
 ;
 llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
     {:
          TablaSimbolos.agregar(id.toString(), "LLAMADA", String.valueOf(idleft),
-    String.valueOf(idright)); 
+    String.valueOf(idright),"float"); 
     :}
 ;
 
