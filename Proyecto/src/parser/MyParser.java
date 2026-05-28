@@ -863,6 +863,12 @@ public class MyParser extends java_cup.runtime.lr_parser {
 /** Cup generated class to encapsulate user supplied action code.*/
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 class CUP$MyParser$actions {
+
+/*se usa para validar los tipos de retorno*/
+    String funcionActual = "";
+    String tipoRetornoActual = "";
+    boolean retornoEncontrado = false;
+
   private final MyParser parser;
 
   /** Constructor */
@@ -936,8 +942,17 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 
-        TablaSimbolos.agregar(id.toString(), "FUNCION",
-            String.valueOf(idleft), String.valueOf(idright),datotype);
+        TablaSimbolos.agregar(
+            id.toString(),
+            "FUNCION",
+            String.valueOf(idleft),
+            String.valueOf(idright),
+            datotype
+        );
+        funcionActual = id.toString();
+        tipoRetornoActual = datotype;
+        retornoEncontrado = false;
+
         TablaSimbolos.entrarScope(id.toString());
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$0",61, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
@@ -957,7 +972,16 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-5)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-5)).value;
 		
+        if (!retornoEncontrado) {
+            ErroresSemanticos.agregar(
+                "La función '" + funcionActual +
+                "' debe retornar un valor de tipo " + tipoRetornoActual + "."
+            );
+        }
         TablaSimbolos.salirScope();
+        funcionActual = "";
+        tipoRetornoActual = "";
+        retornoEncontrado = false;
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("funcion",7, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-7)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -968,8 +992,12 @@ class CUP$MyParser$actions {
             {
               Object RESULT =null;
 
-        TablaSimbolos.entrarScope("__main__");
-    
+    funcionActual = "__main__";
+    tipoRetornoActual = "empty";
+    retornoEncontrado = false;
+
+    TablaSimbolos.entrarScope("__main__");
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$1",62, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -981,8 +1009,12 @@ class CUP$MyParser$actions {
               // propagate RESULT from NT$1
                 RESULT = (Object) ((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).value;
 		
-        TablaSimbolos.salirScope();
-    
+    TablaSimbolos.salirScope();
+
+    funcionActual = "";
+    tipoRetornoActual = "";
+    retornoEncontrado = false;
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("main",8, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1214,9 +1246,10 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
-    TablaSimbolos.agregar(id.toString(), "VARIABLE",
-        String.valueOf(idleft), String.valueOf(idright),datotype);
+                TablaSimbolos.agregar(id.toString(), "VARIABLE",
+                    String.valueOf(idleft), String.valueOf(idright),datotype);
 
+            
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("sentencia",14, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1427,6 +1460,15 @@ class CUP$MyParser$actions {
           case 53: // return_sentencia ::= RETURN SEPARADOR expresion 
             {
               Object RESULT =null;
+		
+    retornoEncontrado = true;
+
+    if ("empty".equals(tipoRetornoActual)) {
+        ErroresSemanticos.agregar(
+            "La función '" + funcionActual +
+            "' es empty y no debe retornar un valor."
+        );
+    }
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("return_sentencia",17, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2228,8 +2270,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2243,8 +2290,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2258,8 +2310,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2273,8 +2330,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2288,8 +2350,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2303,8 +2370,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2318,8 +2390,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
 		
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2333,8 +2410,13 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }

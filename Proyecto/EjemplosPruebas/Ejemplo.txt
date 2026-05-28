@@ -1,8 +1,4 @@
-float~func11<||>|:
-:|
 
-int~func1<||>|:
-:|
 
 float~func1<|char~x22,char~x22|>|:
 
@@ -41,8 +37,7 @@ float~func1<|char~x22,char~x22|>|:
 	cout<|"Hola mundo"|>!
 	cout<|Holamundo|>!
 
-	return~-5.6!
-
+	
 :|  
 
 
@@ -63,7 +58,7 @@ string~func3<||>|:
 
 
 empty~__main__<||>|: 
-
+	return~b1!
 {-
 Comentario 1
 -}

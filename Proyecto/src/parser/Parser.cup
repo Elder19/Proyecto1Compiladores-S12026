@@ -25,7 +25,11 @@ parser code {:
 
 :};
 
-
+action code {:/*se usa para validar los tipos de retorno*/
+    String funcionActual = "";
+    String tipoRetornoActual = "";
+    boolean retornoEncontrado = false;
+:};
 
 
 /*Terminales*/
@@ -164,28 +168,53 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 /*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
-funcion ::= tipo_funcion:datotype  SEPARADOR ID:id
+funcion ::= tipo_funcion:datotype SEPARADOR ID:id
     {:
-        TablaSimbolos.agregar(id.toString(), "FUNCION",
-            String.valueOf(idleft), String.valueOf(idright),datotype);
+        TablaSimbolos.agregar(
+            id.toString(),
+            "FUNCION",
+            String.valueOf(idleft),
+            String.valueOf(idright),
+            datotype
+        );
+        funcionActual = id.toString();
+        tipoRetornoActual = datotype;
+        retornoEncontrado = false;
+
         TablaSimbolos.entrarScope(id.toString());
     :}
     PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
     {:
+        if (!retornoEncontrado) {
+            ErroresSemanticos.agregar(
+                "La función '" + funcionActual +
+                "' debe retornar un valor de tipo " + tipoRetornoActual + "."
+            );
+        }
         TablaSimbolos.salirScope();
+        funcionActual = "";
+        tipoRetornoActual = "";
+        retornoEncontrado = false;
     :}
 ;
-
 /* El bloque principal del programa: "empty main() { ... }"
    Abre su propio scope llamado __main__ al entrar y lo cierra al salir. */
-main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE 
+main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
 {:
-        TablaSimbolos.entrarScope("__main__");
-    :}
-    ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
-      {:
-        TablaSimbolos.salirScope();
-    :}
+    funcionActual = "__main__";
+    tipoRetornoActual = "empty";
+    retornoEncontrado = false;
+
+    TablaSimbolos.entrarScope("__main__");
+:}
+ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+{:
+    TablaSimbolos.salirScope();
+
+    funcionActual = "";
+    tipoRetornoActual = "";
+    retornoEncontrado = false;
+:}
 ;
 
 
@@ -236,9 +265,10 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             | declaracion_float FIN_SENTENCIA
             | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
            {:
-    TablaSimbolos.agregar(id.toString(), "VARIABLE",
-        String.valueOf(idleft), String.valueOf(idright),datotype);
-:}
+                TablaSimbolos.agregar(id.toString(), "VARIABLE",
+                    String.valueOf(idleft), String.valueOf(idright),datotype);
+
+            :}
             | tipo:datotype SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
             {:
                  TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
@@ -294,8 +324,17 @@ param ::= tipo_completo:tc SEPARADOR ID:id
     String.valueOf(idright),tc.toString()); 
     :}
 ;
-
 return_sentencia ::= RETURN SEPARADOR expresion
+{:
+    retornoEncontrado = true;
+
+    if ("empty".equals(tipoRetornoActual)) {
+        ErroresSemanticos.agregar(
+            "La función '" + funcionActual +
+            "' es empty y no debe retornar un valor."
+        );
+    }
+:}
 ;
 asignar_variable ::= ID:id ASIGNACION expresion
 ;
@@ -474,54 +513,96 @@ declaracion_int ::=
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       :}
     | INT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ASIGNACION matriz_enteros
       {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       :}
     | INT SEPARADOR ID:id ASIGNACION expresion
       {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       :}
     | INT SEPARADOR ID:id
       {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       :}
 ;
-
 declaracion_float ::=
       FLOAT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       :}
+
     | FLOAT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ASIGNACION matriz_flotantes
       {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       :}
+
     | FLOAT SEPARADOR ID:id ASIGNACION expresion
       {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       :}
+
     | FLOAT SEPARADOR ID:id
       {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright),"float");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "VARIABLE",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "float"
+          );
       :}
 ;
 llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
