@@ -8,6 +8,7 @@ public class TablaSimbolos {
         public String fila;
         public String columna;
         public String tipoDato;
+     
 
         public Simbolo(String nombreToken, String tipoSimbolo, String fila, String columna, String tipoDato) {
             this.nombreToken = nombreToken;
@@ -15,6 +16,7 @@ public class TablaSimbolos {
             this.fila = fila;
             this.columna = columna;
             this.tipoDato = tipoDato;
+        
         }
     }
 
@@ -65,6 +67,30 @@ public class TablaSimbolos {
 
         return false;
     }
+    public static boolean existe(String nombre) {
+        for (String scope : scopes) {
+            List<Simbolo> simbolos = tablas.get(scope);
+
+            if (simbolos != null) {
+                for (Simbolo s : simbolos) {
+                    if (s.nombreToken.equals(nombre)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        List<Simbolo> globales = tablas.get("global");
+        if (globales != null) {
+            for (Simbolo s : globales) {
+                if (s.nombreToken.equals(nombre)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+}
 
     public static Simbolo buscar(String nombreToken) {
         for (String scope : scopes) {

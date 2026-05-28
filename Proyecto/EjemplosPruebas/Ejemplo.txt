@@ -44,7 +44,7 @@ float~func1<|char~x22,char~x22|>|:
 bool~func2<|bool~b1,int~i1|>|: 
 
 	int~valor!
-	return~b1!
+	return~xx!
 
 :|  
 

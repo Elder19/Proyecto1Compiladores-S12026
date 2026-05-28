@@ -336,7 +336,13 @@ return_sentencia ::= RETURN SEPARADOR expresion
     }
 :}
 ;
-asignar_variable ::= ID:id ASIGNACION expresion
+asignar_variable ::= ID:id ASIGNACION expresion:expr
+    {:  if(!TablaSimbolos.existe(id.toString())){
+        ErroresSemanticos.agregar("La variable  "+id.toString()+ "  en la linea " + idleft + "columna " + idright
+        );//valida que la variable exista antes de asginarle un valor
+    }
+
+:}
 ;
 
 acceder_arreglo ::=
@@ -380,8 +386,15 @@ lectura_escritura ::= cin_sentencia  FIN_SENTENCIA
                     | cout_sentencia FIN_SENTENCIA
 ;
 
-cin_sentencia  ::= CIN PARENTESIS_APERTURA ID PARENTESIS_APERTURA
-                 | CIN PARENTESIS_APERTURA acceder_arreglo PARENTESIS_APERTURA
+cin_sentencia  ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE {:
+    if (!TablaSimbolos.existe(id.toString())) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + id.toString() +
+            "' en línea " + idleft + ", columna " + idright 
+        );
+    }
+:}
+                 | CIN PARENTESIS_APERTURA acceder_arreglo PARENTESIS_CIERRE
 ;
 
 cout_sentencia ::= COUT PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
@@ -456,13 +469,36 @@ resto_potencia ::= POTENCIA factor resto_potencia
    literal, variable, expresión entre paréntesis, acceso a arreglo,
    incremento/decremento prefijo, negación o llamada a función. */
 factor ::= elemento_numerico
-         | ID
+         | ID:id 
+         {:
+               if (!TablaSimbolos.existe(id.toString())) {
+                   ErroresSemanticos.agregar(
+                       "Variable no declarada '" + id.toString() +
+                       "' en línea " + idleft + ", columna " + idright + "."
+                   );
+               }
+           :}
          | CADENA
          | CARACTER
          | PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
          | acceder_arreglo
-         | INCREMENTO ID
-         | DECREMENTO ID
+         | INCREMENTO ID:id {:
+               if (!TablaSimbolos.existe(id.toString())) {
+                   ErroresSemanticos.agregar(
+                       "Variable no declarada '" + id.toString() +
+                       "' en línea " + idleft + ", columna " + idright 
+                   );
+               
+               }
+           :}
+         | DECREMENTO ID:id{:
+               if (!TablaSimbolos.existe(id.toString())) {
+                   ErroresSemanticos.agregar(
+                       "Variable no declarada '" + id.toString() +
+                       "' en línea " + idleft + ", columna " + idright 
+                   );
+               }
+           :}
          | factor_negativo
          | llamada_funcion
         

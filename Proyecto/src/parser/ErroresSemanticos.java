@@ -18,7 +18,7 @@ public class ErroresSemanticos {
         System.out.println("──────────────────────────────────────────────────────");
 
         if (errores.isEmpty()) {
-            System.out.println("✓ Sin errores semánticos.");
+            System.out.println(" Sin errores semánticos.");
         } else {
             for (String error : errores) {
                 System.out.println(error);

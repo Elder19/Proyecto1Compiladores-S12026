@@ -265,7 +265,7 @@ Token: ID            Lexema: valor
 Token: FIN_SENTENCIA Lexema: !                
 Token: RETURN        Lexema: return           
 Token: SEPARADOR     Lexema: ~                
-Token: ID            Lexema: b1               
+Token: ID            Lexema: xx               
 Token: FIN_SENTENCIA Lexema: !                
 Token: CERRAR_BLOQUE Lexema: :|               
 Token: STRING        Lexema: string           

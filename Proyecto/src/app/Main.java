@@ -90,7 +90,7 @@ public class Main {
     private static void ejecutarEjemplos(String carpeta) throws Exception {
         URLClassLoader loader = crearClassLoader();
         Class<?> tablaClass  = Class.forName("TablaSimbolos", true, loader);
-        Class<?> erroresSemanticosClass = Class.forName("ErroresSemanticos", true, loader);
+        Class<?> erroresSemanticosClass = Class.forName("ErroresSemanticos", true, loader); 
         Class<?> lexerClass  = Class.forName("Lexer", true, loader);
         Class<?> parserClass = Class.forName("MyParser", true, loader);
         Class<?> symClass    = Class.forName("sym", true, loader);
@@ -135,7 +135,7 @@ public class Main {
         mostrarTablaSimbolos(tablaClass);
         mostrarResumenSintactico(erroresSintacticos);
 
-        erroresSemanticosClass.getMethod("imprimir").invoke(null);
+        erroresSemanticosClass.getMethod("imprimir").invoke(null); //imprime errores semanticos
 
         List<?> erroresSemanticos =(List<?>) erroresSemanticosClass.getMethod("obtenerErrores").invoke(null);
 
@@ -235,7 +235,7 @@ public class Main {
     private static void mostrarVeredictoFinal(List<?> erroresLex, List<?> erroresSint,int Errorsemantico) {
 
         System.out.println("──────────────────────────────────────────────────────");
-        if (erroresLex.isEmpty() && erroresSint.isEmpty()& Errorsemantico==0) {
+        if (erroresLex.isEmpty() && erroresSint.isEmpty()& Error==0) {
             System.out.println(" El archivo cumple con la gramática y puede ser procesado.");
         } else {
             int total = erroresLex.size() + erroresSint.size();
