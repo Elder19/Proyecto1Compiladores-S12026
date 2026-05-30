@@ -29,6 +29,8 @@ action code {:/*se usa para validar los tipos de retorno*/
     String funcionActual = "";
     String tipoRetornoActual = "";
     boolean retornoEncontrado = false;
+
+    java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
 :};
 
 
@@ -96,12 +98,12 @@ terminal DIVISION_ENTERA;
 
 
 /*no terminales*/
-non terminal String elemento_numerico;
-non terminal String elemento;
+non terminal Resultado elemento_numerico;
+non terminal Resultado elemento;
 non terminal String tipo;
 non terminal String tipo_funcion;
 non terminal String tipo_completo;
-non terminal String bool_literal;
+non terminal Resultado bool_literal;
 
 non terminal programa;
 non terminal lista_funciones;
@@ -117,7 +119,7 @@ non terminal bloque;
 non terminal break_sentencia;
 non terminal return_sentencia;
 
-non terminal String acceder_arreglo;
+non terminal Resultado acceder_arreglo;
 non terminal modificar_arreglo;
 
 non terminal lista_enteros;
@@ -141,25 +143,25 @@ non terminal cases;
 non terminal case_item;
 non terminal case_default;
 
-non terminal String expresion;
-non terminal String expresion_aritmetica;
-non terminal String resto_aritmetica;
-non terminal String termino;
-non terminal String resto_termino;
-non terminal String potencia;
-non terminal String resto_potencia;
-non terminal String factor;
-non terminal String factor_negativo;
+non terminal Resultado expresion;
+non terminal Resultado expresion_aritmetica;
+non terminal Resultado resto_aritmetica;
+non terminal Resultado termino;
+non terminal Resultado resto_termino;
+non terminal Resultado potencia;
+non terminal Resultado resto_potencia;
+non terminal Resultado factor;
+non terminal Resultado factor_negativo;
 
-non terminal String expresion_relacional;
-non terminal String operando_relacional_eq;
-non terminal String expresion_logica;
-non terminal String resto_logico;
-non terminal String termino_logico;
-non terminal String resto_termino_logico;
-non terminal String factor_logico;
+non terminal Resultado expresion_relacional;
+non terminal Resultado operando_relacional_eq;
+non terminal Resultado expresion_logica;
+non terminal Resultado resto_logico;
+non terminal Resultado termino_logico;
+non terminal Resultado resto_termino_logico;
+non terminal Resultado factor_logico;
 non terminal while_sentencia;
-non terminal String llamada_funcion;
+non terminal Resultado llamada_funcion;
 non terminal lista_expresiones;
 non terminal resto_expresiones;
 
@@ -254,14 +256,14 @@ tipo_funcion ::= INT
                | STRING
                 {: RESULT = "string"; :}
 ;
-bool_literal ::= TRUE{:RESULT="bool";:}
-               | FALSE{:RESULT="bool";:}
+bool_literal ::= TRUE  {: RESULT = new Resultado("true",  "bool"); :}
+               | FALSE {: RESULT = new Resultado("false", "bool"); :}
 ;
 
-elemento_numerico ::= ENTERO{:RESULT="int";:}
-                    | FLOTANTE{:RESULT="float";:}
-                    | EXPONENCIAL{:RESULT="float";:}
-                    | FRACCION {:RESULT="float";:}
+elemento_numerico ::= ENTERO:v      {: RESULT = new Resultado(v.toString(), "int");   :}
+                    | FLOTANTE:v    {: RESULT = new Resultado(v.toString(), "float");  :}
+                    | EXPONENCIAL:v {: RESULT = new Resultado(v.toString(), "float");  :}
+                    | FRACCION:v    {: RESULT = new Resultado(v.toString(), "float");  :}
 ;
 
 elemento ::= elemento_numerico
@@ -276,12 +278,12 @@ sentencia ::= declaracion_int FIN_SENTENCIA
            {:
                 TablaSimbolos.agregar(id.toString(), "VARIABLE",
                     String.valueOf(idleft), String.valueOf(idright),datotype,false);
-
             :}
-            | tipo:datotype SEPARADOR ID:id ASIGNACION expresion FIN_SENTENCIA
+            | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
             {:
-                 TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
-    String.valueOf(idright),datotype,true); 
+                TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
+                    String.valueOf(idright),datotype,true);
+                CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
             :}
             | asignar_variable FIN_SENTENCIA
             | modificar_arreglo FIN_SENTENCIA
@@ -346,26 +348,30 @@ return_sentencia ::= RETURN SEPARADOR expresion
 :}
 ;
 asignar_variable ::= ID:id ASIGNACION expresion:expr
-    {: 
-      String nombreasing=id.toString();
-     if(!TablaSimbolos.existe(id.toString())){
-        ErroresSemanticos.agregar("La variable  "+id.toString()+ "  en la linea " + idleft + "columna " + idright
-        );//valida que la variable exista antes de asginarle un valor
-
-    }
-  
-    else { TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);//valida  que no se asignan variables del mismo tipo 
-        String tipoVar = simbolo.tipoDato;
-        String tipoExpr = expr.toString();
-        if(!"error".equals(tipoExpr)&&!tipoVar.equals(tipoExpr)){
-            ErroresSemanticos.agregar( "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": no se puede asignar un valor de tipo '" + tipoExpr +
-                "' a la variable '" + nombreasing +
-                "' de tipo '" + tipoVar );
-        }}
-
-:}
+    {:
+        String nombreasing = id.toString();
+        if (!TablaSimbolos.existe(id.toString())) {
+            ErroresSemanticos.agregar(
+                "La variable " + id.toString() +
+                " en la linea " + idleft + " columna " + idright
+            );
+        } else {
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);
+            String tipoVar  = simbolo.tipoDato;
+            String tipoExpr = expr.tipo;           // ← antes era expr.toString()
+            if (!"error".equals(tipoExpr) && !tipoVar.equals(tipoExpr)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": no se puede asignar un valor de tipo '" + tipoExpr +
+                    "' a la variable '" + nombreasing +
+                    "' de tipo '" + tipoVar
+                );
+            }
+        }
+        // código intermedio usa el valor
+        CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
+    :}
 ;
 
 acceder_arreglo ::=
@@ -373,16 +379,15 @@ acceder_arreglo ::=
            ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
       {:
           String nombreArreglo = id.toString();
-
           if (!TablaSimbolos.existe(nombreArreglo)) {
               ErroresSemanticos.agregar(
                   "Arreglo no declarado '" + nombreArreglo +
                   "' en línea " + idleft + ", columna " + idright + "."
               );
-              RESULT = "error";
+              RESULT = new Resultado("error", "error");
           } else {
               TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreArreglo);
-              RESULT = simbolo.tipoDato;
+              RESULT = new Resultado(nombreArreglo, simbolo.tipoDato);
           }
       :}
 ;
@@ -494,67 +499,110 @@ case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
                | /* vacio */
 ;
 
-expresion_aritmetica ::= termino:t resto_aritmetica {:RESULT=t;:}
-;
-/* Continúa sumando o restando términos de forma recursiva, o termina. */
-resto_aritmetica ::= SUMA   termino resto_aritmetica
-                   | RESTA  termino resto_aritmetica
-                   | /* vacio */
+expresion_aritmetica ::= termino:izq SUMA termino:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " + " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | termino:izq RESTA termino:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " - " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | termino:t
+    {:
+        RESULT = t;
+    :}
 ;
 
-termino ::= potencia:p resto_termino{:
-    RESULT = p;
-:}
-;
-/* Continúa con *, /, %, división entera de forma recursiva, o termina. */
-resto_termino ::= MULTIPLICACION potencia resto_termino
-                | DIVISION       potencia resto_termino
-                | MODULO         potencia resto_termino
-                | DIVISION_ENTERA potencia resto_termino 
-                | /* vacio */
+termino ::= potencia:izq MULTIPLICACION potencia:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " * " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | potencia:izq DIVISION potencia:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " / " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | potencia:izq MODULO potencia:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " % " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | potencia:izq DIVISION_ENTERA potencia:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " // " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | potencia:p
+    {:
+        RESULT = p;
+    :}
 ;
 
-potencia ::= factor:f resto_potencia {:RESULT=f;:}
+potencia ::= factor:izq POTENCIA factor:der
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " ^ " + der.valor);
+        RESULT = new Resultado(temp, izq.tipo);
+    :}
+
+    | factor:f
+    {:
+        RESULT = f;
+    :}
 ;
-/* Continúa elevando a potencias de forma recursiva, o termina. */
-resto_potencia ::= POTENCIA factor resto_potencia
-                 | /* vacio */
-;
+
 /* 
    literal, variable, expresión entre paréntesis, acceso a arreglo,
    incremento/decremento prefijo, negación o llamada a función. */
-factor ::= elemento_numerico:t {:RESULT=t;:}
+factor ::= elemento_numerico:t
+        {: RESULT = t; :}
+
         | ID:id
         {:
-            String nombreFactor = id.toString();
-
-            if (!TablaSimbolos.existe(nombreFactor)) {
+            if (!TablaSimbolos.existe(id.toString())) {
                 ErroresSemanticos.agregar(
-                    "Variable no declarada '" + nombreFactor +
+                    "Variable no declarada '" + id.toString() +
                     "' en línea " + idleft + ", columna " + idright + "."
                 );
-                RESULT = "error";
+                RESULT = new Resultado("error", "error");
             } else {
-                
-                TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreFactor);
-                RESULT = simbolo.tipoDato;
+                TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+                // valor = nombre de la variable, tipo = su tipo
+                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
             }
         :}
-        | CADENA
+
+        | CADENA:v
         {:
-            RESULT = "string";
-        :}
-        | CARACTER
-        {:
-            RESULT = "char";
+            RESULT = new Resultado(v.toString(), "string");
         :}
 
-         | PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
-         {:RESULT=e;:}
-         | acceder_arreglo:a {:
-            RESULT = a;
+        | CARACTER:v
+        {:
+            RESULT = new Resultado(v.toString(), "char");
         :}
-        
+
+        | PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
+        {: RESULT = e; :}
+
+        | acceder_arreglo:a
+        {: RESULT = a; :}
+
         | INCREMENTO ID:id
         {:
             if (!TablaSimbolos.existe(id.toString())) {
@@ -562,10 +610,12 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
                     "Variable no declarada '" + id.toString() +
                     "' en línea " + idleft + ", columna " + idright
                 );
-                RESULT = "error";
+                RESULT = new Resultado("error", "error");
             } else {
                 TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                RESULT = simbolo.tipoDato;
+                // emite el incremento
+                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " + 1");
+                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
             }
         :}
 
@@ -576,88 +626,103 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
                     "Variable no declarada '" + id.toString() +
                     "' en línea " + idleft + ", columna " + idright
                 );
-                RESULT = "error";
+                RESULT = new Resultado("error", "error");
             } else {
                 TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                RESULT = simbolo.tipoDato;
+                // emite el decremento
+                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " - 1");
+                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
             }
         :}
 
         | factor_negativo:f
-        {:
-            RESULT = f;
-        :}
+        {: RESULT = f; :}
 
         | llamada_funcion:lf
-        {:
-            RESULT = lf;
-        :}
-        
+        {: RESULT = lf; :}
 ;
 
 factor_negativo ::= RESTA elemento_numerico:t
-                  {:
-                      RESULT = t;
-                  :}
+                {:
+                    // negamos el valor literalmente
+                    RESULT = new Resultado("-" + t.valor, t.tipo);
+                :}
 
-                  | RESTA ID:id
-                  {:
-                      if (!TablaSimbolos.existe(id.toString())) {
-                          ErroresSemanticos.agregar(
-                              "Variable no declarada '" + id.toString() +
-                              "' en línea " + idleft + ", columna " + idright
-                          );
-                          RESULT = "error";
-                      } else {
-                          TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                          RESULT = simbolo.tipoDato;
-                      }
-                  :}
+                | RESTA ID:id
+                {:
+                    if (!TablaSimbolos.existe(id.toString())) {
+                        ErroresSemanticos.agregar(
+                            "Variable no declarada '" + id.toString() +
+                            "' en línea " + idleft + ", columna " + idright
+                        );
+                        RESULT = new Resultado("error", "error");
+                    } else {
+                        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+                        String temp = CodigoIntermedio.nuevoTemporal();
+                        CodigoIntermedio.emitir(temp + " = -" + id.toString());
+                        RESULT = new Resultado(temp, simbolo.tipoDato);
+                    }
+                :}
 
-                  | RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
-                  {:
-                      RESULT = e;
-                  :}
+                | RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
+                {:
+                    String temp = CodigoIntermedio.nuevoTemporal();
+                    CodigoIntermedio.emitir(temp + " = -" + e.valor);
+                    RESULT = new Resultado(temp, e.tipo);
+                :}
 
-                  | RESTA RESTA elemento_numerico:t
-                  {:
-                      RESULT = t;
-                  :}
+                | RESTA RESTA elemento_numerico:t
+                {:
+                    // doble negativo = positivo
+                    RESULT = new Resultado(t.valor, t.tipo);
+                :}
 ;
 
 
 
-        expresion_relacional ::= EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
+expresion_relacional ::= EQUAL PARENTESIS_APERTURA operando_relacional_eq:a COMA operando_relacional_eq:b PARENTESIS_CIERRE {:
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " == " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
 
-        | N_EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
+        | N_EQUAL PARENTESIS_APERTURA operando_relacional_eq:a COMA operando_relacional_eq:b PARENTESIS_CIERRE
         {:
-            RESULT = "bool";
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " != " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
 
-        | LESS_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+        | LESS_T PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
         {:
-            RESULT = "bool";
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " < " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
 
-        | LESS_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+        | LESS_TE PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
         {:
-            RESULT = "bool";
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " <= " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
 
-        | GREATHER_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+        | GREATHER_T PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
         {:
-            RESULT = "bool";
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " > " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
 
-        | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
+        | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
         {:
-            RESULT = "bool";
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = " + a.valor + " >= " + b.valor);
+            RESULT = new Resultado(temp, "bool");
         :}
-        ;
-        operando_relacional_eq ::= expresion_aritmetica:e
+;
+    
+operando_relacional_eq ::= expresion_aritmetica:e
         {:
             RESULT = e;
         :}
@@ -717,68 +782,48 @@ factor_negativo ::= RESTA elemento_numerico:t
         {:
             RESULT = b;
         :}
-        ;
+;
+
 declaracion_int ::=
       INT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "ARREGLO",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "int"
-          );
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright), "int");
       :}
+
     | INT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ASIGNACION matriz_enteros
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "ARREGLO",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "int"
-          );
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright), "int");
       :}
-    | INT SEPARADOR ID:id ASIGNACION expresion
+
+    | INT SEPARADOR ID:id ASIGNACION expresion:expr
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "VARIABLE",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "int",
-              true  //se declara e inicializa
-          );
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright), "int", true);
+          // ── código intermedio ──
+          CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
       :}
+
     | INT SEPARADOR ID:id
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "VARIABLE",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "int",
-              false // solo se declara
-          );
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright), "int", false);
       :}
 ;
+
 declaracion_float ::=
       FLOAT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "ARREGLO",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "float"
-          );
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright), "float");
       :}
 
     | FLOAT SEPARADOR ID:id
@@ -786,52 +831,39 @@ declaracion_float ::=
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ASIGNACION matriz_flotantes
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "ARREGLO",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "float"
-          );
+          TablaSimbolos.agregar(id.toString(), "ARREGLO",
+              String.valueOf(idleft), String.valueOf(idright), "float");
       :}
 
-    | FLOAT SEPARADOR ID:id ASIGNACION expresion
+    | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "VARIABLE",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "float",
-              true
-          );
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright), "float", true);
+          // ── código intermedio ──
+          CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
       :}
 
     | FLOAT SEPARADOR ID:id
       {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "VARIABLE",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "float",
-              false
-          );
+          TablaSimbolos.agregar(id.toString(), "VARIABLE",
+              String.valueOf(idleft), String.valueOf(idright), "float", false);
       :}
 ;
-llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE 
-    {: //valida que se llame una funcion existente siu no existe notifica el error semanticos y si existe retorna el tipo de funcion 
-        String nombreFuncion = id.toString();
 
+llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
+    {:
+        String nombreFuncion = id.toString();
         if (!TablaSimbolos.existe(nombreFuncion)) {
             ErroresSemanticos.agregar(
                 "Función no declarada '" + nombreFuncion +
                 "' en línea " + idleft + ", columna " + idright + "."
             );
-            RESULT = "error";
+            RESULT = new Resultado("error", "error");
         } else {
             TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreFuncion);
-            RESULT = simbolo.tipoDato;
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = call " + nombreFuncion);
+            RESULT = new Resultado(temp, simbolo.tipoDato);
         }
     :}
 ;
