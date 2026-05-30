@@ -58,6 +58,12 @@ Token: ABRIR_PARENTESIS_CUADRADO Lexema: <<
 Token: ENTERO        Lexema: 1                
 Token: CERRAR_PARENTESIS_CUADRADO Lexema: >>               
 Token: FIN_SENTENCIA Lexema: !                
+Token: INT           Lexema: int              
+Token: SEPARADOR     Lexema: ~                
+Token: ID            Lexema: x2012            
+Token: ASIGNACION    Lexema: <-               
+Token: ENTERO        Lexema: 10               
+Token: FIN_SENTENCIA Lexema: !                
 Token: FLOAT         Lexema: float            
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: x51              
@@ -254,12 +260,6 @@ Token: COUT          Lexema: cout
 Token: PARENTESIS_APERTURA Lexema: <|               
 Token: ID            Lexema: Holamundo        
 Token: PARENTESIS_CIERRE Lexema: |>               
-Token: FIN_SENTENCIA Lexema: !                
-Token: INT           Lexema: int              
-Token: SEPARADOR     Lexema: ~                
-Token: ID            Lexema: opcion           
-Token: ASIGNACION    Lexema: <-               
-Token: ENTERO        Lexema: 1                
 Token: FIN_SENTENCIA Lexema: !                
 Token: CERRAR_BLOQUE Lexema: :|               
 Token: STRING        Lexema: string           
