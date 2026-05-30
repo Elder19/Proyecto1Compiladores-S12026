@@ -1,0 +1,24 @@
+compiladores: 
+    ☐ 1. Corregir errores de sintaxis en acciones CUP actuales.
+2. Duplicados: funciones, parámetros, variables, arreglos.
+3. Return básico: función debe retornar, main no debe retornar.
+4. Variables no declaradas: asignación, factor, cout, cin. cin solo entero o flotante.
+
+terminar lo de expresion retuslt t
+
+✔ 5. Arreglos: existe y realmente es arreglo. @done (5/29/2026, 9:47:13 PM)
+
+☐ 
+✔ 6. Llamadas a función: existe y realmente es función. @done (5/29/2026, 9:50:10 PM)
+
+7. Hacer que expresion devuelva String.
+
+8. Validar tipos en return.
+9. Validar tipos en asignaciones. 
+
+10. Validar operaciones aritméticas.
+11. Validar operaciones relacionales.
+12. Validar operaciones lógicas.
+13. Validar condiciones de if / while / switch.
+14. Validar break.
+15. Luego pasar a código intermedio.

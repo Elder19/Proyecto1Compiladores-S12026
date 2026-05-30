@@ -143,28 +143,29 @@ non terminal cases;
 non terminal case_item;
 non terminal case_default;
 
-non terminal Resultado expresion;
-non terminal Resultado expresion_aritmetica;
-non terminal Resultado resto_aritmetica;
-non terminal Resultado termino;
-non terminal Resultado resto_termino;
-non terminal Resultado potencia;
-non terminal Resultado resto_potencia;
-non terminal Resultado factor;
-non terminal Resultado factor_negativo;
+non terminal String expresion;
+non terminal String expresion_aritmetica;
+non terminal String resto_aritmetica;
+non terminal String termino;
+non terminal String resto_termino;
+non terminal String potencia;
+non terminal String resto_potencia;
+non terminal String factor;
+non terminal String factor_negativo;
 
-non terminal Resultado expresion_relacional;
-non terminal Resultado operando_relacional_eq;
-non terminal Resultado expresion_logica;
-non terminal Resultado resto_logico;
-non terminal Resultado termino_logico;
-non terminal Resultado resto_termino_logico;
-non terminal Resultado factor_logico;
+non terminal String expresion_relacional;
+non terminal String operando_relacional_eq;
+non terminal String expresion_logica;
+non terminal String resto_logico;
+non terminal String termino_logico;
+non terminal String resto_termino_logico;
+non terminal String factor_logico;
 non terminal while_sentencia;
-non terminal Resultado llamada_funcion;
+non terminal String llamada_funcion;
 non terminal lista_expresiones;
 non terminal resto_expresiones;
-
+non terminal lista_cout;
+non terminal resto_cout;
 non terminal asignar_variable;
 non terminal declaracion_int;
 non terminal declaracion_float;
@@ -375,29 +376,65 @@ asignar_variable ::= ID:id ASIGNACION expresion:expr
 ;
 
 acceder_arreglo ::=
-      ID:id ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
-           ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
+      ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
+           ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
       {:
           String nombreArreglo = id.toString();
+
           if (!TablaSimbolos.existe(nombreArreglo)) {
               ErroresSemanticos.agregar(
                   "Arreglo no declarado '" + nombreArreglo +
-                  "' en línea " + idleft + ", columna " + idright + "."
+                  "' en línea " + idleft + ", columna " + idright 
               );
-              RESULT = new Resultado("error", "error");
+              RESULT = "error";
           } else {
               TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreArreglo);
-              RESULT = new Resultado(nombreArreglo, simbolo.tipoDato);
+              RESULT = simbolo.tipoDato;
           }
       :}
 ;
 
 modificar_arreglo ::=
-      ID:id ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
-         ABRIR_PARENTESIS_CUADRADO expresion CERRAR_PARENTESIS_CUADRADO
-         ASIGNACION expresion
-;
+      ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
+         ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
+         ASIGNACION expresion:expr
+      {:
+          String nombre = id.toString();
 
+          if (!TablaSimbolos.existe(nombre)) {
+              ErroresSemanticos.agregar(
+                  "Arreglo no declarado '" + nombre +
+                  "' en línea " + idleft + ", columna " + idright + "."
+              );
+          } 
+          else if (!expr1.equals("int") || !expr2.equals("int")) {
+              ErroresSemanticos.agregar(
+                  "No se puede acceder un arreglo con índices diferentes de int."
+              );
+          }
+          else {
+              TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+
+              if (simbolo == null) {
+                  ErroresSemanticos.agregar(
+                      "Error interno: no se pudo recuperar el símbolo '" + nombre + "'."
+                  );
+              }
+              else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
+                  ErroresSemanticos.agregar(
+                      "'" + nombre + "' no es un arreglo."
+                  );
+              } 
+              else if (!simbolo.tipoDato.equals(expr)) {
+                  ErroresSemanticos.agregar(
+                      "No se puede asignar un valor de tipo '" + expr +
+                      "' al arreglo '" + nombre +
+                      "' de tipo '" + simbolo.tipoDato + "'."
+                  );
+              }
+          }
+      :}
+;
 lista_enteros ::= ENTERO
                 | ENTERO COMA lista_enteros
 ;
@@ -456,7 +493,14 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
 | CIN PARENTESIS_APERTURA acceder_arreglo PARENTESIS_CIERRE
 ;
 
-cout_sentencia ::= COUT PARENTESIS_APERTURA expresion PARENTESIS_CIERRE
+cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
+;
+
+lista_cout ::= expresion resto_cout
+;
+
+resto_cout ::= COMA expresion resto_cout
+             | /* vacio */
 ;
 
 instruccion ::= if_sentencia
@@ -789,8 +833,13 @@ declaracion_int ::=
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
       {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "int");
+          TablaSimbolos.agregar(
+              id.toString(),
+              "ARREGLO",
+              String.valueOf(idleft),
+              String.valueOf(idright),
+              "int"
+          );
       :}
 
     | INT SEPARADOR ID:id
@@ -849,21 +898,19 @@ declaracion_float ::=
               String.valueOf(idleft), String.valueOf(idright), "float", false);
       :}
 ;
-
-llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
-    {:
+llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE 
+    {: //valida que se llame una funcion existente siu no existe notifica el error semanticos y si existe retorna el tipo de funcion 
         String nombreFuncion = id.toString();
+
         if (!TablaSimbolos.existe(nombreFuncion)) {
             ErroresSemanticos.agregar(
                 "Función no declarada '" + nombreFuncion +
-                "' en línea " + idleft + ", columna " + idright + "."
+                "' en línea " + idleft + ", columna " + idright 
             );
             RESULT = new Resultado("error", "error");
         } else {
             TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreFuncion);
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = call " + nombreFuncion);
-            RESULT = new Resultado(temp, simbolo.tipoDato);
+            RESULT = simbolo.tipoDato;
         }
     :}
 ;
