@@ -1,93 +1,11 @@
-
-
-float~func1<|char~x22,char~x23|>|:
-
-	float~x<-0.01!
-	char~x2222<-'x'! {- semantico x22 -}
-	char~miChar<-'!'!
-	char~miChar2<-'!'!
-	int~x30<--1!
-	bool~x40<-false!
-
-	float~x50<<1000>><<1>>!
-
-	float~x51<<1000>><<6>><-|:|:4.0,5.0:|,|:4.0,5.0:|,|:4.0,5.0:|:|!
-	int~x52<<1000>><<67>><-|:|:4,5:|,|:4,5:|,|:4,5:|:|!
-
-	int~x53<-100e10+-100e10!
-	float~x54<--5//6+9//16!
-
-	string~x55<-"Hola a todos los $ que est<<a>> haciendo un compilador nuevo|:n"!
-		int~var!
-		if<|less_te<|x22,45|>@greather_t<|var,5//6|>|>|:
-			int~y!
-			x22<-10!
-			char~ch33<-'a'!
-		:|
-		else |: 
-			int~y!
-			string~str2<-"sdff"!
-		:| 
-	
-		do|:
-			cout<|i|>!
-			int~f<-10!
-		:|
-		
-		
-		while<|equal<|1*id,2/f<||>|>@less_te<|var,f1<|1,'c',"d",f1<|x|>|>|>#$<|false|>|>!
-
-		cout<|"Hola mundo"|>!
-		cout<|Holamundo|>!
-
-
-
-		
-	:|  
-
-
-
-
-string~func3<||>|:
-
-	string~b1!
-	return~b1!
-
-:| 
-
-
-empty~__main__<||>|: 
-	return~b1!
-{-
-Comentario 1
--}
-
-	char~miChar<-'!'!
-	char~miChar2<-'!'!
-
-	string~str1<-"Mi string 1"!
-
-	float~fl1!
-	float~fl1<-56.6 / 6//8!
-
-	int~in1<-fl1-14+in1 % 7 / 15!
-
-	float~fl2<-3.7 ^ fl1 + 45.6 % 76!
-	
-{-
-Comentario 2
--}
-	int~f<-10!
-	arr<<67>><<67*f<||>>><-1//1!
-
-	fl1<-4.5%miChar^-0.005!
-
-	miFunc<|miFunc<||>,'a'|>!
-
-	bool~bl0<-n_equal<|6.7,8//9|>!
-
-	bl0<-$<|n_equal<|1,2|>|>!
-
-	bool~bl1<-greather_t<|in1,fl1|>#false@$<|greather_te<|func2<|true,in1|>,56|>|>!
-
-:| 
+empty ~ __main__ <| |>
+|:
+    int ~ x <- 5 !
+    int ~ y <- 3 !
+    int ~ z <- x + y !
+    float ~ a <- 2.5 !
+    float ~ b <- a * 3.0 !
+    int ~ p <- 2 ^ 3 !
+    int ~ m <- 10 % 3 !
+    x <- x + 1 !
+:|
