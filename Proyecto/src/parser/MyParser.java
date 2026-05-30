@@ -878,6 +878,16 @@ class CUP$MyParser$actions {
     String funcionActual = "";
     String tipoRetornoActual = "";
     boolean retornoEncontrado = false;
+    boolean tiposCompatibles(String esperado, String recibido) {
+    if (esperado == null || recibido == null) return false;
+
+    if (esperado.equals(recibido)) return true;
+
+    // Permitir int -> float
+    if (esperado.equals("float") && recibido.equals("int")) return true;
+
+    return false;
+}
 
   private final MyParser parser;
 
@@ -1274,9 +1284,21 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).value;
+		int exprleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int exprright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		String expr = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
                  TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
     String.valueOf(idright),datotype,true); 
+        if (!"error".equals(expr) && !tiposCompatibles(datotype, expr)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": no se puede inicializar la variable '" + id.toString() +
+                "' de tipo '" + datotype +
+                "' con una expresión de tipo '" + expr 
+            );
+        }
             
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("sentencia",14, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-5)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -1470,6 +1492,9 @@ class CUP$MyParser$actions {
           case 53: // return_sentencia ::= RETURN SEPARADOR expresion 
             {
               Object RESULT =null;
+		int exprleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int exprright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		String expr = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
     retornoEncontrado = true;
 
@@ -1477,6 +1502,13 @@ class CUP$MyParser$actions {
         ErroresSemanticos.agregar(
             "La función '" + funcionActual +
             "' es empty y no debe retornar un valor."
+        );
+    }
+    else if (!"error".equals(expr) && !tiposCompatibles(tipoRetornoActual, expr)) {
+        ErroresSemanticos.agregar(
+            "Error semántico: la función '" + funcionActual +
+            "' debe retornar '" + tipoRetornoActual +
+            "', pero está retornando '" + expr + "'."
         );
     }
 
@@ -1505,7 +1537,7 @@ class CUP$MyParser$actions {
     else { TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);//valida  que no se asignan variables del mismo tipo 
         String tipoVar = simbolo.tipoDato;
         String tipoExpr = expr.toString();
-        if(!"error".equals(tipoExpr)&&!tipoVar.equals(tipoExpr)){
+       if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
             ErroresSemanticos.agregar( "Error semántico en línea " + idleft +
                 ", columna " + idright +
                 ": no se puede asignar un valor de tipo '" + tipoExpr +
@@ -1612,7 +1644,7 @@ class CUP$MyParser$actions {
                       "'" + nombre + "' no es un arreglo."
                   );
               } 
-              else if (!simbolo.tipoDato.equals(expr)) {
+              else if (!tiposCompatibles(simbolo.tipoDato, expr)) {
                   ErroresSemanticos.agregar(
                       "No se puede asignar un valor de tipo '" + expr +
                       "' al arreglo '" + nombre +
@@ -2655,6 +2687,9 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
+		int exprleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int exprright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		String expr = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
           TablaSimbolos.agregar(
               id.toString(),
@@ -2664,6 +2699,14 @@ class CUP$MyParser$actions {
               "int",
               true  //se declara e inicializa
           );
+           if (!"error".equals(expr) && !tiposCompatibles("int", expr)) {
+          ErroresSemanticos.agregar(
+              "Error semántico en línea " + idleft +
+              ", columna " + idright +
+              ": no se puede inicializar la variable '" + id.toString() +
+              "' de tipo 'int' con una expresión de tipo '" + expr + "'."
+          );
+      }
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",62, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2737,6 +2780,9 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
+		int exprleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int exprright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		String expr = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
           TablaSimbolos.agregar(
               id.toString(),
@@ -2746,6 +2792,15 @@ class CUP$MyParser$actions {
               "float",
               true
           );
+
+      if (!"error".equals(expr) && !tiposCompatibles("float", expr)) {
+          ErroresSemanticos.agregar(
+              "Error semántico en línea " + idleft +
+              ", columna " + idright +
+              ": no se puede inicializar la variable '" + id.toString() +
+              "' de tipo 'float' con una expresión de tipo '" + expr + "'."
+          );
+      }
       
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",63, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }

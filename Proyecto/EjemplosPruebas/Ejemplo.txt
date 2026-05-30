@@ -41,7 +41,7 @@ float~func1<|char~x22,char~x23|>|:
 		cout<|Holamundo|>!
 
 
-
+	return~x54!
 		
 	:|  
 
@@ -57,7 +57,7 @@ string~func3<||>|:
 
 
 empty~__main__<||>|: 
-	return~b1!
+	
 {-
 Comentario 1
 -}
@@ -70,7 +70,7 @@ Comentario 1
 	float~fl1!
 	float~fl1<-56.6 / 6//8!
 
-	int~in1<-fl1-14+in1 % 7 / 15!
+	float~in1<-fl1-14+in1 % 7!
 
 	float~fl2<-3.7 ^ fl1 + 45.6 % 76!
 	

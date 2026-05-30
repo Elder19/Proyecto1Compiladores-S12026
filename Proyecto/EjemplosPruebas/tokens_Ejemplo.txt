@@ -261,6 +261,10 @@ Token: PARENTESIS_APERTURA Lexema: <|
 Token: ID            Lexema: Holamundo        
 Token: PARENTESIS_CIERRE Lexema: |>               
 Token: FIN_SENTENCIA Lexema: !                
+Token: RETURN        Lexema: return           
+Token: SEPARADOR     Lexema: ~                
+Token: ID            Lexema: x54              
+Token: FIN_SENTENCIA Lexema: !                
 Token: CERRAR_BLOQUE Lexema: :|               
 Token: STRING        Lexema: string           
 Token: SEPARADOR     Lexema: ~                
@@ -283,10 +287,6 @@ Token: MAIN          Lexema: __main__
 Token: PARENTESIS_APERTURA Lexema: <|               
 Token: PARENTESIS_CIERRE Lexema: |>               
 Token: ABRIR_BLOQUE  Lexema: |:               
-Token: RETURN        Lexema: return           
-Token: SEPARADOR     Lexema: ~                
-Token: ID            Lexema: b1               
-Token: FIN_SENTENCIA Lexema: !                
 Token: CHAR          Lexema: char             
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: miChar           
@@ -317,7 +317,7 @@ Token: FLOTANTE      Lexema: 56.6
 Token: DIVISION      Lexema: /                
 Token: FRACCION      Lexema: 6//8             
 Token: FIN_SENTENCIA Lexema: !                
-Token: INT           Lexema: int              
+Token: FLOAT         Lexema: float            
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: in1              
 Token: ASIGNACION    Lexema: <-               
@@ -328,8 +328,6 @@ Token: SUMA          Lexema: +
 Token: ID            Lexema: in1              
 Token: MODULO        Lexema: %                
 Token: ENTERO        Lexema: 7                
-Token: DIVISION      Lexema: /                
-Token: ENTERO        Lexema: 15               
 Token: FIN_SENTENCIA Lexema: !                
 Token: FLOAT         Lexema: float            
 Token: SEPARADOR     Lexema: ~                
