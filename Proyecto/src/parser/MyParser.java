@@ -1735,28 +1735,28 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
-    {
-        String nombreCin = id.toString();
+    String nombreCin = id.toString();
 
-        if (!TablaSimbolos.existe(nombreCin)) {// valida que la variable que se asigna exista
+    if (!TablaSimbolos.existe(nombreCin)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombreCin +
+            "' en línea " + idleft + ", columna " + idright + "."
+        );
+    } else {
+        TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);
+        String tipoCin = simboloCin.tipoDato;
+
+        if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + nombreCin +
-                "' en línea " + idleft + ", columna " + idright + "."
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": cin solo puede leer variables de tipo int o float. '" +
+                nombreCin + "' es de tipo '" + tipoCin + "'."
             );
-        } else {
-            TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);//valida que solo puede leer int o float busca el dato y compara el tipo
-            String tipoCin = simboloCin.tipoDato;
-
-            if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + idleft +
-                    ", columna " + idright +
-                    ": cin solo puede leer variables de tipo int o float. '" +
-                    nombreCin + "' es de tipo '" + tipoCin + "'."
-                );
-            }
         }
     }
+    // ── código intermedio ──
+    CodigoIntermedio.emitir("read " + id.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("cin_sentencia",29, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -1766,6 +1766,11 @@ class CUP$MyParser$actions {
           case 72: // cin_sentencia ::= CIN PARENTESIS_APERTURA acceder_arreglo PARENTESIS_CIERRE 
             {
               Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		Resultado a = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
+		
+    CodigoIntermedio.emitir("read " + a.valor);
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("cin_sentencia",29, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -1784,7 +1789,12 @@ class CUP$MyParser$actions {
           case 74: // lista_cout ::= expresion resto_cout 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		Resultado e = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
+		
+        CodigoIntermedio.emitir("print " + e.valor);
+    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_cout",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1793,7 +1803,12 @@ class CUP$MyParser$actions {
           case 75: // resto_cout ::= COMA expresion resto_cout 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		Resultado e = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
+		
+        CodigoIntermedio.emitir("print " + e.valor);
+    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("resto_cout",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;

@@ -467,40 +467,49 @@ lectura_escritura ::= cin_sentencia  FIN_SENTENCIA
 
 cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
 {:
-    {
-        String nombreCin = id.toString();
+    String nombreCin = id.toString();
 
-        if (!TablaSimbolos.existe(nombreCin)) {// valida que la variable que se asigna exista
+    if (!TablaSimbolos.existe(nombreCin)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombreCin +
+            "' en línea " + idleft + ", columna " + idright + "."
+        );
+    } else {
+        TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);
+        String tipoCin = simboloCin.tipoDato;
+
+        if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + nombreCin +
-                "' en línea " + idleft + ", columna " + idright + "."
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": cin solo puede leer variables de tipo int o float. '" +
+                nombreCin + "' es de tipo '" + tipoCin + "'."
             );
-        } else {
-            TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);//valida que solo puede leer int o float busca el dato y compara el tipo
-            String tipoCin = simboloCin.tipoDato;
-
-            if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + idleft +
-                    ", columna " + idright +
-                    ": cin solo puede leer variables de tipo int o float. '" +
-                    nombreCin + "' es de tipo '" + tipoCin + "'."
-                );
-            }
         }
     }
+    // ── código intermedio ──
+    CodigoIntermedio.emitir("read " + id.toString());
 :}
-| CIN PARENTESIS_APERTURA acceder_arreglo PARENTESIS_CIERRE
+| CIN PARENTESIS_APERTURA acceder_arreglo:a PARENTESIS_CIERRE
+{:
+    CodigoIntermedio.emitir("read " + a.valor);
+:}
 ;
 
 cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
 ;
 
-lista_cout ::= expresion resto_cout
+lista_cout ::= expresion:e resto_cout
+    {:
+        CodigoIntermedio.emitir("print " + e.valor);
+    :}
 ;
 
-resto_cout ::= COMA expresion resto_cout
-             | /* vacio */
+resto_cout ::= COMA expresion:e resto_cout
+    {:
+        CodigoIntermedio.emitir("print " + e.valor);
+    :}
+    | /* vacio */
 ;
 
 instruccion ::= if_sentencia
