@@ -9,6 +9,30 @@ int~funcion_valida<||>
         if<|greather_t<|x,5|>|>
         |:
             int~a <- 1!
+              return~30!
+        :|
+        else
+        |:
+            return~20!
+        :|
+    :|
+    else
+    |:
+        return~30!
+    :|
+
+:|
+
+float~funcion_valida<||>
+|:
+    int~x <- 10!
+
+    if<|equal<|x,10|>|>
+    |:
+        if<|greather_t<|x,5|>|>
+        |:
+            int~a <- 1!
+              return~30!
         :|
         else
         |:

@@ -22,6 +22,7 @@ parser code {:
         erroresSintacticos.add(msg);
         System.err.println(msg);
     }
+    boolean funcionDeclaradaCorrectamente = true;//para validar duplicidades
 
 :};
 
@@ -36,6 +37,8 @@ action code {:/*se usa para validar los tipos de retorno*/
 
     // Permitir int -> float
     if (esperado.equals("float") && recibido.equals("int")) return true;
+
+    
 
     return false;
 }
@@ -121,11 +124,11 @@ non terminal lista_params;
 non terminal resto_params;
 non terminal param;
 
-non terminal lista_sentencias;
-non terminal sentencia;
-non terminal bloque;
+non terminal Boolean  lista_sentencias;
+non terminal Boolean  sentencia;
+non terminal Boolean  bloque;
 non terminal break_sentencia;
-non terminal return_sentencia;
+non terminal Boolean  return_sentencia;
 
 non terminal String acceder_arreglo;
 non terminal modificar_arreglo;
@@ -142,9 +145,9 @@ non terminal matriz_flotantes;
 non terminal lectura_escritura;
 non terminal cin_sentencia;
 non terminal cout_sentencia;
-non terminal instruccion;
-non terminal if_sentencia;
-non terminal else_bloque;
+non terminal Boolean instruccion;
+non terminal Boolean if_sentencia;
+non terminal Boolean else_bloque;
 non terminal do_while;
 non terminal switch_sentencia;
 non terminal cases;
@@ -168,7 +171,7 @@ non terminal  resto_logico;
 non terminal String termino_logico;
 non terminal  resto_termino_logico;
 non terminal  String factor_logico;
-non terminal while_sentencia;
+
 non terminal String llamada_funcion;
 non terminal String  lista_expresiones;
 non terminal resto_expresiones;
@@ -177,6 +180,7 @@ non terminal resto_cout;
 non terminal asignar_variable;
 non terminal declaracion_int;
 non terminal declaracion_float;
+
 /*producciones*/
 
 start with programa;
@@ -188,34 +192,44 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 /*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
-funcion ::= tipo_funcion:datotype SEPARADOR ID:id
-    {:
-        TablaSimbolos.agregar(
-            id.toString(),
-            "FUNCION",
-            String.valueOf(idleft),
-            String.valueOf(idright),
-            datotype
-        );
-        funcionActual = id.toString();
-        tipoRetornoActual = datotype;
-        retornoEncontrado = false;
+funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA lista_params  PARENTESIS_CIERRE
+       {:
+            funcionActual = id.toString();
+            tipoRetornoActual = t.toString();
+            retornoEncontrado = false;
 
-        TablaSimbolos.entrarScope(id.toString());
-    :}
-    PARENTESIS_APERTURA lista_params PARENTESIS_CIERRE bloque
-    {:
-        if (!retornoEncontrado) {
-            ErroresSemanticos.agregar(
-                "La función '" + funcionActual +
-                "' debe retornar un valor de tipo " + tipoRetornoActual + "."
+            funcionDeclaradaCorrectamente = TablaSimbolos.agregar(
+                id.toString(),
+                "FUNCION",
+                String.valueOf(idleft),
+                String.valueOf(idright),
+                t.toString(),
+                true
             );
-        }
-        TablaSimbolos.salirScope();
-        funcionActual = "";
-        tipoRetornoActual = "";
-        retornoEncontrado = false;
-    :}
+
+            if (funcionDeclaradaCorrectamente) {
+                TablaSimbolos.entrarScope("Funcion " + id.toString());
+            } else {
+                TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);//scope temporal para notificar errores tremporales
+            }
+        :}
+        bloque
+        {:
+            if (!"empty".equals(tipoRetornoActual) && !retornoEncontrado) {
+                ErroresSemanticos.agregar(
+                    "La función '" + funcionActual +
+                    "' debe retornar un valor de tipo " + tipoRetornoActual +
+                    " en todos los caminos."
+                );
+            }
+
+            TablaSimbolos.salirScope();
+
+            funcionActual = null;
+            tipoRetornoActual = null;
+            retornoEncontrado = false;
+            funcionDeclaradaCorrectamente = true;
+        :}
 ;
 /* El bloque principal del programa: "empty main() { ... }"
    Abre su propio scope llamado __main__ al entrar y lo cierra al salir. */
@@ -227,13 +241,20 @@ main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
 
     TablaSimbolos.entrarScope("__main__");
 :}
-ABRIR_BLOQUE lista_sentencias CERRAR_BLOQUE
+bloque
 {:
     TablaSimbolos.salirScope();
 
-    funcionActual = "";
-    tipoRetornoActual = "";
+    funcionActual = null;
+    tipoRetornoActual = null;
     retornoEncontrado = false;
+:}
+;
+
+bloque::= ABRIR_BLOQUE lista_sentencias:ls CERRAR_BLOQUE
+{:
+
+    RESULT= ls;
 :}
 ;
 
@@ -281,55 +302,112 @@ elemento ::= elemento_numerico
            | CARACTER
 ;
 /*sentencia cubre los controles minimo deintriucciones que pueden generarse  */
+/* sentencia devuelve true si garantiza un return, false si no */
+
 sentencia ::= declaracion_int FIN_SENTENCIA
-            | declaracion_float FIN_SENTENCIA
-            | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
-           {:
-                TablaSimbolos.agregar(id.toString(), "VARIABLE",
-                    String.valueOf(idleft), String.valueOf(idright),datotype,false);
+        {:
+            RESULT = false;
+        :}
 
-            :}
-            | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
-            {:
-                 TablaSimbolos.agregar(id.toString(), "VARIABLE", String.valueOf(idleft),
-    String.valueOf(idright),datotype,true); 
-        if (!"error".equals(expr) && !tiposCompatibles(datotype, expr)) {
-            ErroresSemanticos.agregar(
-                "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": no se puede inicializar la variable '" + id.toString() +
-                "' de tipo '" + datotype +
-                "' con una expresión de tipo '" + expr 
+        | declaracion_float FIN_SENTENCIA
+        {:
+            RESULT = false;
+        :}
+
+        | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
+        {:
+            TablaSimbolos.agregar(
+                id.toString(),
+                "VARIABLE",
+                String.valueOf(idleft),
+                String.valueOf(idright),
+                datotype,
+                false
             );
-        }
-            :}
-            | asignar_variable FIN_SENTENCIA
-            | modificar_arreglo FIN_SENTENCIA
-            | instruccion
-            | bloque
-            | return_sentencia FIN_SENTENCIA
-            | break_sentencia FIN_SENTENCIA
-            | lectura_escritura
-            | expresion FIN_SENTENCIA
-            | error FIN_SENTENCIA
-            {:
-                parser.erroresSintacticos.add(
-                    "  → Recuperado: se omitió sentencia inválida hasta '!'"
+
+            RESULT = false;
+        :}
+
+        | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
+        {:
+            TablaSimbolos.agregar(
+                id.toString(),
+                "VARIABLE",
+                String.valueOf(idleft),
+                String.valueOf(idright),
+                datotype,
+                true
+            );
+
+            if (!"error".equals(expr) && !tiposCompatibles(datotype, expr)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": no se puede inicializar la variable '" + id.toString() +
+                    "' de tipo '" + datotype +
+                    "' con una expresión de tipo '" + expr + "'."
                 );
-            :}
-;
+            }
 
-bloque ::= ABRIR_BLOQUE 
-  
-    lista_sentencias 
-    CERRAR_BLOQUE
-   
-;
+            RESULT = false;
+        :}
 
-lista_sentencias ::= sentencia lista_sentencias
-                   | /* vacio */
-;
+        | asignar_variable FIN_SENTENCIA
+        {:
+            RESULT = false;
+        :}
 
+        | modificar_arreglo FIN_SENTENCIA
+        {:
+            RESULT = false;
+        :}
+
+        | instruccion:i
+        {:
+            RESULT = i;
+        :}
+
+        | bloque:b
+        {:
+            RESULT = b;
+        :}
+
+        | return_sentencia:r FIN_SENTENCIA
+        {:
+            RESULT = r;
+        :}
+
+        | break_sentencia FIN_SENTENCIA
+        {:
+            RESULT = false;
+        :}
+
+        | lectura_escritura
+        {:
+            RESULT = false;
+        :}
+
+        | expresion FIN_SENTENCIA
+        {:
+            RESULT = false;
+        :}
+
+        | error FIN_SENTENCIA
+        {:
+            parser.erroresSintacticos.add(
+                "  → Recuperado: se omitió sentencia inválida hasta '!'"
+            );
+
+            RESULT = false;
+        :};
+
+
+
+lista_sentencias ::= sentencia:s lista_sentencias:ls
+{: RESULT = s || ls; :}
+| /* vacio */
+{: RESULT = false;:}
+;
 
 break_sentencia ::= BREAK
 ;
@@ -370,6 +448,7 @@ return_sentencia ::= RETURN SEPARADOR expresion:expr
             "', pero está retornando '" + expr + "'."
         );
     }
+    RESULT=true;
 :}
 ;
 asignar_variable ::= ID:id ASIGNACION expresion:expr
@@ -543,10 +622,20 @@ resto_cout ::= COMA expresion resto_cout
              | /* vacio */
 ;
 
-instruccion ::= if_sentencia
-              | do_while
-              | switch_sentencia
-         
+instruccion ::= if_sentencia:i
+{:
+    RESULT = i;
+:}
+
+| do_while
+{:
+    RESULT = false;
+:}
+
+| switch_sentencia
+{:
+    RESULT = false;
+:}
 ;
 
 
@@ -554,15 +643,17 @@ instruccion ::= if_sentencia
    Abre scope propio para el bloque then; el scope del else lo maneja else_bloque. */
 if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE 
  {:  TablaSimbolos.entrarScope("if");  :}
-    bloque
+    bloque:b
     {:  TablaSimbolos.salirScope();       :}
-    else_bloque
+    else_bloque:e {:RESULT=b && e;:}
  
 ;
 /*abre su propio scope si existe, o produce vacío. */
 else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
-    bloque
-    {: TablaSimbolos.salirScope(); :}| /* vacio */
+    bloque:b
+    {: TablaSimbolos.salirScope();
+    RESULT=b; :}
+    | /* vacio */{:RESULT=false;:}
 ;
 /* Ciclo do-while: ejecuta el bloque al menos una vez y repite mientras la condición sea verdadera. */
 do_while ::= DO {: TablaSimbolos.entrarScope("do_while"); :}bloque  {: TablaSimbolos.salirScope();            :} WHILE PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
