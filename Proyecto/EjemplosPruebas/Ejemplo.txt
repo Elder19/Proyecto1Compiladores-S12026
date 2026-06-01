@@ -1,18 +1,196 @@
-empty ~ __main__ <| |>
+int~suma<|int~a, int~b|>
 |:
-    int ~ x <- 5 !
-    int ~ y <- 3 !
-    int ~ z <- x + y !
-    bool ~ a <- true !
-    bool ~ b <- false !
-    bool ~ r1 <- a # b !
-    bool ~ r2 <- a @ b !
-    bool ~ r3 <- $a !
-    bool ~ r4 <- equal<|x, y|> !
-    bool ~ r5 <- less_t<|x, y|> !
-    x <- x + 1 !
-    cout<|z|> !
-    cout<|r1, r2|> !
-    cin<|x|> !
-    return ~ x !
+    int~r <- a + b!
+    return~r!
+:|
+
+float~mezcla<|int~x, float~y|>
+|:
+    float~r <- x + y!
+    return~r!
+:|
+
+bool~comparar<|int~a, float~b|>
+|:
+    bool~r <- greather_t<|b,a|>!
+    return~r!
+:|
+
+int~retornoMalo<|int~x|>
+|:
+    bool~bandera <- true!
+    return~bandera!
+:|
+
+int~sinReturn<||>
+|:
+    int~x <- 10!
+    x <- x + 1!
+:|
+
+int~codigoMuerto<|int~n|>
+|:
+    int~x <- n + 1!
+    return~x!
+
+    int~despues <- 100!
+    despues <- "hola"!
+:|
+
+empty~__main__<||>
+|:
+    int~a <- 10!
+    int~b <- 5!
+    float~f <- 2.5!
+    bool~bandera <- true!
+    string~texto <- "hola"!
+    char~letra <- 'z'!
+
+    int~mat<<3>><<3>>!
+    float~matF<<2>><<2>>!
+
+    mat<<0>><<0>><-1!
+    mat<<0>><<1>><-a + b!
+    mat<<1>><<1>><-suma<|a,b|>!
+    matF<<0>><<0>><-f!
+    matF<<0>><<1>><-a!
+
+    int~i <- 1!
+    int~j <- 2!
+    mat<<i>><<j>><-20!
+    mat<<i + 1>><<j - 1>><-30!
+
+    int~res <- suma<|a,b|>!
+    float~resF <- mezcla<|a,f|>!
+    bool~ok <- comparar<|a,f|>!
+
+    bool~r1 <- equal<|a,b|>!
+    bool~r2 <- n_equal<|a,f|>!
+    bool~r3 <- less_t<|b,a|>!
+    bool~r4 <- greather_te<|f,a|>!
+    bool~l1 <- r1 @ r3!
+    bool~l2 <- r2 # r4!
+    bool~l3 <- $ bandera!
+
+    int~errDecl1 <- "texto"!
+    float~errDecl2 <- false!
+    bool~errDecl3 <- 123!
+    string~errDecl4 <- 99!
+    char~errDecl5 <- "cadena"!
+
+    a <- f!
+    bandera <- a!
+    texto <- bandera!
+    noExiste <- 100!
+
+    int~errArit1 <- texto + a!
+    int~errArit2 <- bandera * b!
+    int~errArit3 <- letra - a!
+    int~errArit4 <- a % f!
+    int~errArit5 <- f // b!
+    int~errArit6 <- -texto!
+    int~errArit7 <- ++texto!
+    int~errArit8 <- --bandera!
+
+    bool~errRel1 <- equal<|letra,a|>!
+    bool~errRel2 <- equal<|texto,bandera|>!
+    bool~errRel3 <- less_t<|bandera,a|>!
+    bool~errRel4 <- greather_t<|texto,f|>!
+    bool~errRel5 <- less_te<|letra,a|>!
+
+    bool~errLog1 <- a @ bandera!
+    bool~errLog2 <- texto # bandera!
+    bool~errLog3 <- $ a!
+    bool~errLog4 <- letra @ bandera!
+    bool~errLog5 <- f # bandera!
+
+    mat<-5!
+
+    int~normal!
+    normal<<0>><<0>><-4!
+
+    mat<<f>><<0>><-1!
+    mat<<0>><<bandera>><-1!
+    mat<<texto>><<0>><-1!
+    mat<<0>><<0>><-false!
+    matF<<0>><<0>><-"malo"!
+    noMat<<0>><<0>><-1!
+
+    if<|ok|>
+    |:
+        int~dentroIf <- 1!
+    :|
+    else
+    |:
+        int~dentroElse <- 2!
+    :|
+
+    if<|a|>
+    |:
+        int~ifMalo1 <- 1!
+    :|
+
+    if<|texto|>
+    |:
+        int~ifMalo2 <- 2!
+    :|
+
+    do
+    |:
+        a <- a - 1!
+        break!
+    :|
+    while<|greather_t<|a,0|>|>!
+
+    do
+    |:
+        b <- b - 1!
+    :|
+    while<|texto|>!
+
+    switch<|a|>
+    |:
+        case~1:
+            cout<|"uno"|>!
+            break!
+        case~5:
+            cout<|"cinco"|>!
+            break!
+        default:
+            cout<|"otro"|>!
+    :|
+
+    switch<|letra|>
+    |:
+        case~'z':
+            cout<|"letra z"|>!
+            break!
+        default:
+            cout<|"otra letra"|>!
+    :|
+
+    switch<|texto|>
+    |:
+        case~'h':
+            cout<|"texto hola"|>!
+            break!
+        default:
+            cout<|"otro texto"|>!
+    :|
+
+
+    cin<|a|>!
+    cin<|f|>!
+    cin<|bandera|>!
+    cin<|texto|>!
+    cin<|letra|>!
+    cin<|variableInexistente|>!
+
+    int~llamadaOk <- suma<|1,2|>!
+    int~llamadaMala1 <- funcionNoExiste<|1,2|>!
+    int~llamadaMala2 <- mezcla<|a,f|>!
+
+    break!
+
+    return~5!
 :|

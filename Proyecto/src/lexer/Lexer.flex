@@ -129,5 +129,5 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
                  ", columna " + (yycolumn + 1);
     erroresLexicos.add(msg);
     System.err.println(msg);
-    return symbol(sym.ERROR, yytext());
+    
 }

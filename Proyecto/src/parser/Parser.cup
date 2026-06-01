@@ -22,101 +22,113 @@ parser code {:
         erroresSintacticos.add(msg);
         System.err.println(msg);
     }
-    boolean funcionDeclaradaCorrectamente = true;//para validar duplicidades
 
+    boolean funcionDeclaradaCorrectamente = true;
 :};
 
-action code {:/*se usa para validar los tipos de retorno*/
+action code {:
     String funcionActual = "";
     String tipoRetornoActual = "";
     boolean retornoEncontrado = false;
-    boolean tiposCompatibles(String esperado, String recibido) {
-    if (esperado == null || recibido == null) return false;
+    boolean codigoInalcanzableActivo = false;
 
-    if (esperado.equals(recibido)) return true;
-
-    // Permitir int -> float
-    if (esperado.equals("float") && recibido.equals("int")) return true;
-
-    
-
-    return false;
-}
-
+    int contextoBreak = 0;
     java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
+
+    boolean tiposCompatibles(String esperado, String recibido) {
+        if (esperado == null || recibido == null) return false;
+        if (esperado.equals(recibido)) return true;
+        if (esperado.equals("float") && recibido.equals("int")) return true;
+        return false;
+    }
+
+    void validarBreak(int linea, int columna) {
+        if (contextoBreak <= 0) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + linea +
+                ", columna " + columna +
+                ": 'break' solo puede usarse dentro de un ciclo o switch."
+            );
+        }
+    }
+
+    void validarCodigoInalcanzable(int linea, int columna) {
+        if (codigoInalcanzableActivo) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + linea +
+                ", columna " + columna +
+                ": código inalcanzable después de return."
+            );
+        }
+    }
 :};
 
-
-/*Terminales*/
-
- terminal ID;
- terminal CADENA;
- terminal CARACTER;
- terminal ENTERO;
- terminal FLOTANTE;
- terminal FRACCION;
- terminal BOOL;
- terminal EXPONENCIAL;
- terminal FLOAT;
- terminal STRING;
- terminal CHAR;
- terminal IF;
- terminal ELSE;
- terminal SWITCH;
- terminal CASE;
- terminal DEFAULT;
- terminal RETURN;
- terminal BREAK;
- terminal CIN;
- terminal COUT;
- terminal TRUE;
- terminal FALSE;
- terminal EMPTY;
- terminal DO;
- terminal WHILE;
- terminal EQUAL;
- terminal N_EQUAL;
- terminal LESS_T;
- terminal LESS_TE;
- terminal GREATHER_T;
- terminal GREATHER_TE;
- terminal ERROR;
- 
- terminal ABRIR_BLOQUE;
- terminal CERRAR_BLOQUE;
- terminal ASIGNACION;
- terminal PARENTESIS_APERTURA;
- terminal PARENTESIS_CIERRE;
- terminal ABRIR_PARENTESIS_CUADRADO;
- terminal CERRAR_PARENTESIS_CUADRADO;
- terminal INCREMENTO;
- terminal DECREMENTO;
- terminal FIN_SENTENCIA;
- terminal SEPARADOR;
- terminal COMA;
- terminal DOS_PUNTOS;
- terminal SUMA;
- terminal RESTA;
- terminal MULTIPLICACION;
- terminal DIVISION;
- terminal POTENCIA;
- terminal MODULO;
- terminal AND;
- terminal OR;
- terminal NOT;
- terminal MAIN;
- terminal INT;
+/* Terminales */
+terminal ID;
+terminal CADENA;
+terminal CARACTER;
+terminal ENTERO;
+terminal FLOTANTE;
+terminal FRACCION;
+terminal BOOL;
+terminal EXPONENCIAL;
+terminal FLOAT;
+terminal STRING;
+terminal CHAR;
+terminal IF;
+terminal ELSE;
+terminal SWITCH;
+terminal CASE;
+terminal DEFAULT;
+terminal RETURN;
+terminal BREAK;
+terminal CIN;
+terminal COUT;
+terminal TRUE;
+terminal FALSE;
+terminal EMPTY;
+terminal DO;
+terminal WHILE;
+terminal EQUAL;
+terminal N_EQUAL;
+terminal LESS_T;
+terminal LESS_TE;
+terminal GREATHER_T;
+terminal GREATHER_TE;
+terminal ABRIR_BLOQUE;
+terminal CERRAR_BLOQUE;
+terminal ASIGNACION;
+terminal PARENTESIS_APERTURA;
+terminal PARENTESIS_CIERRE;
+terminal ABRIR_PARENTESIS_CUADRADO;
+terminal CERRAR_PARENTESIS_CUADRADO;
+terminal INCREMENTO;
+terminal DECREMENTO;
+terminal FIN_SENTENCIA;
+terminal SEPARADOR;
+terminal COMA;
+terminal DOS_PUNTOS;
+terminal SUMA;
+terminal RESTA;
+terminal MULTIPLICACION;
+terminal DIVISION;
+terminal POTENCIA;
+terminal MODULO;
+terminal AND;
+terminal OR;
+terminal NOT;
+terminal MAIN;
+terminal INT;
 terminal DIVISION_ENTERA;
 
-
-
-/*no terminales*/
+/* No terminales */
 non terminal Resultado elemento_numerico;
-non terminal Resultado elemento;
+
 non terminal String tipo;
 non terminal String tipo_funcion;
 non terminal String tipo_completo;
 non terminal Resultado bool_literal;
+non terminal String valor_case;
 
 non terminal programa;
 non terminal lista_funciones;
@@ -126,11 +138,11 @@ non terminal lista_params;
 non terminal resto_params;
 non terminal param;
 
-non terminal Boolean  lista_sentencias;
-non terminal Boolean  sentencia;
-non terminal Boolean  bloque;
+non terminal Boolean lista_sentencias;
+non terminal Boolean sentencia;
+non terminal Boolean bloque;
 non terminal break_sentencia;
-non terminal Boolean  return_sentencia;
+non terminal Boolean return_sentencia;
 
 non terminal Resultado acceder_arreglo;
 non terminal modificar_arreglo;
@@ -158,24 +170,19 @@ non terminal case_default;
 
 non terminal Resultado expresion;
 non terminal Resultado expresion_aritmetica;
-non terminal Resultado resto_aritmetica;
 non terminal Resultado termino;
-non terminal Resultado resto_termino;
 non terminal Resultado potencia;
-non terminal Resultado resto_potencia;
 non terminal Resultado factor;
 non terminal Resultado factor_negativo;
 
 non terminal Resultado expresion_relacional;
 non terminal Resultado operando_relacional_eq;
 non terminal Resultado expresion_logica;
-non terminal Resultado resto_logico;
 non terminal Resultado termino_logico;
-non terminal Resultado resto_termino_logico;
 non terminal Resultado factor_logico;
-non terminal while_sentencia;
+
 non terminal Resultado llamada_funcion;
-non terminal lista_expresiones;
+non terminal Resultado lista_expresiones;
 non terminal resto_expresiones;
 non terminal lista_cout;
 non terminal resto_cout;
@@ -183,63 +190,62 @@ non terminal asignar_variable;
 non terminal declaracion_int;
 non terminal declaracion_float;
 
-/*producciones*/
-
 start with programa;
 
 programa ::= lista_funciones main;
 
-/* lista_funciones acumula todas las funciones definidas antes del main. */
 lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
-/*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
-funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA lista_params  PARENTESIS_CIERRE
-       {:
-            funcionActual = id.toString();
-            tipoRetornoActual = t.toString();
-            retornoEncontrado = false;
 
-            funcionDeclaradaCorrectamente = TablaSimbolos.agregar(
-                id.toString(),
-                "FUNCION",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                t.toString(),
-                true
-            );
+funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA
+{:
+    funcionActual = id.toString();
+    tipoRetornoActual = t.toString();
+    retornoEncontrado = false;
+    codigoInalcanzableActivo = false;
 
-            if (funcionDeclaradaCorrectamente) {
-                TablaSimbolos.entrarScope("Funcion " + id.toString());
-            } else {
-                TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);//scope temporal para notificar errores tremporales
-            }
-        :}
-        bloque
-        {:
-            if (!"empty".equals(tipoRetornoActual) && !retornoEncontrado) {
-                ErroresSemanticos.agregar(
-                    "La función '" + funcionActual +
-                    "' debe retornar un valor de tipo " + tipoRetornoActual +
-                    " en todos los caminos."
-                );
-            }
+    funcionDeclaradaCorrectamente = TablaSimbolos.agregar(
+        id.toString(),
+        "FUNCION",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        t.toString(),
+        true
+    );
 
-            TablaSimbolos.salirScope();
+    if (funcionDeclaradaCorrectamente) {
+        TablaSimbolos.entrarScope("Funcion " + id.toString());
+    } else {
+        TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);
+    }
+:}
+lista_params PARENTESIS_CIERRE bloque
+{:
+    if (!"empty".equals(tipoRetornoActual) && !retornoEncontrado) {
+        ErroresSemanticos.agregar(
+            "La función '" + funcionActual +
+            "' debe retornar un valor de tipo " + tipoRetornoActual +
+            " en todos los caminos."
+        );
+    }
 
-            funcionActual = null;
-            tipoRetornoActual = null;
-            retornoEncontrado = false;
-            funcionDeclaradaCorrectamente = true;
-        :}
+    TablaSimbolos.salirScope();
+
+    funcionActual = null;
+    tipoRetornoActual = null;
+    retornoEncontrado = false;
+    funcionDeclaradaCorrectamente = true;
+    codigoInalcanzableActivo = false;
+:}
 ;
-/* El bloque principal del programa: "empty main() { ... }"
-   Abre su propio scope llamado __main__ al entrar y lo cierra al salir. */
+
 main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
 {:
     funcionActual = "__main__";
     tipoRetornoActual = "empty";
     retornoEncontrado = false;
+    codigoInalcanzableActivo = false;
 
     TablaSimbolos.entrarScope("__main__");
 :}
@@ -250,16 +256,15 @@ bloque
     funcionActual = null;
     tipoRetornoActual = null;
     retornoEncontrado = false;
+    codigoInalcanzableActivo = false;
 :}
 ;
 
-bloque::= ABRIR_BLOQUE lista_sentencias:ls CERRAR_BLOQUE
+bloque ::= ABRIR_BLOQUE lista_sentencias:ls CERRAR_BLOQUE
 {:
-
-    RESULT= ls;
+    RESULT = ls;
 :}
 ;
-
 
 lista_params ::= param resto_params
                | /* vacio */
@@ -269,7 +274,6 @@ resto_params ::= COMA param resto_params
                | /* vacio */
 ;
 
-
 tipo ::= BOOL
         {: RESULT = "bool"; :}
        | STRING
@@ -277,6 +281,7 @@ tipo ::= BOOL
        | CHAR
         {: RESULT = "char"; :}
 ;
+
 tipo_funcion ::= INT
                 {: RESULT = "int"; :}
                | BOOL
@@ -288,23 +293,24 @@ tipo_funcion ::= INT
                | STRING
                 {: RESULT = "string"; :}
 ;
-bool_literal ::= TRUE  {: RESULT = new Resultado("true",  "bool"); :}
-               | FALSE {: RESULT = new Resultado("false", "bool"); :}
+
+bool_literal ::= TRUE
+                {: RESULT = new Resultado("true", "bool"); :}
+               | FALSE
+                {: RESULT = new Resultado("false", "bool"); :}
 ;
 
-elemento_numerico ::= ENTERO:v      {: RESULT = new Resultado(v.toString(), "int");   :}
-                    | FLOTANTE:v    {: RESULT = new Resultado(v.toString(), "float");  :}
-                    | EXPONENCIAL:v {: RESULT = new Resultado(v.toString(), "float");  :}
-                    | FRACCION:v    {: RESULT = new Resultado(v.toString(), "float");  :}
+elemento_numerico ::= ENTERO:v
+                    {: RESULT = new Resultado(v.toString(), "int"); :}
+                    | FLOTANTE:v
+                    {: RESULT = new Resultado(v.toString(), "float"); :}
+                    | EXPONENCIAL:v
+                    {: RESULT = new Resultado(v.toString(), "float"); :}
+                    | FRACCION:v
+                    {: RESULT = new Resultado(v.toString(), "float"); :}
 ;
 
-elemento ::= elemento_numerico
-           | bool_literal
-           | CADENA
-           | CARACTER
-;
-/*sentencia cubre los controles minimo deintriucciones que pueden generarse  */
-/* sentencia devuelve true si garantiza un return, false si no */
+
 
 sentencia ::= declaracion_int FIN_SENTENCIA
         {:
@@ -318,6 +324,7 @@ sentencia ::= declaracion_int FIN_SENTENCIA
 
         | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
         {:
+            validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
                 id.toString(), "VARIABLE",
                 String.valueOf(idleft), String.valueOf(idright),
@@ -328,11 +335,15 @@ sentencia ::= declaracion_int FIN_SENTENCIA
 
         | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
         {:
+            validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
                 id.toString(), "VARIABLE",
                 String.valueOf(idleft), String.valueOf(idright),
                 datotype, true
             );
+
+            CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
+
             if (!"error".equals(expr.tipo) && !tiposCompatibles(datotype, expr.tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
@@ -342,8 +353,6 @@ sentencia ::= declaracion_int FIN_SENTENCIA
                     "' con una expresión de tipo '" + expr.tipo + "'."
                 );
             }
-            // ── código intermedio ──
-            CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
             RESULT = false;
         :}
 
@@ -396,17 +405,23 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         :}
 ;
 
-
-
 lista_sentencias ::= sentencia:s lista_sentencias:ls
-{: RESULT = s || ls; :}
+{:
+    RESULT = s || ls;
+:}
 | /* vacio */
-{: RESULT = false;:}
+{:
+    RESULT = false;
+:}
 ;
 
-break_sentencia ::= BREAK
+break_sentencia ::= BREAK:br
+{:
+    validarCodigoInalcanzable(brleft, brright);
+    validarBreak(brleft, brright);
+:}
 ;
-/* Tipos válidos tanto para parámetros como para variables locales. */
+
 tipo_completo ::= INT
                  {: RESULT = "int"; :}
                 | BOOL
@@ -418,18 +433,25 @@ tipo_completo ::= INT
                 | CHAR
                  {: RESULT = "char"; :}
 ;
-/* Un parámetro formal de función: tipo + nombre. Se registra como PARAMETRO en
-   la tabla de símbolos dentro del scope de la función. */
+
 param ::= tipo_completo:tc SEPARADOR ID:id
-    {:
-         TablaSimbolos.agregar(id.toString(), "PARAMETRO",  String.valueOf(idleft),
-    String.valueOf(idright),tc.toString()); 
-    :}
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "PARAMETRO",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        tc.toString()
+    );
+:}
 ;
 
-return_sentencia ::= RETURN SEPARADOR expresion:expr
+return_sentencia ::= RETURN:ret SEPARADOR expresion:expr
 {:
+    validarCodigoInalcanzable(retleft, retright);
+
     retornoEncontrado = true;
+    codigoInalcanzableActivo = true;
 
     if ("empty".equals(tipoRetornoActual)) {
         ErroresSemanticos.agregar(
@@ -444,99 +466,157 @@ return_sentencia ::= RETURN SEPARADOR expresion:expr
             "', pero está retornando '" + expr.tipo + "'."
         );
     }
-    // ── código intermedio ──
-    CodigoIntermedio.emitir("return " + expr.valor);
+
     RESULT = true;
 :}
 ;
 
 asignar_variable ::= ID:id ASIGNACION expresion:expr
-    {:
-        String nombreasing = id.toString();
-        if (!TablaSimbolos.existe(id.toString())) {
+{:
+    validarCodigoInalcanzable(idleft, idright);
+    String nombreAsign = id.toString();
+
+    if (!TablaSimbolos.existe(nombreAsign)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": la variable '" + nombreAsign + "' no está declarada."
+        );
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreAsign);
+
+        if (simbolo == null) {
             ErroresSemanticos.agregar(
-                "La variable " + id.toString() +
-                " en la linea " + idleft + " columna " + idright
+                "Error interno: no se pudo recuperar el símbolo '" + nombreAsign + "'."
             );
-        } else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);
-            String tipoVar  = simbolo.tipoDato;
-            String tipoExpr = expr.tipo;
-            if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
+        }
+        else if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombreAsign + "' es un arreglo y no se puede asignar como variable. Use índices."
+            );
+        }
+        else {
+            String tipoVar = simbolo.tipoDato;
+
+            CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
+
+            if (!"error".equals(expr.tipo) && !tiposCompatibles(tipoVar, expr.tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
                     ", columna " + idright +
-                    ": no se puede asignar un valor de tipo '" + tipoExpr +
-                    "' a la variable '" + nombreasing +
-                    "' de tipo '" + tipoVar
+                    ": no se puede asignar un valor de tipo '" + expr.tipo +
+                    "' a la variable '" + nombreAsign +
+                    "' de tipo '" + tipoVar + "'."
                 );
             }
         }
-        // ── código intermedio ──
-        CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-    :}
+    }
+:}
 ;
 
-acceder_arreglo ::=
-      ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
-           ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
-      {:
-          String nombreArreglo = id.toString();
+acceder_arreglo ::= ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
+                    ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
+{:
+    String nombreArreglo = id.toString();
 
-          if (!TablaSimbolos.existe(nombreArreglo)) {
-              ErroresSemanticos.agregar(
-                  "Arreglo no declarado '" + nombreArreglo +
-                  "' en línea " + idleft + ", columna " + idright 
-              );
-              RESULT = new Resultado("error", "error");
-          } else {
-              TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreArreglo);
-              RESULT = new Resultado(nombreArreglo, simbolo.tipoDato);
-          }
-      :}
+    if (!TablaSimbolos.existe(nombreArreglo)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": arreglo no declarado '" + nombreArreglo + "'."
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreArreglo);
+
+        if (simbolo == null) {
+            ErroresSemanticos.agregar(
+                "Error interno: no se pudo recuperar el símbolo '" + nombreArreglo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombreArreglo + "' no es un arreglo."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!"int".equals(expr1.tipo) || !"int".equals(expr2.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": los índices del arreglo '" + nombreArreglo +
+                "' deben ser de tipo int."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            String temp = nombreArreglo + "[" + expr1.valor + "][" + expr2.valor + "]";
+            RESULT = new Resultado(temp, simbolo.tipoDato);
+        }
+    }
+:}
 ;
 
-modificar_arreglo ::=
-      ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
-         ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
-         ASIGNACION expresion:expr
-      {:
-          String nombre = id.toString();
+modificar_arreglo ::= ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
+                      ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
+                      ASIGNACION expresion:expr
+{:
+    validarCodigoInalcanzable(idleft, idright);
+    String nombre = id.toString();
 
-          if (!TablaSimbolos.existe(nombre)) {
-              ErroresSemanticos.agregar(
-                  "Arreglo no declarado '" + nombre +
-                  "' en línea " + idleft + ", columna " + idright + "."
-              );
-          } 
-          else if (!expr1.equals("int") || !expr2.equals("int")) {
-              ErroresSemanticos.agregar(
-                  "No se puede acceder un arreglo con índices diferentes de int."
-              );
-          }
-          else {
-              TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": arreglo no declarado '" + nombre + "'."
+        );
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
 
-              if (simbolo == null) {
-                  ErroresSemanticos.agregar(
-                      "Error interno: no se pudo recuperar el símbolo '" + nombre + "'."
-                  );
-              }
-              else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
-                  ErroresSemanticos.agregar(
-                      "'" + nombre + "' no es un arreglo."
-                  );
-              } 
-              else if (!tiposCompatibles(simbolo.tipoDato, expr.tipo)) {
-                  ErroresSemanticos.agregar(
-                      "No se puede asignar un valor de tipo '" + expr +
-                      "' al arreglo '" + nombre +
-                      "' de tipo '" + simbolo.tipoDato + "'."
-                  );
-              }
-          }
-      :}
+        if (simbolo == null) {
+            ErroresSemanticos.agregar(
+                "Error interno: no se pudo recuperar el símbolo '" + nombre + "'."
+            );
+        }
+        else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombre + "' no es un arreglo."
+            );
+        }
+        else if (!"int".equals(expr1.tipo) || !"int".equals(expr2.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": los índices del arreglo '" + nombre + "' deben ser de tipo int."
+            );
+        }
+        else {
+            CodigoIntermedio.emitir(nombre + "[" + expr1.valor + "][" + expr2.valor + "] = " + expr.valor);
+
+            if (!"error".equals(expr.tipo) && !tiposCompatibles(simbolo.tipoDato, expr.tipo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": no se puede asignar un valor de tipo '" + expr.tipo +
+                    "' al arreglo '" + nombre +
+                    "' de tipo '" + simbolo.tipoDato + "'."
+                );
+            }
+        }
+    }
+:}
 ;
+
 lista_enteros ::= ENTERO
                 | ENTERO COMA lista_enteros
 ;
@@ -545,25 +625,27 @@ lista_flotantes ::= FLOTANTE
                   | FLOTANTE COMA lista_flotantes
 ;
 
-fila_enteros  ::= ABRIR_BLOQUE lista_enteros  CERRAR_BLOQUE
+fila_enteros ::= ABRIR_BLOQUE lista_enteros CERRAR_BLOQUE
 ;
+
 fila_flotantes ::= ABRIR_BLOQUE lista_flotantes CERRAR_BLOQUE
 ;
 
-filas_enteros  ::= fila_enteros
-                 | fila_enteros COMA filas_enteros
+filas_enteros ::= fila_enteros
+                | fila_enteros COMA filas_enteros
 ;
+
 filas_flotantes ::= fila_flotantes
                   | fila_flotantes COMA filas_flotantes
 ;
 
-matriz_enteros  ::= ABRIR_BLOQUE filas_enteros  CERRAR_BLOQUE
+matriz_enteros ::= ABRIR_BLOQUE filas_enteros CERRAR_BLOQUE
 ;
+
 matriz_flotantes ::= ABRIR_BLOQUE filas_flotantes CERRAR_BLOQUE
 ;
 
-
-lectura_escritura ::= cin_sentencia  FIN_SENTENCIA
+lectura_escritura ::= cin_sentencia FIN_SENTENCIA
                     | cout_sentencia FIN_SENTENCIA
 ;
 
@@ -576,7 +658,8 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
             "Variable no declarada '" + nombreCin +
             "' en línea " + idleft + ", columna " + idright + "."
         );
-    } else {
+    }
+    else {
         TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);
         String tipoCin = simboloCin.tipoDato;
 
@@ -589,7 +672,7 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
             );
         }
     }
-    // ── código intermedio ──
+
     CodigoIntermedio.emitir("read " + id.toString());
 :}
 | CIN PARENTESIS_APERTURA acceder_arreglo:a PARENTESIS_CIERRE
@@ -602,64 +685,102 @@ cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
 ;
 
 lista_cout ::= expresion:e resto_cout
-    {:
-        CodigoIntermedio.emitir("print " + e.valor);
-    :}
+{:
+    CodigoIntermedio.emitir("print " + e.valor);
+:}
 ;
 
 resto_cout ::= COMA expresion:e resto_cout
-    {:
-        CodigoIntermedio.emitir("print " + e.valor);
-    :}
-    | /* vacio */
+{:
+    CodigoIntermedio.emitir("print " + e.valor);
+:}
+| /* vacio */
 ;
 
 instruccion ::= if_sentencia:i
 {:
     RESULT = i;
 :}
-
 | do_while
 {:
     RESULT = false;
 :}
-
 | switch_sentencia
 {:
     RESULT = false;
 :}
 ;
 
-
-/* Condicional if con else opcional.
-   Abre scope propio para el bloque then; el scope del else lo maneja else_bloque. */
-if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE 
- {:  TablaSimbolos.entrarScope("if");  :}
-    bloque:b
-    {:  TablaSimbolos.salirScope();       :}
-    else_bloque:e {:RESULT=b && e;:}
- 
-;
-/*abre su propio scope si existe, o produce vacío. */
-else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
-    bloque:b
-    {: TablaSimbolos.salirScope();
-    RESULT=b; :}
-    | /* vacio */{:RESULT=false;:}
-;
-/* Ciclo do-while: ejecuta el bloque al menos una vez y repite mientras la condición sea verdadera. */
-do_while ::= DO {: TablaSimbolos.entrarScope("do_while"); :}bloque  {: TablaSimbolos.salirScope();            :} WHILE PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
-;
-/* Switch: evalúa una expresión y salta al case correspondiente.
-   Abre scope propio para todo el cuerpo del switch. */
-switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE {: TablaSimbolos.entrarScope("switch"); :} ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
- {: TablaSimbolos.salirScope();          :}
-;
-cases ::= case_item cases
-        | /* vacio */
+if_sentencia ::= IF:ifTok PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE
+{:
+    ErroresSemanticos.validarCondicionBooleana(cond.tipo, "if", ifTokleft, ifTokright);
+    TablaSimbolos.entrarScope("if");
+:}
+bloque:b
+{:
+    TablaSimbolos.salirScope();
+:}
+else_bloque:e
+{:
+    RESULT = b && e;
+:}
 ;
 
-case_item ::= CASE SEPARADOR elemento DOS_PUNTOS lista_sentencias
+else_bloque ::= ELSE
+{:
+    TablaSimbolos.entrarScope("else");
+:}
+bloque:b
+{:
+    TablaSimbolos.salirScope();
+    RESULT = b;
+:}
+| /* vacio */
+{:
+    RESULT = false;
+:}
+;
+
+do_while ::= DO:doTok
+{:
+    contextoBreak++;
+    TablaSimbolos.entrarScope("do_while");
+:}
+bloque
+{:
+    TablaSimbolos.salirScope();
+    contextoBreak--;
+:}
+WHILE PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE FIN_SENTENCIA
+{:
+    ErroresSemanticos.validarCondicionBooleana(cond.tipo, "while", doTokleft, doTokright);
+:}
+;
+
+switch_sentencia ::= SWITCH:sw PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE
+{:
+    ErroresSemanticos.validarCondicionSwitch(cond.tipo, swleft, swright);
+    contextoBreak++;
+    TablaSimbolos.entrarScope("switch");
+:}
+ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
+{:
+    TablaSimbolos.salirScope();
+    contextoBreak--;
+:}
+;
+
+cases ::= case_item
+        | case_item cases
+;
+
+case_item ::= CASE SEPARADOR valor_case DOS_PUNTOS lista_sentencias
+;
+
+valor_case ::= ENTERO
+             {: RESULT = "int"; :}
+             | CARACTER
+             {: RESULT = "char"; :}
 ;
 
 case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
@@ -667,243 +788,271 @@ case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
 ;
 
 expresion_aritmetica ::= termino:izq SUMA termino:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " + " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | termino:izq RESTA termino:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " - " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | termino:t
-    {:
-        RESULT = t;
-    :}
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "+", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " + " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| termino:izq RESTA termino:der
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "-", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " - " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| termino:t
+{:
+    RESULT = t;
+:}
 ;
 
 termino ::= potencia:izq MULTIPLICACION potencia:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " * " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | potencia:izq DIVISION potencia:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " / " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | potencia:izq MODULO potencia:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " % " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | potencia:izq DIVISION_ENTERA potencia:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " // " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | potencia:p
-    {:
-        RESULT = p;
-    :}
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "*", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " * " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| potencia:izq DIVISION potencia:der
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "/", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " / " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| potencia:izq MODULO potencia:der
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "%", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " % " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| potencia:izq DIVISION_ENTERA potencia:der
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "//", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " // " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| potencia:p
+{:
+    RESULT = p;
+:}
 ;
 
 potencia ::= factor:izq POTENCIA factor:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " ^ " + der.valor);
-        RESULT = new Resultado(temp, izq.tipo);
-    :}
-
-    | factor:f
-    {:
-        RESULT = f;
-    :}
+{:
+    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "^", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " ^ " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| factor:f
+{:
+    RESULT = f;
+:}
 ;
 
-/* 
-   literal, variable, expresión entre paréntesis, acceso a arreglo,
-   incremento/decremento prefijo, negación o llamada a función. */
 factor ::= elemento_numerico:t
-        {: RESULT = t; :}
+{:
+    RESULT = t;
+:}
+| ID:id
+{:
+    if (!TablaSimbolos.existe(id.toString())) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + id.toString() +
+            "' en línea " + idleft + ", columna " + idright + "."
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+        RESULT = new Resultado(id.toString(), simbolo.tipoDato);
+    }
+:}
+| CADENA:v
+{:
+    RESULT = new Resultado(v.toString(), "string");
+:}
+| CARACTER:v
+{:
+    RESULT = new Resultado(v.toString(), "char");
+:}
+| PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
+{:
+    RESULT = e;
+:}
+| acceder_arreglo:a
+{:
+    RESULT = a;
+:}
+| INCREMENTO:op ID:id
+{:
+    if (!TablaSimbolos.existe(id.toString())) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + id.toString() +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+        String tipo = simbolo.tipoDato;
 
-        | ID:id
-        {:
-            if (!TablaSimbolos.existe(id.toString())) {
-                ErroresSemanticos.agregar(
-                    "Variable no declarada '" + id.toString() +
-                    "' en línea " + idleft + ", columna " + idright + "."
-                );
-                RESULT = new Resultado("error", "error");
-            } else {
-                TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                // valor = nombre de la variable, tipo = su tipo
-                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
-            }
-        :}
+        if (!ErroresSemanticos.esNumerico(tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '++' solo puede aplicarse a variables int o float. '" +
+                id.toString() + "' es de tipo '" + tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " + 1");
+            RESULT = new Resultado(id.toString(), tipo);
+        }
+    }
+:}
+| DECREMENTO:op ID:id
+{:
+    if (!TablaSimbolos.existe(id.toString())) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + id.toString() +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+        String tipo = simbolo.tipoDato;
 
-        | CADENA:v
-        {:
-            RESULT = new Resultado(v.toString(), "string");
-        :}
-
-        | CARACTER:v
-        {:
-            RESULT = new Resultado(v.toString(), "char");
-        :}
-
-        | PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
-        {: RESULT = e; :}
-
-        | acceder_arreglo:a
-        {: RESULT = a; :}
-
-        | INCREMENTO ID:id
-        {:
-            if (!TablaSimbolos.existe(id.toString())) {
-                ErroresSemanticos.agregar(
-                    "Variable no declarada '" + id.toString() +
-                    "' en línea " + idleft + ", columna " + idright
-                );
-                RESULT = new Resultado("error", "error");
-            } else {
-                TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                // emite el incremento
-                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " + 1");
-                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
-            }
-        :}
-
-        | DECREMENTO ID:id
-        {:
-            if (!TablaSimbolos.existe(id.toString())) {
-                ErroresSemanticos.agregar(
-                    "Variable no declarada '" + id.toString() +
-                    "' en línea " + idleft + ", columna " + idright
-                );
-                RESULT = new Resultado("error", "error");
-            } else {
-                TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                // emite el decremento
-                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " - 1");
-                RESULT = new Resultado(id.toString(), simbolo.tipoDato);
-            }
-        :}
-
-        | factor_negativo:f
-        {: RESULT = f; :}
-
-        | llamada_funcion:lf
-        {: RESULT = lf; :}
+        if (!ErroresSemanticos.esNumerico(tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '--' solo puede aplicarse a variables int o float. '" +
+                id.toString() + "' es de tipo '" + tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " - 1");
+            RESULT = new Resultado(id.toString(), tipo);
+        }
+    }
+:}
+| factor_negativo:f
+{:
+    RESULT = f;
+:}
+| llamada_funcion:lf
+{:
+    RESULT = lf;
+:}
 ;
 
 factor_negativo ::= RESTA elemento_numerico:t
-                {:
-                    // negamos el valor literalmente
-                    RESULT = new Resultado("-" + t.valor, t.tipo);
-                :}
+{:
+    RESULT = new Resultado("-" + t.valor, t.tipo);
+:}
+| RESTA:op ID:id
+{:
+    if (!TablaSimbolos.existe(id.toString())) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + id.toString() +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+        String tipo = simbolo.tipoDato;
 
-                | RESTA ID:id
-                {:
-                    if (!TablaSimbolos.existe(id.toString())) {
-                        ErroresSemanticos.agregar(
-                            "Variable no declarada '" + id.toString() +
-                            "' en línea " + idleft + ", columna " + idright
-                        );
-                        RESULT = new Resultado("error", "error");
-                    } else {
-                        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                        String temp = CodigoIntermedio.nuevoTemporal();
-                        CodigoIntermedio.emitir(temp + " = -" + id.toString());
-                        RESULT = new Resultado(temp, simbolo.tipoDato);
-                    }
-                :}
-
-                | RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
-                {:
-                    String temp = CodigoIntermedio.nuevoTemporal();
-                    CodigoIntermedio.emitir(temp + " = -" + e.valor);
-                    RESULT = new Resultado(temp, e.tipo);
-                :}
-
-                | RESTA RESTA elemento_numerico:t
-                {:
-                    // doble negativo = positivo
-                    RESULT = new Resultado(t.valor, t.tipo);
-                :}
+        if (!ErroresSemanticos.esNumerico(tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '-' unario solo puede aplicarse a int o float. '" +
+                id.toString() + "' es de tipo '" + tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = -" + id.toString());
+            RESULT = new Resultado(temp, tipo);
+        }
+    }
+:}
+| RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
+{:
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = -" + e.valor);
+    RESULT = new Resultado(temp, e.tipo);
+:}
+| RESTA RESTA elemento_numerico:t
+{:
+    RESULT = new Resultado(t.valor, t.tipo);
+:}
 ;
 
-
-
-expresion_relacional ::= EQUAL PARENTESIS_APERTURA operando_relacional_eq:a COMA operando_relacional_eq:b PARENTESIS_CIERRE {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " == " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
-
-        | N_EQUAL PARENTESIS_APERTURA operando_relacional_eq:a COMA operando_relacional_eq:b PARENTESIS_CIERRE
-        {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " != " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
-
-        | LESS_T PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
-        {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " < " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
-
-        | LESS_TE PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
-        {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " <= " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
-
-        | GREATHER_T PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
-        {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " > " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
-
-        | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica:a COMA expresion_aritmetica:b PARENTESIS_CIERRE
-        {:
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + a.valor + " >= " + b.valor);
-            RESULT = new Resultado(temp, "bool");
-        :}
+expresion_relacional ::= EQUAL:op PARENTESIS_APERTURA operando_relacional_eq:e1 COMA operando_relacional_eq:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarIgualdad(e1.tipo, e2.tipo, "equal", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " == " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| N_EQUAL:op PARENTESIS_APERTURA operando_relacional_eq:e1 COMA operando_relacional_eq:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarIgualdad(e1.tipo, e2.tipo, "n_equal", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " != " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| LESS_T:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarRelacionalNumerica(e1.tipo, e2.tipo, "less_t", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " < " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| LESS_TE:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarRelacionalNumerica(e1.tipo, e2.tipo, "less_te", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " <= " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| GREATHER_T:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarRelacionalNumerica(e1.tipo, e2.tipo, "greather_t", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " > " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| GREATHER_TE:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    String tipoRes = ErroresSemanticos.validarRelacionalNumerica(e1.tipo, e2.tipo, "greather_te", opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + e1.valor + " >= " + e2.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
 ;
-    
+
 operando_relacional_eq ::= expresion_aritmetica:e
-        {:
-            RESULT = e;
-        :}
+{:
+    RESULT = e;
+:}
+| expresion_relacional:r
+{:
+    RESULT = r;
+:}
+;
 
-        | bool_literal:b
-        {:
-            RESULT = b;
-        :}
-
-        | expresion_relacional:r
-        {:
-            RESULT = r;
-        :}
-                ;
 expresion ::= expresion_logica:t
 {:
     RESULT = t;
@@ -911,167 +1060,212 @@ expresion ::= expresion_logica:t
 ;
 
 expresion_logica ::= termino_logico:izq OR termino_logico:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " || " + der.valor);
-        RESULT = new Resultado(temp, "bool");
-    :}
-
-    | termino_logico:t
-    {:
-        RESULT = t;
-    :}
+{:
+    String tipoRes = ErroresSemanticos.validarLogica(izq.tipo, der.tipo, "OR", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " || " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| termino_logico:t
+{:
+    RESULT = t;
+:}
 ;
-
-
 
 termino_logico ::= factor_logico:izq AND factor_logico:der
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " && " + der.valor);
-        RESULT = new Resultado(temp, "bool");
-    :}
-
-    | factor_logico:f
-    {:
-        RESULT = f;
-    :}
+{:
+    String tipoRes = ErroresSemanticos.validarLogica(izq.tipo, der.tipo, "AND", izqleft, izqright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + izq.valor + " && " + der.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| factor_logico:f
+{:
+    RESULT = f;
+:}
 ;
 
-
-
-factor_logico ::= NOT factor_logico:f
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = !" + f.valor);
-        RESULT = new Resultado(temp, "bool");
-    :}
-
-    | expresion_relacional:r
-    {: RESULT = r; :}
-
-    | expresion_aritmetica:e
-    {: RESULT = e; :}
-
-    | bool_literal:b
-    {: RESULT = b; :}
+factor_logico ::= NOT:op factor_logico:f
+{:
+    String tipoRes = ErroresSemanticos.validarNot(f.tipo, opleft, opright);
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = !" + f.valor);
+    RESULT = new Resultado(temp, tipoRes);
+:}
+| expresion_relacional:r
+{:
+    RESULT = r;
+:}
+| expresion_aritmetica:e
+{:
+    RESULT = e;
+:}| bool_literal:b
+{:
+    RESULT = b;
+:}
 ;
 
-declaracion_int ::=
-      INT SEPARADOR ID:id
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-      {:
-          TablaSimbolos.agregar(
-              id.toString(),
-              "ARREGLO",
-              String.valueOf(idleft),
-              String.valueOf(idright),
-              "int"
-          );
-      :}
+declaracion_int ::= INT SEPARADOR ID:id
+                    ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+                    ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "ARREGLO",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "int"
+    );
+:}
+| INT SEPARADOR ID:id
+  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ASIGNACION matriz_enteros
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "ARREGLO",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "int"
+    );
+:}
+| INT SEPARADOR ID:id ASIGNACION expresion:expr
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "VARIABLE",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "int",
+        true
+    );
 
-    | INT SEPARADOR ID:id
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ASIGNACION matriz_enteros
-      {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "int");
-      :}
+    CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
 
-    | INT SEPARADOR ID:id ASIGNACION expresion:expr
-      {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int", true);
-          // ── código intermedio ──
-          CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-           if (!"error".equals(expr) && !tiposCompatibles("int", expr.tipo)) {
-          ErroresSemanticos.agregar(
-              "Error semántico en línea " + idleft +
-              ", columna " + idright +
-              ": no se puede inicializar la variable '" + id.toString() +
-              "' de tipo 'int' con una expresión de tipo '" + expr + "'."
-          );
-      }
-      :}
-
-    | INT SEPARADOR ID:id
-      {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "int", false);
-      :}
+    if (!"error".equals(expr.tipo) && !tiposCompatibles("int", expr.tipo)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": no se puede inicializar la variable '" + id.toString() +
+            "' de tipo 'int' con una expresión de tipo '" + expr.tipo + "'."
+        );
+    }
+:}
+| INT SEPARADOR ID:id
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "VARIABLE",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "int",
+        false
+    );
+:}
 ;
 
-declaracion_float ::=
-      FLOAT SEPARADOR ID:id
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-      {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "float");
-      :}
+declaracion_float ::= FLOAT SEPARADOR ID:id
+                      ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+                      ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "ARREGLO",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "float"
+    );
+:}
+| FLOAT SEPARADOR ID:id
+  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ASIGNACION matriz_flotantes
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "ARREGLO",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "float"
+    );
+:}
+| FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "VARIABLE",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "float",
+        true
+    );
 
-    | FLOAT SEPARADOR ID:id
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-        ASIGNACION matriz_flotantes
-      {:
-          TablaSimbolos.agregar(id.toString(), "ARREGLO",
-              String.valueOf(idleft), String.valueOf(idright), "float");
-      :}
+    CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
 
-    | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
-      {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "float", true);
-          // ── código intermedio ──
-          CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
-      if (!"error".equals(expr) && !tiposCompatibles("float", expr.tipo)) {
-          ErroresSemanticos.agregar(
-              "Error semántico en línea " + idleft +
-              ", columna " + idright +
-              ": no se puede inicializar la variable '" + id.toString() +
-              "' de tipo 'float' con una expresión de tipo '" + expr + "'."
-          );
-      }
-      :}
-
-    | FLOAT SEPARADOR ID:id
-      {:
-          TablaSimbolos.agregar(id.toString(), "VARIABLE",
-              String.valueOf(idleft), String.valueOf(idright), "float", false);
-      :}
+    if (!"error".equals(expr.tipo) && !tiposCompatibles("float", expr.tipo)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": no se puede inicializar la variable '" + id.toString() +
+            "' de tipo 'float' con una expresión de tipo '" + expr.tipo + "'."
+        );
+    }
+:}
+| FLOAT SEPARADOR ID:id
+{:
+    TablaSimbolos.agregar(
+        id.toString(),
+        "VARIABLE",
+        String.valueOf(idleft),
+        String.valueOf(idright),
+        "float",
+        false
+    );
+:}
 ;
-llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE 
-    {: //valida que se llame una funcion existente siu no existe notifica el error semanticos y si existe retorna el tipo de funcion 
-        String nombreFuncion = id.toString();
 
-        if (!TablaSimbolos.existe(nombreFuncion)) {
+llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones PARENTESIS_CIERRE
+{:
+    String nombreFuncion = id.toString();
+
+    if (!TablaSimbolos.existe(nombreFuncion)) {
+        ErroresSemanticos.agregar(
+            "Función no declarada '" + nombreFuncion +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreFuncion);
+
+        if (!"FUNCION".equals(simbolo.tipoSimbolo)) {
             ErroresSemanticos.agregar(
-                "Función no declarada '" + nombreFuncion +
-                "' en línea " + idleft + ", columna " + idright 
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombreFuncion + "' existe, pero no es una función."
             );
             RESULT = new Resultado("error", "error");
-        } else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreFuncion);
+        }
+        else {
             String temp = CodigoIntermedio.nuevoTemporal();
             CodigoIntermedio.emitir(temp + " = call " + nombreFuncion);
             RESULT = new Resultado(temp, simbolo.tipoDato);
         }
-    :}
+    }
+:}
 ;
 
 lista_expresiones ::= expresion:expr resto_expresiones
-{:RESULT=expr;:}
-                    | /* vacio */
+{:
+    RESULT = expr;
+:}
+| /* vacio */
+{:
+    RESULT = new Resultado("", "void");
+:}
 ;
 
 resto_expresiones ::= COMA expresion resto_expresiones
                     | /* vacio */
 ;
-
-
-
-                
