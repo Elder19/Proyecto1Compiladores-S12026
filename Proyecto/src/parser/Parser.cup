@@ -715,13 +715,29 @@ if_sentencia ::= IF:ifTok PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE
 {:
     ErroresSemanticos.validarCondicionBooleana(cond.tipo, "if", ifTokleft, ifTokright);
     TablaSimbolos.entrarScope("if");
+
+    // ── código intermedio ──
+    String eElse = CodigoIntermedio.nuevaEtiqueta();
+    pilaEtiquetas.push(eElse);
+    CodigoIntermedio.emitir("if_false " + cond.valor + " goto " + eElse);
 :}
 bloque:b
 {:
     TablaSimbolos.salirScope();
+
+    // ── código intermedio ──
+    String eFin = CodigoIntermedio.nuevaEtiqueta();
+    pilaEtiquetas.push(eFin);
+    CodigoIntermedio.emitir("goto " + eFin);
+    CodigoIntermedio.emitir(pilaEtiquetas.get(pilaEtiquetas.size() - 2) + ":");
 :}
 else_bloque:e
 {:
+    // ── código intermedio ──
+    String eFin = pilaEtiquetas.pop();
+    pilaEtiquetas.pop();
+    CodigoIntermedio.emitir(eFin + ":");
+
     RESULT = b && e;
 :}
 ;

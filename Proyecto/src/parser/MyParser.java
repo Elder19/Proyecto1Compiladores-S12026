@@ -873,8 +873,6 @@ class CUP$MyParser$actions {
         }
     }
 
-    java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
-
   private final MyParser parser;
 
   /** Constructor */
@@ -1892,7 +1890,7 @@ class CUP$MyParser$actions {
     if (!TablaSimbolos.existe(nombreCin)) {
         ErroresSemanticos.agregar(
             "Variable no declarada '" + nombreCin +
-            "' en línea " + idleft + ", columna " + idright + "."
+            "' en línea " + idleft + ", columna " + idright 
         );
     }
     else {
@@ -2025,6 +2023,11 @@ class CUP$MyParser$actions {
     ErroresSemanticos.validarCondicionBooleana(cond.tipo, "if", ifTokleft, ifTokright);
     TablaSimbolos.entrarScope("if");
 
+    // ── código intermedio ──
+    String eElse = CodigoIntermedio.nuevaEtiqueta();
+    pilaEtiquetas.push(eElse);
+    CodigoIntermedio.emitir("if_false " + cond.valor + " goto " + eElse);
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$2",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -2044,6 +2047,12 @@ class CUP$MyParser$actions {
 		Boolean b = (Boolean)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 
     TablaSimbolos.salirScope();
+
+    // ── código intermedio ──
+    String eFin = CodigoIntermedio.nuevaEtiqueta();
+    pilaEtiquetas.push(eFin);
+    CodigoIntermedio.emitir("goto " + eFin);
+    CodigoIntermedio.emitir(pilaEtiquetas.get(pilaEtiquetas.size() - 2) + ":");
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$3",61, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2068,6 +2077,11 @@ class CUP$MyParser$actions {
 		int eright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Boolean e = (Boolean)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
+    // ── código intermedio ──
+    String eFin = pilaEtiquetas.pop();
+    pilaEtiquetas.pop();
+    CodigoIntermedio.emitir(eFin + ":");
+
     RESULT = b && e;
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("if_sentencia",32, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-7)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
@@ -2527,7 +2541,7 @@ class CUP$MyParser$actions {
     if (!TablaSimbolos.existe(id.toString())) {
         ErroresSemanticos.agregar(
             "Variable no declarada '" + id.toString() +
-            "' en línea " + idleft + ", columna " + idright + "."
+            "' en línea " + idleft + ", columna " + idright
         );
         RESULT = new Resultado("error", "error");
     }
