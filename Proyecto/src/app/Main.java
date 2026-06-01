@@ -141,7 +141,8 @@ public class Main {
                 "-cp", "." + SEP + "lib/java-cup-runtime.jar" + SEP + "src/parser",
                 "-d", "src/parser",
                 "src/parser/TablaSimbolos.java",
-                "src/parser/ErroresSemanticos.java"
+                "src/parser/ErroresSemanticos.java",
+                "src/parser/CodigoIntermedio.java"   // ← línea nueva
         );
     }
 
@@ -183,11 +184,12 @@ public class Main {
     private static void ejecutarEjemplos(String carpeta) throws Exception {
         URLClassLoader loader = crearClassLoader();
 
-        Class<?> tablaClass = Class.forName("TablaSimbolos", true, loader);
+        Class<?> tablaClass           = Class.forName("TablaSimbolos",    true, loader);
         Class<?> erroresSemanticosClass = Class.forName("ErroresSemanticos", true, loader);
-        Class<?> lexerClass = Class.forName("Lexer", true, loader);
-        Class<?> parserClass = Class.forName("MyParser", true, loader);
-        Class<?> symClass = Class.forName("sym", true, loader);
+        Class<?> codigoIntermedioClass  = Class.forName("CodigoIntermedio",  true, loader); // ← nueva
+        Class<?> lexerClass           = Class.forName("Lexer",            true, loader);
+        Class<?> parserClass          = Class.forName("MyParser",         true, loader);
+        Class<?> symClass             = Class.forName("sym",              true, loader);
 
         int EOF = symClass.getField("EOF").getInt(null);
         String[] terminalNames = (String[]) symClass.getField("terminalNames").get(null);
@@ -196,9 +198,7 @@ public class Main {
 
         File[] archivos = obtenerArchivosDePrueba(carpeta);
 
-        if (archivos == null) {
-            return;
-        }
+        if (archivos == null) return;
 
         for (File archivo : archivos) {
             procesarArchivo(
@@ -206,6 +206,7 @@ public class Main {
                     carpeta,
                     tablaClass,
                     erroresSemanticosClass,
+                    codigoIntermedioClass,
                     lexerClass,
                     parserClass,
                     EOF,
@@ -229,6 +230,7 @@ public class Main {
             String carpeta,
             Class<?> tablaClass,
             Class<?> erroresSemanticosClass,
+            Class<?> codigoIntermedioClass,
             Class<?> lexerClass,
             Class<?> parserClass,
             int EOF,
@@ -238,6 +240,7 @@ public class Main {
 
         tablaClass.getMethod("limpiar").invoke(null);
         erroresSemanticosClass.getMethod("limpiar").invoke(null);
+        codigoIntermedioClass.getMethod("limpiar").invoke(null);
 
         imprimirEncabezado(archivo.getName());
 
@@ -269,6 +272,8 @@ public class Main {
         List<?> erroresSemanticos = (List<?>) erroresSemanticosClass
                 .getMethod("obtenerErrores")
                 .invoke(null);
+
+        mostrarCodigoIntermedio(codigoIntermedioClass);
 
         mostrarVeredictoFinal(
                 erroresLexicos,
@@ -468,6 +473,29 @@ public class Main {
         }
 
         erroresSemanticosClass.getMethod("limpiar").invoke(null);
+    }
+
+
+    /**
+     * Imprime el resultado final del codigo intermedio.
+     */
+    @SuppressWarnings("unchecked")
+    private static void mostrarCodigoIntermedio(Class<?> codigoIntermedioClass) throws Exception {
+        System.out.println("\n[ CÓDIGO INTERMEDIO ]");
+        System.out.println("──────────────────────────────────────────────────────");
+
+        List<String> instrucciones = (List<String>) codigoIntermedioClass
+                .getMethod("getInstrucciones")
+                .invoke(null);
+
+        if (instrucciones.isEmpty()) {
+            System.out.println(" No se generó código intermedio.");
+        } else {
+            int numero = 1;
+            for (String instruccion : instrucciones) {
+                System.out.printf(" %3d.  %s%n", numero++, instruccion);
+            }
+        }
     }
 
     // ============================================================
