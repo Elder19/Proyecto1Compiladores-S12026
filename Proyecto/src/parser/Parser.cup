@@ -790,51 +790,61 @@ operando_relacional_eq ::= expresion_aritmetica:e
             RESULT = r;
         :}
                 ;
-        expresion ::= expresion_logica:t
-        {:
-            RESULT = t;
-        :}
-        ;
+expresion ::= expresion_logica:t
+{:
+    RESULT = t;
+:}
+;
 
-        expresion_logica ::= termino_logico:t resto_logico
-        {:
-            RESULT = t;
-        :}
-        ;
+expresion_logica ::= termino_logico:izq OR termino_logico:der resto_logico
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " || " + der.valor);
+        RESULT = new Resultado(temp, "bool");
+    :}
 
-        resto_logico ::= OR termino_logico resto_logico
-                    | /* vacio */
-        ;
+    | termino_logico:t resto_logico
+    {:
+        RESULT = t;
+    :}
+;
 
-        termino_logico ::= factor_logico:f resto_termino_logico
-        {:
-            RESULT = f;
-        :}
-        ;
+resto_logico ::= OR termino_logico resto_logico
+               | /* vacio */
+;
 
-        resto_termino_logico ::= AND factor_logico resto_termino_logico
-                            | /* vacio */
-        ;
+termino_logico ::= factor_logico:izq AND factor_logico:der resto_termino_logico
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + izq.valor + " && " + der.valor);
+        RESULT = new Resultado(temp, "bool");
+    :}
 
-        factor_logico ::= NOT factor_logico:f
-        {:
-            RESULT = f;
-        :}
+    | factor_logico:f resto_termino_logico
+    {:
+        RESULT = f;
+    :}
+;
 
-        | expresion_relacional:r
-        {:
-            RESULT = r;
-        :}
+resto_termino_logico ::= AND factor_logico resto_termino_logico
+                       | /* vacio */
+;
 
-        | expresion_aritmetica:e
-        {:
-            RESULT = e;
-        :}
+factor_logico ::= NOT factor_logico:f
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = !" + f.valor);
+        RESULT = new Resultado(temp, "bool");
+    :}
 
-        | bool_literal:b
-        {:
-            RESULT = b;
-        :}
+    | expresion_relacional:r
+    {: RESULT = r; :}
+
+    | expresion_aritmetica:e
+    {: RESULT = e; :}
+
+    | bool_literal:b
+    {: RESULT = b; :}
 ;
 
 declaracion_int ::=
