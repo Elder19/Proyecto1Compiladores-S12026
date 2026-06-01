@@ -216,73 +216,90 @@ public class Main {
         }
     }
 
-    /**
-     * Procesa un único archivo:
-     * - Limpia estructuras anteriores.
-     * - Realiza análisis léxico.
-     * - Realiza análisis sintáctico.
-     * - Imprime tabla de símbolos.
-     * - Imprime errores semánticos.
-     * - Muestra el veredicto final.
-     */
-    private static void procesarArchivo(
-            File archivo,
-            String carpeta,
-            Class<?> tablaClass,
-            Class<?> erroresSemanticosClass,
-            Class<?> codigoIntermedioClass,
-            Class<?> lexerClass,
-            Class<?> parserClass,
-            int EOF,
-            String[] terminalNames,
-            Field campoErroresLex
-    ) throws Exception {
+/**
+ * Procesa un único archivo:
+ * - Limpia estructuras anteriores.
+ * - Realiza análisis léxico.
+ * - Realiza análisis sintáctico.
+ * - Imprime tabla de símbolos.
+ * - Imprime errores semánticos.
+ * - Muestra el veredicto final.
+ */
+private static void procesarArchivo(
+        File archivo,
+        String carpeta,
+        Class<?> tablaClass,
+        Class<?> erroresSemanticosClass,
+        Class<?> codigoIntermedioClass,
+        Class<?> lexerClass,
+        Class<?> parserClass,
+        int EOF,
+        String[] terminalNames,
+        Field campoErroresLex
+) throws Exception {
 
-        tablaClass.getMethod("limpiar").invoke(null);
-        erroresSemanticosClass.getMethod("limpiar").invoke(null);
-        codigoIntermedioClass.getMethod("limpiar").invoke(null);
+    tablaClass.getMethod("limpiar").invoke(null);
+    erroresSemanticosClass.getMethod("limpiar").invoke(null);
+    codigoIntermedioClass.getMethod("limpiar").invoke(null);
 
-        imprimirEncabezado(archivo.getName());
+    imprimirEncabezado(archivo.getName());
 
-        List<?> erroresLexicos = limpiarLista(campoErroresLex, null);
+    List<?> erroresLexicos = limpiarLista(campoErroresLex, null);
 
-        realizarAnalisisLexico(
-                archivo,
-                carpeta,
-                lexerClass,
-                EOF,
-                terminalNames
-        );
+    realizarAnalisisLexico(
+            archivo,
+            carpeta,
+            lexerClass,
+            EOF,
+            terminalNames
+    );
 
-        mostrarResumenLexico(erroresLexicos);
+    mostrarResumenLexico(erroresLexicos);
 
-        List<?> erroresSintacticos = realizarAnalisisSintactico(
-                archivo,
-                lexerClass,
-                parserClass,
-                erroresLexicos
-        );
+    List<?> erroresSintacticos = realizarAnalisisSintactico(
+            archivo,
+            lexerClass,
+            parserClass,
+            erroresLexicos
+    );
 
-        mostrarTablaSimbolos(tablaClass);
+    mostrarTablaSimbolos(tablaClass);
 
-        mostrarResumenSintactico(erroresSintacticos);
+    mostrarResumenSintactico(erroresSintacticos);
 
-        erroresSemanticosClass.getMethod("imprimir").invoke(null);
-
-        List<?> erroresSemanticos = (List<?>) erroresSemanticosClass
-                .getMethod("obtenerErrores")
-                .invoke(null);
-
-        mostrarCodigoIntermedio(codigoIntermedioClass);
-
-        mostrarVeredictoFinal(
-                erroresLexicos,
-                erroresSintacticos,
-                erroresSemanticos.size(),
-                erroresSemanticosClass
-        );
+    // false = imprime solo un error por línea
+    // true  = imprime todos los errores
+    try {
+        erroresSemanticosClass
+                .getField("imprimirTodos")
+                .setBoolean(null, false);//MOSTAR TODOS LOS ERRROES
+    } catch (NoSuchFieldException e) {
+        System.out.println("Aviso: no existe la bandera imprimirTodos en ErroresSemanticos.");
     }
 
+    erroresSemanticosClass.getMethod("imprimir").invoke(null);
+
+    List<?> erroresSemanticos;
+
+    try {
+        erroresSemanticos = (List<?>) erroresSemanticosClass
+                .getMethod("obtenerErroresParaImprimir")
+                .invoke(null);
+    } catch (NoSuchMethodException e) {
+        erroresSemanticos = (List<?>) erroresSemanticosClass
+                .getMethod("obtenerErrores")
+                .invoke(null);
+    }
+
+    mostrarCodigoIntermedio(codigoIntermedioClass);
+
+    mostrarVeredictoFinal(
+            erroresLexicos,
+            erroresSintacticos,
+            erroresSemanticos.size(),
+            erroresSemanticosClass
+    );
+}
     /**
      * Lista todos los archivos .txt de prueba que no sean archivos de salida tokens_*.
      */

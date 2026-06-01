@@ -7,17 +7,11 @@ public class ErroresSemanticos {
 
     public static List<String> errores = new ArrayList<>();
 
-    // true  = imprime todos los errores
+    // true  = imprime todos
     // false = imprime solo un error por línea
     public static boolean imprimirTodos = true;
 
     public static void agregar(String mensaje) {
-        errores.add(mensaje);
-    }
-
-    // Se deja este método para no cambiar tus validadores.
-    // Ahora guarda todos los errores; el filtro se hace solo al imprimir.
-    public static void agregarExpresionUnaVezPorLinea(String mensaje) {
         errores.add(mensaje);
     }
 
@@ -29,36 +23,43 @@ public class ErroresSemanticos {
         System.out.println("\n[ ERRORES SEMÁNTICOS ]");
         System.out.println("──────────────────────────────────────────────────────");
 
-        if (errores.isEmpty()) {
+        List<String> erroresAImprimir = obtenerErroresParaImprimir();
+
+        if (erroresAImprimir.isEmpty()) {
             System.out.println(" Sin errores semánticos.");
             return;
         }
 
-        if (imprimirTodos) {
-            for (String error : errores) {
-                System.out.println(error);
-            }
-        } else {
-            Set<Integer> lineasReportadas = new HashSet<>();
-
-            for (String error : errores) {
-                int linea = extraerLinea(error);
-
-                // Si no se pudo extraer línea, se imprime para no perder el error.
-                if (linea == -1) {
-                    System.out.println(error);
-                    continue;
-                }
-
-                // Si ya se imprimió un error de esa línea, se omite.
-                if (lineasReportadas.contains(linea)) {
-                    continue;
-                }
-
-                lineasReportadas.add(linea);
-                System.out.println(error);
-            }
+        for (String error : erroresAImprimir) {
+            System.out.println(error);
         }
+    }
+
+    public static List<String> obtenerErroresParaImprimir() {
+        if (imprimirTodos) {
+            return errores;
+        }
+
+        List<String> filtrados = new ArrayList<>();
+        Set<Integer> lineasReportadas = new HashSet<>();
+
+        for (String error : errores) {
+            int linea = extraerLinea(error);
+
+            if (linea == -1) {
+                filtrados.add(error);
+                continue;
+            }
+
+            if (lineasReportadas.contains(linea)) {
+                continue;
+            }
+
+            lineasReportadas.add(linea);
+            filtrados.add(error);
+        }
+
+        return filtrados;
     }
 
     private static int extraerLinea(String error) {
@@ -72,11 +73,8 @@ public class ErroresSemanticos {
             }
 
             if (inicio == -1) {
-                marcador = "fila ";
-                inicio = error.indexOf(marcador);
+                return -1;
             }
-
-            if (inicio == -1) return -1;
 
             inicio += marcador.length();
 
@@ -118,15 +116,11 @@ public class ErroresSemanticos {
         return "int".equals(tipo);
     }
 
-    // ============================================================
-    // VALIDAR OPERACIONES ARITMÉTICAS
-    // ============================================================
-
     public static String validarAritmetica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";
 
         if (!esNumerico(t1) || !esNumerico(t2)) {
-            agregarExpresionUnaVezPorLinea(
+            agregar(
                 "Error semántico en línea " + linea + ", columna " + columna +
                 ": operación aritmética inválida '" + t1 + " " + op + " " + t2 + "'."
             );
@@ -135,7 +129,7 @@ public class ErroresSemanticos {
 
         if ("%".equals(op) || "//".equals(op)) {
             if (!esEntero(t1) || !esEntero(t2)) {
-                agregarExpresionUnaVezPorLinea(
+                agregar(
                     "Error semántico en línea " + linea + ", columna " + columna +
                     ": el operador '" + op + "' solo permite operandos de tipo int."
                 );
@@ -147,10 +141,6 @@ public class ErroresSemanticos {
         return ("float".equals(t1) || "float".equals(t2)) ? "float" : "int";
     }
 
-    // ============================================================
-    // VALIDAR OPERACIONES RELACIONALES
-    // ============================================================
-
     public static String validarRelacionalNumerica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";
 
@@ -158,7 +148,7 @@ public class ErroresSemanticos {
             return "bool";
         }
 
-        agregarExpresionUnaVezPorLinea(
+        agregar(
             "Error semántico en línea " + linea + ", columna " + columna +
             ": el operador '" + op +
             "' solo permite operandos int o float. Se recibió '" +
@@ -168,30 +158,22 @@ public class ErroresSemanticos {
         return "error";
     }
 
-    public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
-        if ("error".equals(t1) || "error".equals(t2)) return "error";
+   public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
+    if ("error".equals(t1) || "error".equals(t2)) return "error";
 
-        if (esNumerico(t1) && esNumerico(t2)) {
-            return "bool";
-        }
-
-        if ("bool".equals(t1) && "bool".equals(t2)) {
-            return "bool";
-        }
-
-        agregarExpresionUnaVezPorLinea(
-            "Error semántico en línea " + linea + ", columna " + columna +
-            ": el operador '" + op +
-            "' solo permite comparar valores numéricos o booleanos entre sí. Se recibió '" +
-            t1 + "' y '" + t2 + "'."
-        );
-
-        return "error";
+    if (esNumerico(t1) && esNumerico(t2)) {
+        return "bool";
     }
 
-    // ============================================================
-    // VALIDAR OPERACIONES LÓGICAS
-    // ============================================================
+    agregar(
+        "Error semántico en línea " + linea + ", columna " + columna +
+        ": el operador '" + op +
+        "' solo permite comparar valores int o float. Se recibió '" +
+        t1 + "' y '" + t2 
+    );
+
+    return "error";
+}
 
     public static String validarLogica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";
@@ -200,7 +182,7 @@ public class ErroresSemanticos {
             return "bool";
         }
 
-        agregarExpresionUnaVezPorLinea(
+        agregar(
             "Error semántico en línea " + linea + ", columna " + columna +
             ": el operador '" + op + "' solo permite operandos de tipo bool. Se recibió '" +
             t1 + "' y '" + t2 + "'."
@@ -216,7 +198,7 @@ public class ErroresSemanticos {
             return "bool";
         }
 
-        agregarExpresionUnaVezPorLinea(
+        agregar(
             "Error semántico en línea " + linea + ", columna " + columna +
             ": el operador 'NOT' solo puede aplicarse a expresiones de tipo bool. Se recibió '" +
             tipo + "'."
@@ -224,10 +206,6 @@ public class ErroresSemanticos {
 
         return "error";
     }
-
-    // ============================================================
-    // VALIDAR CONDICIONES DE CONTROL
-    // ============================================================
 
     public static void validarCondicionBooleana(String tipo, String estructura, int linea, int columna) {
         if ("error".equals(tipo)) return;
@@ -241,15 +219,15 @@ public class ErroresSemanticos {
         }
     }
 
-   public static void validarCondicionSwitch(String tipo, int linea, int columna) {
-    if ("error".equals(tipo)) return;
+    public static void validarCondicionSwitch(String tipo, int linea, int columna) {
+        if ("error".equals(tipo)) return;
 
-    if (!"int".equals(tipo) && !"char".equals(tipo)) {
-        agregar(
-            "Error semántico en línea " + linea + ", columna " + columna +
-            ": la expresión de 'switch' debe ser de tipo int o char. Se recibió '" +
-            tipo 
-        );
+        if (!"int".equals(tipo) && !"char".equals(tipo)) {
+            agregar(
+                "Error semántico en línea " + linea + ", columna " + columna +
+                ": la expresión de 'switch' debe ser de tipo int o char. Se recibió '" +
+                tipo + "'."
+            );
+        }
     }
-}
 }

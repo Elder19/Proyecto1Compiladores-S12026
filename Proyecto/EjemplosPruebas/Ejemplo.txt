@@ -1,18 +1,18 @@
-int~suma<|int~a, int~b|>
+int~sumar<|int~a, int~b|>
 |:
     int~r <- a + b!
     return~r!
 :|
 
-float~mezcla<|int~x, float~y|>
+float~mezclar<|int~x, float~y|>
 |:
     float~r <- x + y!
     return~r!
 :|
 
-bool~comparar<|int~a, float~b|>
+bool~mayor<|int~x, int~y|>
 |:
-    bool~r <- greather_t<|b,a|>!
+    bool~r <- greather_t<|x,y|>!
     return~r!
 :|
 
@@ -22,7 +22,7 @@ int~retornoMalo<|int~x|>
     return~bandera!
 :|
 
-int~sinReturn<||>
+int~sinRetorno<||>
 |:
     int~x <- 10!
     x <- x + 1!
@@ -32,9 +32,14 @@ int~codigoMuerto<|int~n|>
 |:
     int~x <- n + 1!
     return~x!
+    int~despues <- "hola"!
+:|
 
-    int~despues <- 100!
-    despues <- "hola"!
+int~duplicados<||>
+|:
+    int~a <- 1!
+    int~a <- 2!
+    return~a!
 :|
 
 empty~__main__<||>
@@ -44,33 +49,31 @@ empty~__main__<||>
     float~f <- 2.5!
     bool~bandera <- true!
     string~texto <- "hola"!
-    char~letra <- 'z'!
+    char~letra <- 'x'!
 
     int~mat<<3>><<3>>!
     float~matF<<2>><<2>>!
 
     mat<<0>><<0>><-1!
     mat<<0>><<1>><-a + b!
-    mat<<1>><<1>><-suma<|a,b|>!
-    matF<<0>><<0>><-f!
-    matF<<0>><<1>><-a!
+    mat<<1>><<1>><-sumar<|a,b|>!
 
     int~i <- 1!
     int~j <- 2!
     mat<<i>><<j>><-20!
-    mat<<i + 1>><<j - 1>><-30!
 
-    int~res <- suma<|a,b|>!
-    float~resF <- mezcla<|a,f|>!
-    bool~ok <- comparar<|a,f|>!
+    int~ok1 <- sumar<|a,b|>!
+    float~ok2 <- mezclar<|a,f|>!
+    bool~ok3 <- mayor<|a,b|>!
 
-    bool~r1 <- equal<|a,b|>!
-    bool~r2 <- n_equal<|a,f|>!
-    bool~r3 <- less_t<|b,a|>!
-    bool~r4 <- greather_te<|f,a|>!
-    bool~l1 <- r1 @ r3!
-    bool~l2 <- r2 # r4!
-    bool~l3 <- $ bandera!
+    bool~rel1 <- equal<|a,b|>!
+    bool~rel2 <- n_equal<|a,f|>!
+    bool~rel3 <- less_t<|b,a|>!
+    bool~rel4 <- greather_te<|f,a|>!
+
+    bool~log1 <- rel1 @ rel3!
+    bool~log2 <- rel2 # rel4!
+    bool~log3 <- $ bandera!
 
     int~errDecl1 <- "texto"!
     float~errDecl2 <- false!
@@ -94,9 +97,10 @@ empty~__main__<||>
 
     bool~errRel1 <- equal<|letra,a|>!
     bool~errRel2 <- equal<|texto,bandera|>!
-    bool~errRel3 <- less_t<|bandera,a|>!
-    bool~errRel4 <- greather_t<|texto,f|>!
-    bool~errRel5 <- less_te<|letra,a|>!
+    bool~errRel3 <- equal<|bandera,true|>!
+    bool~errRel4 <- less_t<|bandera,a|>!
+    bool~errRel5 <- greather_t<|texto,f|>!
+    bool~errRel6 <- less_te<|letra,a|>!
 
     bool~errLog1 <- a @ bandera!
     bool~errLog2 <- texto # bandera!
@@ -116,13 +120,15 @@ empty~__main__<||>
     matF<<0>><<0>><-"malo"!
     noMat<<0>><<0>><-1!
 
-    if<|ok|>
+    if<|ok3|>
     |:
         int~dentroIf <- 1!
+        cout<|"if correcto", dentroIf|>!
     :|
     else
     |:
         int~dentroElse <- 2!
+        cout<|"else correcto", dentroElse|>!
     :|
 
     if<|a|>
@@ -138,7 +144,10 @@ empty~__main__<||>
     do
     |:
         a <- a - 1!
-        break!
+        if<|equal<|a,5|>|>
+        |:
+            break!
+        :|
     :|
     while<|greather_t<|a,0|>|>!
 
@@ -162,8 +171,8 @@ empty~__main__<||>
 
     switch<|letra|>
     |:
-        case~'z':
-            cout<|"letra z"|>!
+        case~'x':
+            cout<|"letra x"|>!
             break!
         default:
             cout<|"otra letra"|>!
@@ -171,13 +180,12 @@ empty~__main__<||>
 
     switch<|texto|>
     |:
-        case~'h':
-            cout<|"texto hola"|>!
+        case~1:
+            cout<|"texto malo"|>!
             break!
         default:
-            cout<|"otro texto"|>!
+            cout<|"default"|>!
     :|
-
 
     cin<|a|>!
     cin<|f|>!
@@ -186,9 +194,11 @@ empty~__main__<||>
     cin<|letra|>!
     cin<|variableInexistente|>!
 
-    int~llamadaOk <- suma<|1,2|>!
+    int~llamadaOk <- sumar<|1,2|>!
     int~llamadaMala1 <- funcionNoExiste<|1,2|>!
-    int~llamadaMala2 <- mezcla<|a,f|>!
+    int~unaVar <- 5!
+    int~llamadaMala2 <- unaVar<||>!
+    int~llamadaMala3 <- mezclar<|a,f|>!
 
     break!
 
