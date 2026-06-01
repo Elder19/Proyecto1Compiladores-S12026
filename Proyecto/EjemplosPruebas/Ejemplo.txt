@@ -1,13 +1,9 @@
 empty ~ __main__ <| |>
-|:
-    int ~ x <- 5 !
+|:  
+    int ~ x <- 1 !
     int ~ y <- 10 !
     if <|less_t<|x, y|>|>
     |:
         cout<|x|> !
-    :|
-    else
-    |:
-        cout<|y|> !
     :|
 :|

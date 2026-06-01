@@ -1,0 +1,8 @@
+  1.  x = 1
+  2.  y = 10
+  3.  t1 = x < y
+  4.  if_false t1 goto L1
+  5.  print x
+  6.  goto L2
+  7.  L1:
+  8.  L2:

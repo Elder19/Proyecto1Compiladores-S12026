@@ -8,7 +8,7 @@ Token: INT           Lexema: int
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: x                
 Token: ASIGNACION    Lexema: <-               
-Token: ENTERO        Lexema: 5                
+Token: ENTERO        Lexema: 1                
 Token: FIN_SENTENCIA Lexema: !                
 Token: INT           Lexema: int              
 Token: SEPARADOR     Lexema: ~                
@@ -29,14 +29,6 @@ Token: ABRIR_BLOQUE  Lexema: |:
 Token: COUT          Lexema: cout             
 Token: PARENTESIS_APERTURA Lexema: <|               
 Token: ID            Lexema: x                
-Token: PARENTESIS_CIERRE Lexema: |>               
-Token: FIN_SENTENCIA Lexema: !                
-Token: CERRAR_BLOQUE Lexema: :|               
-Token: ELSE          Lexema: else             
-Token: ABRIR_BLOQUE  Lexema: |:               
-Token: COUT          Lexema: cout             
-Token: PARENTESIS_APERTURA Lexema: <|               
-Token: ID            Lexema: y                
 Token: PARENTESIS_CIERRE Lexema: |>               
 Token: FIN_SENTENCIA Lexema: !                
 Token: CERRAR_BLOQUE Lexema: :|               
