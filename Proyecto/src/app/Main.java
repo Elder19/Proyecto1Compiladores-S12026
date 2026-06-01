@@ -291,7 +291,19 @@ private static void procesarArchivo(
                 .invoke(null);
     }
 
-    mostrarCodigoIntermedio(codigoIntermedioClass);
+    boolean hayErrores = !erroresLexicos.isEmpty() 
+                    || !erroresSintacticos.isEmpty()
+                    || (boolean) erroresSemanticosClass
+                            .getMethod("hayErrores")
+                            .invoke(null);
+
+    if (hayErrores) {
+        System.out.println("\n[ CÓDIGO INTERMEDIO ]");
+        System.out.println("──────────────────────────────────────────────────────");
+        System.out.println(" No se genera código intermedio por presencia de errores.");
+    } else {
+        mostrarCodigoIntermedio(codigoIntermedioClass, archivo.getName(), carpeta);
+    }
 
     mostrarVeredictoFinal(
             erroresLexicos,
@@ -496,8 +508,11 @@ private static void procesarArchivo(
     /**
      * Imprime el resultado final del codigo intermedio.
      */
-    @SuppressWarnings("unchecked")
-    private static void mostrarCodigoIntermedio(Class<?> codigoIntermedioClass) throws Exception {
+    private static void mostrarCodigoIntermedio(
+            Class<?> codigoIntermedioClass,
+            String nombreArchivo,          
+            String carpeta                 
+    ) throws Exception {
         System.out.println("\n[ CÓDIGO INTERMEDIO ]");
         System.out.println("──────────────────────────────────────────────────────");
 
@@ -508,9 +523,24 @@ private static void procesarArchivo(
         if (instrucciones.isEmpty()) {
             System.out.println(" No se generó código intermedio.");
         } else {
+            // mostrar en consola
             int numero = 1;
             for (String instruccion : instrucciones) {
                 System.out.printf(" %3d.  %s%n", numero++, instruccion);
+            }
+
+            // guardar en archivo
+            String nombreSinExtension = nombreArchivo.replace(".txt", "");
+            String rutaSalida = carpeta + "/Codigo3D_" + nombreSinExtension + ".txt";
+
+            try (PrintWriter writer = new PrintWriter(new FileWriter(rutaSalida))) {
+                int num = 1;
+                for (String instruccion : instrucciones) {
+                    writer.printf("%3d.  %s%n", num++, instruccion);
+                }
+                System.out.println("\n Código guardado en: " + rutaSalida);
+            } catch (Exception e) {
+                System.out.println(" Error al guardar el archivo: " + e.getMessage());
             }
         }
     }

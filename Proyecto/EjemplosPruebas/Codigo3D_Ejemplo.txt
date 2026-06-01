@@ -1,0 +1,17 @@
+  1.  var int x
+  2.  var int y
+  3.  y = 5
+  4.  var float a
+  5.  var float b
+  6.  b = 2.5
+  7.  var bool c
+  8.  var bool d
+  9.  d = true
+ 10.  var int[] arr 3,2
+ 11.  var float[] arrF 2,2
+ 12.  t1 = x + y
+ 13.  var int z
+ 14.  z = t1
+ 15.  arr[0][0] = 10
+ 16.  arr[1][0] = 20
+ 17.  print z
