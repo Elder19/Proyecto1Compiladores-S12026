@@ -203,49 +203,50 @@ public class TablaSimbolos {
      * Si el símbolo ya existe en el scope actual, se registra un error semántico.
      * Las llamadas no se almacenan como símbolos declarados.
      */
-    public static void agregar(
-            String nombreToken,
-            String tipoSimbolo,
-            String fila,
-            String columna,
-            String tipoDato
-        ) {
-            agregar(nombreToken, tipoSimbolo, fila, columna, tipoDato, true);  //SOPBRECARGA PARA NO CAMBIAR TODOS LAS LLAMADAS EN CUP
-        }
-
-    public static void agregar(
-            String nombreToken,
-            String tipoSimbolo,
-            String fila,
-            String columna,
-            String tipoDato,
-            boolean VarInicializada
-    ) {
-        if ("LLAMADA".equals(tipoSimbolo)) {
-            return;
-        }
-
-        String scope = scopeActual();
-
-        if (!tablas.containsKey(scope)) {
-            tablas.put(scope, new ArrayList<>());
-        }
-
-        if (existeEnScopeActual(nombreToken)) {
-            ErroresSemanticos.agregar(
-                    "Error semántico en fila " + fila +
-                    ", columna " + columna +
-                    ": el identificador '" + nombreToken +
-                    "' ya fue declarado en el scope '" + scope + "'."
-            );
-            return;
-        }
-
-        tablas.get(scope).add(
-                new Simbolo(nombreToken, tipoSimbolo, fila, columna, tipoDato,VarInicializada)
-        );
+    public static boolean agregar(
+        String nombreToken,
+        String tipoSimbolo,
+        String fila,
+        String columna,
+        String tipoDato
+) {
+    return agregar(nombreToken, tipoSimbolo, fila, columna, tipoDato, true);
+}
+public static boolean agregar(
+        String nombreToken,
+        String tipoSimbolo,
+        String fila,
+        String columna,
+        String tipoDato,
+        boolean varInicializada
+) {
+    if ("LLAMADA".equals(tipoSimbolo)) {
+        return true;
     }
 
+    String scope = scopeActual();
+
+    if (!tablas.containsKey(scope)) {
+        tablas.put(scope, new ArrayList<>());
+    }
+
+    if (existeEnScopeActual(nombreToken)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en fila " + fila +
+            ", columna " + columna +
+            ": el identificador '" + nombreToken +
+            "' ya fue declarado en el scope '" + scope + "'"
+        );
+
+        return false; // hubo duplicidad
+    }
+
+    tablas.get(scope).add(
+        new Simbolo(nombreToken, tipoSimbolo, fila, columna, tipoDato, varInicializada)
+    );
+
+    return true; // se agregó correctamente
+}
     // ============================================================
     // LIMPIEZA
     // ============================================================

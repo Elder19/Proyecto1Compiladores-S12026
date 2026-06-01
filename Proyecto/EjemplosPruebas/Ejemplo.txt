@@ -1,8 +1,50 @@
-empty ~ __main__ <| |>
+
+
+int~funcion_valida<||>
 |:
-    int ~ x <- 5 !
-    int ~ y <- 3 !
-    cin<|x|> !
-    cout<|x + y|> !
-    cout<|x, y|> !
+    int~x <- 10!
+
+    if<|equal<|x,10|>|>
+    |:
+        if<|greather_t<|x,5|>|>
+        |:
+            int~a <- 1!
+              return~30!
+        :|
+        else
+        |:
+            return~20!
+        :|
+    :|
+    else
+    |:
+        return~30!
+    :|
+
+:|
+
+float~funcion_valida<||>
+|:
+    int~x <- 10!
+
+    if<|equal<|x,10|>|>
+    |:
+        if<|greather_t<|x,5|>|>
+        |:
+            int~a <- 1!
+              return~30!
+        :|
+        else
+        |:
+            return~20!
+        :|
+    :|
+    else
+    |:
+        return~30!
+    :|
+
+:|
+empty~__main__<||>
+|:
 :|
