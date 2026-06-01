@@ -326,12 +326,9 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         {:
             validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                false
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, false
             );
             RESULT = false;
         :}
@@ -340,12 +337,9 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         {:
             validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                true
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, true
             );
 
             CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
