@@ -1,9 +1,14 @@
 empty ~ __main__ <| |>
-|:  
-    int ~ x <- 1 !
-    int ~ y <- 10 !
-    if <|less_t<|x, y|>|>
-    |:
+|:
+    int ~ x <- 0!
+    do
+    |:  
+        x <- x + 1 !
+        if <|equal<|x, 3|>|>
+        |:
+            break !
+        :|
         cout<|x|> !
     :|
+    while <|less_t<|x, 5|>|> !
 :|

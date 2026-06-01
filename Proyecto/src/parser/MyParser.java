@@ -845,6 +845,7 @@ class CUP$MyParser$actions {
 
     int contextoBreak = 0;
     java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
+    java.util.Stack<String> pilaBreak = new java.util.Stack<>();
 
     boolean tiposCompatibles(String esperado, String recibido) {
         if (esperado == null || recibido == null) return false;
@@ -1457,6 +1458,11 @@ class CUP$MyParser$actions {
 		
     validarCodigoInalcanzable(brleft, brright);
     validarBreak(brleft, brright);
+
+    // ── código intermedio ──
+    if (!pilaBreak.isEmpty()) {
+        CodigoIntermedio.emitir("goto " + pilaBreak.peek());
+    }
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("break_sentencia",16, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2138,6 +2144,13 @@ class CUP$MyParser$actions {
     contextoBreak++;
     TablaSimbolos.entrarScope("do_while");
 
+    String eInicio = CodigoIntermedio.nuevaEtiqueta();
+    String eFin    = CodigoIntermedio.nuevaEtiqueta();
+    pilaEtiquetas.push(eInicio);
+    pilaEtiquetas.push(eFin);
+    pilaBreak.push(eFin);
+    CodigoIntermedio.emitir(eInicio + ":");
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$5",63, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -2152,6 +2165,7 @@ class CUP$MyParser$actions {
 
     TablaSimbolos.salirScope();
     contextoBreak--;
+    pilaBreak.pop();
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$6",64, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -2171,6 +2185,10 @@ class CUP$MyParser$actions {
 		Resultado cond = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
 		
     ErroresSemanticos.validarCondicionBooleana(cond.tipo, "while", doTokleft, doTokright);
+    String eFin    = pilaEtiquetas.pop();
+    String eInicio = pilaEtiquetas.pop();
+    CodigoIntermedio.emitir("if_true " + cond.valor + " goto " + eInicio);
+    CodigoIntermedio.emitir(eFin + ":");
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("do_while",34, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
