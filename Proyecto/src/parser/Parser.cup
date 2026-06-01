@@ -319,38 +319,31 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
         {:
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                false
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, false
             );
-
             RESULT = false;
         :}
 
         | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
         {:
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                true
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, true
             );
-
-            if (!"error".equals(expr) && !tiposCompatibles(datotype, expr)) {
+            if (!"error".equals(expr.tipo) && !tiposCompatibles(datotype, expr.tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
                     ", columna " + idright +
                     ": no se puede inicializar la variable '" + id.toString() +
                     "' de tipo '" + datotype +
-                    "' con una expresión de tipo '" + expr + "'."
+                    "' con una expresión de tipo '" + expr.tipo + "'."
                 );
             }
-
+            // ── código intermedio ──
+            CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
             RESULT = false;
         :}
 
@@ -399,9 +392,9 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             parser.erroresSintacticos.add(
                 "  → Recuperado: se omitió sentencia inválida hasta '!'"
             );
-
             RESULT = false;
-        :};
+        :}
+;
 
 
 
@@ -433,6 +426,7 @@ param ::= tipo_completo:tc SEPARADOR ID:id
     String.valueOf(idright),tc.toString()); 
     :}
 ;
+
 return_sentencia ::= RETURN SEPARADOR expresion:expr
 {:
     retornoEncontrado = true;
@@ -443,37 +437,44 @@ return_sentencia ::= RETURN SEPARADOR expresion:expr
             "' es empty y no debe retornar un valor."
         );
     }
-    else if (!"error".equals(expr) && !tiposCompatibles(tipoRetornoActual, expr)) {
+    else if (!"error".equals(expr.tipo) && !tiposCompatibles(tipoRetornoActual, expr.tipo)) {
         ErroresSemanticos.agregar(
             "Error semántico: la función '" + funcionActual +
             "' debe retornar '" + tipoRetornoActual +
-            "', pero está retornando '" + expr + "'."
+            "', pero está retornando '" + expr.tipo + "'."
         );
     }
-    RESULT=true;
+    // ── código intermedio ──
+    CodigoIntermedio.emitir("return " + expr.valor);
+    RESULT = true;
 :}
 ;
+
 asignar_variable ::= ID:id ASIGNACION expresion:expr
-    {: 
-      String nombreasing=id.toString();
-     if(!TablaSimbolos.existe(id.toString())){
-        ErroresSemanticos.agregar("La variable  "+id.toString()+ "  en la linea " + idleft + "columna " + idright
-        );//valida que la variable exista antes de asginarle un valor
-
-    }
-  
-    else { TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);//valida  que no se asignan variables del mismo tipo 
-        String tipoVar = simbolo.tipoDato;
-        String tipoExpr = expr.toString();
-       if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
-            ErroresSemanticos.agregar( "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": no se puede asignar un valor de tipo '" + tipoExpr +
-                "' a la variable '" + nombreasing +
-                "' de tipo '" + tipoVar );
-        }}
-
-:}
+    {:
+        String nombreasing = id.toString();
+        if (!TablaSimbolos.existe(id.toString())) {
+            ErroresSemanticos.agregar(
+                "La variable " + id.toString() +
+                " en la linea " + idleft + " columna " + idright
+            );
+        } else {
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);
+            String tipoVar  = simbolo.tipoDato;
+            String tipoExpr = expr.tipo;
+            if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": no se puede asignar un valor de tipo '" + tipoExpr +
+                    "' a la variable '" + nombreasing +
+                    "' de tipo '" + tipoVar
+                );
+            }
+        }
+        // ── código intermedio ──
+        CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
+    :}
 ;
 
 acceder_arreglo ::=
@@ -526,7 +527,7 @@ modificar_arreglo ::=
                       "'" + nombre + "' no es un arreglo."
                   );
               } 
-              else if (!tiposCompatibles(simbolo.tipoDato, expr)) {
+              else if (!tiposCompatibles(simbolo.tipoDato, expr.tipo)) {
                   ErroresSemanticos.agregar(
                       "No se puede asignar un valor de tipo '" + expr +
                       "' al arreglo '" + nombre +
@@ -909,39 +910,35 @@ expresion ::= expresion_logica:t
 :}
 ;
 
-expresion_logica ::= termino_logico:izq OR termino_logico:der resto_logico
+expresion_logica ::= termino_logico:izq OR termino_logico:der
     {:
         String temp = CodigoIntermedio.nuevoTemporal();
         CodigoIntermedio.emitir(temp + " = " + izq.valor + " || " + der.valor);
         RESULT = new Resultado(temp, "bool");
     :}
 
-    | termino_logico:t resto_logico
+    | termino_logico:t
     {:
         RESULT = t;
     :}
 ;
 
-resto_logico ::= OR termino_logico resto_logico
-               | /* vacio */
-;
 
-termino_logico ::= factor_logico:izq AND factor_logico:der resto_termino_logico
+
+termino_logico ::= factor_logico:izq AND factor_logico:der
     {:
         String temp = CodigoIntermedio.nuevoTemporal();
         CodigoIntermedio.emitir(temp + " = " + izq.valor + " && " + der.valor);
         RESULT = new Resultado(temp, "bool");
     :}
 
-    | factor_logico:f resto_termino_logico
+    | factor_logico:f
     {:
         RESULT = f;
     :}
 ;
 
-resto_termino_logico ::= AND factor_logico resto_termino_logico
-                       | /* vacio */
-;
+
 
 factor_logico ::= NOT factor_logico:f
     {:
@@ -983,13 +980,13 @@ declaracion_int ::=
               String.valueOf(idleft), String.valueOf(idright), "int");
       :}
 
-    | INT SEPARADOR ID:id ASIGNACION expresion:expr:expr
+    | INT SEPARADOR ID:id ASIGNACION expresion:expr
       {:
           TablaSimbolos.agregar(id.toString(), "VARIABLE",
               String.valueOf(idleft), String.valueOf(idright), "int", true);
           // ── código intermedio ──
           CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-           if (!"error".equals(expr) && !tiposCompatibles("int", expr)) {
+           if (!"error".equals(expr) && !tiposCompatibles("int", expr.tipo)) {
           ErroresSemanticos.agregar(
               "Error semántico en línea " + idleft +
               ", columna " + idright +
@@ -1031,7 +1028,7 @@ declaracion_float ::=
           // ── código intermedio ──
           CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
 
-      if (!"error".equals(expr) && !tiposCompatibles("float", expr)) {
+      if (!"error".equals(expr) && !tiposCompatibles("float", expr.tipo)) {
           ErroresSemanticos.agregar(
               "Error semántico en línea " + idleft +
               ", columna " + idright +
