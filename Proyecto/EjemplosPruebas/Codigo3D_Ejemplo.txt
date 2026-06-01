@@ -1,3 +1,51 @@
-  1.  var int id
-  2.  t1 = 3 // 2
-  3.  id = t1
+  1.  func doble:
+  2.  param_def int n
+  3.  t1 = n
+  4.  t2 = 2
+  5.  t3 = t1 * t2
+  6.  var int r
+  7.  r = t3
+  8.  t4 = r
+  9.  return t4
+ 10.  end func doble
+ 11.  main:
+ 12.  t5 = 3
+ 13.  var int a
+ 14.  a = t5
+ 15.  t6 = 4
+ 16.  var int b
+ 17.  b = t6
+ 18.  var int x
+ 19.  t7 = a
+ 20.  t8 = b
+ 21.  t9 = 2
+ 22.  t10 = t8 * t9
+ 23.  t11 = t7 + t10
+ 24.  x = t11
+ 25.  t12 = x
+ 26.  param t12
+ 27.  t13 = call doble, 1
+ 28.  var int y
+ 29.  y = t13
+ 30.  t14 = y
+ 31.  t15 = 10
+ 32.  t16 = t14 > t15
+ 33.  if_false t16 goto if_else_1
+ 34.  t17 = y
+ 35.  print t17
+ 36.  goto if_end_1
+ 37.  if_else_1:
+ 38.  t18 = x
+ 39.  print t18
+ 40.  if_end_1:
+ 41.  do_start_1:
+ 42.  t19 = a
+ 43.  t20 = 1
+ 44.  t21 = t19 + t20
+ 45.  a = t21
+ 46.  t22 = a
+ 47.  t23 = 5
+ 48.  t24 = t22 < t23
+ 49.  if_true t24 goto do_start_1
+ 50.  do_end_1:
+ 51.  main_end:
