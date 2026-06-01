@@ -117,29 +117,36 @@ public class ErroresSemanticos {
     }
 
     public static String validarAritmetica(String t1, String t2, String op, int linea, int columna) {
-        if ("error".equals(t1) || "error".equals(t2)) return "error";
+    if ("error".equals(t1) || "error".equals(t2)) return "error";
 
-        if (!esNumerico(t1) || !esNumerico(t2)) {
+    if (!esNumerico(t1) || !esNumerico(t2)) {
+        agregar(
+            "Error semántico en línea " + linea + ", columna " + columna +
+            ": operación aritmética inválida '" + t1 + " " + op + " " + t2 + "'."
+        );
+        return "error";
+    }
+
+    // División normal: siempre produce float
+    if ("/".equals(op)) {
+        return "float";
+    }
+
+    // Módulo y división entera: solo int
+    if ("%".equals(op) || "//".equals(op)) {
+        if (!esEntero(t1) || !esEntero(t2)) {
             agregar(
                 "Error semántico en línea " + linea + ", columna " + columna +
-                ": operación aritmética inválida '" + t1 + " " + op + " " + t2 + "'."
+                ": el operador '" + op + "' solo permite operandos de tipo int."
             );
             return "error";
         }
-
-        if ("%".equals(op) || "//".equals(op)) {
-            if (!esEntero(t1) || !esEntero(t2)) {
-                agregar(
-                    "Error semántico en línea " + linea + ", columna " + columna +
-                    ": el operador '" + op + "' solo permite operandos de tipo int."
-                );
-                return "error";
-            }
-            return "int";
-        }
-
-        return ("float".equals(t1) || "float".equals(t2)) ? "float" : "int";
+        return "int";
     }
+
+    // +, -, *, ^ permiten int/float
+    return ("float".equals(t1) || "float".equals(t2)) ? "float" : "int";
+}
 
     public static String validarRelacionalNumerica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";

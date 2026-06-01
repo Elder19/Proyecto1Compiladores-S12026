@@ -70,7 +70,7 @@ terminal CADENA;
 terminal CARACTER;
 terminal ENTERO;
 terminal FLOTANTE;
-terminal FRACCION;
+
 terminal BOOL;
 terminal EXPONENCIAL;
 terminal FLOAT;
@@ -307,8 +307,7 @@ elemento_numerico ::= ENTERO:v
                     {: RESULT = new Resultado(v.toString(), "float"); :}
                     | EXPONENCIAL:v
                     {: RESULT = new Resultado(v.toString(), "float"); :}
-                    | FRACCION:v
-                    {: RESULT = new Resultado(v.toString(), "float"); :}
+                  
 ;
 
 
