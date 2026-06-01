@@ -1,14 +1,15 @@
 empty ~ __main__ <| |>
 |:
-    int ~ x <- 0!
-    do
-    |:  
-        x <- x + 1 !
-        if <|equal<|x, 3|>|>
-        |:
-            break !
-        :|
-        cout<|x|> !
-    :|
-    while <|less_t<|x, 5|>|> !
+    int ~ x !
+    int ~ y <- 5 !
+    float ~ a !
+    float ~ b <- 2.5 !
+    bool ~ c !
+    bool ~ d <- true !
+    int ~ arr<<3>><<2>> !
+    float ~ arrF<<2>><<2>> !
+    int ~ z <- x + y !
+    arr<<0>><<0>> <- 10 !
+    arr<<1>><<0>> <- 20 !
+    cout<|z|> !
 :|

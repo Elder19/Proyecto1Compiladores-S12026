@@ -331,6 +331,7 @@ sentencia ::= declaracion_int FIN_SENTENCIA
                 String.valueOf(idleft), String.valueOf(idright),
                 datotype, false
             );
+            CodigoIntermedio.emitir("var " + datotype + " " + id.toString());
             RESULT = false;
         :}
 
@@ -342,9 +343,8 @@ sentencia ::= declaracion_int FIN_SENTENCIA
                 String.valueOf(idleft), String.valueOf(idright),
                 datotype, true
             );
-
+            CodigoIntermedio.emitir("var " + datotype + " " + id.toString());
             CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
             if (!"error".equals(expr.tipo) && !tiposCompatibles(datotype, expr.tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
@@ -1206,43 +1206,36 @@ factor_logico ::= NOT:op factor_logico:f
 ;
 
 declaracion_int ::= INT SEPARADOR ID:id
-                    ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-                    ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+                    ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+                    ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "int"
     );
+    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
 :}
+
 | INT SEPARADOR ID:id
-  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
   ASIGNACION matriz_enteros
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "int"
     );
+    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
 :}
+
 | INT SEPARADOR ID:id ASIGNACION expresion:expr
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int",
-        true
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "int", true
     );
-
+    CodigoIntermedio.emitir("var int " + id.toString());
     CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
     if (!"error".equals(expr.tipo) && !tiposCompatibles("int", expr.tipo)) {
         ErroresSemanticos.agregar(
             "Error semántico en línea " + idleft +
@@ -1252,57 +1245,49 @@ declaracion_int ::= INT SEPARADOR ID:id
         );
     }
 :}
+
 | INT SEPARADOR ID:id
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int",
-        false
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "int", false
     );
+    CodigoIntermedio.emitir("var int " + id.toString());
 :}
 ;
 
+
 declaracion_float ::= FLOAT SEPARADOR ID:id
-                      ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-                      ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+                      ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+                      ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "float"
     );
+    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
 :}
+
 | FLOAT SEPARADOR ID:id
-  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
-  ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+  ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
   ASIGNACION matriz_flotantes
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "float"
     );
+    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
 :}
+
 | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float",
-        true
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "float", true
     );
-
+    CodigoIntermedio.emitir("var float " + id.toString());
     CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
     if (!"error".equals(expr.tipo) && !tiposCompatibles("float", expr.tipo)) {
         ErroresSemanticos.agregar(
             "Error semántico en línea " + idleft +
@@ -1312,16 +1297,14 @@ declaracion_float ::= FLOAT SEPARADOR ID:id
         );
     }
 :}
+
 | FLOAT SEPARADOR ID:id
 {:
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float",
-        false
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "float", false
     );
+    CodigoIntermedio.emitir("var float " + id.toString());
 :}
 ;
 

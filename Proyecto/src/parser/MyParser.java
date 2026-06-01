@@ -1265,6 +1265,7 @@ class CUP$MyParser$actions {
                 String.valueOf(idleft), String.valueOf(idright),
                 datotype, false
             );
+            CodigoIntermedio.emitir("var " + datotype + " " + id.toString());
             RESULT = false;
         
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("sentencia",14, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
@@ -1291,9 +1292,8 @@ class CUP$MyParser$actions {
                 String.valueOf(idleft), String.valueOf(idright),
                 datotype, true
             );
-
+            CodigoIntermedio.emitir("var " + datotype + " " + id.toString());
             CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
             if (!"error".equals(expr.tipo) && !tiposCompatibles(datotype, expr.tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
@@ -3155,14 +3155,18 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).right;
+		Object f = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).value;
+		int cleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int cright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		Object c = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "int"
     );
+    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -3175,14 +3179,18 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).value;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
+		Object f = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
+		int cleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).left;
+		int cright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).right;
+		Object c = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "int"
     );
+    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -3200,16 +3208,11 @@ class CUP$MyParser$actions {
 		Resultado expr = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int",
-        true
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "int", true
     );
-
+    CodigoIntermedio.emitir("var int " + id.toString());
     CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
     if (!"error".equals(expr.tipo) && !tiposCompatibles("int", expr.tipo)) {
         ErroresSemanticos.agregar(
             "Error semántico en línea " + idleft +
@@ -3232,13 +3235,10 @@ class CUP$MyParser$actions {
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "int",
-        false
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "int", false
     );
+    CodigoIntermedio.emitir("var int " + id.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -3251,14 +3251,18 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).right;
+		Object f = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)).value;
+		int cleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int cright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		Object c = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "float"
     );
+    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -3271,14 +3275,18 @@ class CUP$MyParser$actions {
 		int idleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)).value;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).right;
+		Object f = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)).value;
+		int cleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).left;
+		int cright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).right;
+		Object c = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-3)).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "ARREGLO",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float"
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "float"
     );
+    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -3296,16 +3304,11 @@ class CUP$MyParser$actions {
 		Resultado expr = (Resultado)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float",
-        true
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "float", true
     );
-
+    CodigoIntermedio.emitir("var float " + id.toString());
     CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-
     if (!"error".equals(expr.tipo) && !tiposCompatibles("float", expr.tipo)) {
         ErroresSemanticos.agregar(
             "Error semántico en línea " + idleft +
@@ -3328,13 +3331,10 @@ class CUP$MyParser$actions {
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
     TablaSimbolos.agregar(
-        id.toString(),
-        "VARIABLE",
-        String.valueOf(idleft),
-        String.valueOf(idright),
-        "float",
-        false
+        id.toString(), "VARIABLE",
+        String.valueOf(idleft), String.valueOf(idright), "float", false
     );
+    CodigoIntermedio.emitir("var float " + id.toString());
 
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
