@@ -662,7 +662,7 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
     if (!TablaSimbolos.existe(nombreCin)) {
         ErroresSemanticos.agregar(
             "Variable no declarada '" + nombreCin +
-            "' en línea " + idleft + ", columna " + idright + "."
+            "' en línea " + idleft + ", columna " + idright 
         );
     }
     else {
@@ -793,67 +793,130 @@ case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
                | /* vacio */
 ;
 
-expresion_aritmetica ::= termino:izq SUMA termino:der
+expresion_aritmetica ::= expresion_aritmetica:izq SUMA termino:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "+", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "+",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " + " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
-| termino:izq RESTA termino:der
+
+| expresion_aritmetica:izq RESTA termino:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "-", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "-",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " - " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
+
 | termino:t
 {:
     RESULT = t;
 :}
 ;
 
-termino ::= potencia:izq MULTIPLICACION potencia:der
+
+termino ::= termino:izq MULTIPLICACION potencia:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "*", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "*",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " * " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
-| potencia:izq DIVISION potencia:der
+
+| termino:izq DIVISION potencia:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "/", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "/",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " / " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
-| potencia:izq MODULO potencia:der
+
+| termino:izq MODULO potencia:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "%", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "%",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " % " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
-| potencia:izq DIVISION_ENTERA potencia:der
+
+| termino:izq DIVISION_ENTERA potencia:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "//", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "//",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " // " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
+
 | potencia:p
 {:
     RESULT = p;
 :}
 ;
-
-potencia ::= factor:izq POTENCIA factor:der
+potencia ::= factor:izq POTENCIA potencia:der
 {:
-    String tipoRes = ErroresSemanticos.validarAritmetica(izq.tipo, der.tipo, "^", izqleft, izqright);
+    String tipoRes = ErroresSemanticos.validarAritmetica(
+        izq.tipo,
+        der.tipo,
+        "^",
+        izqleft,
+        izqright
+    );
+
     String temp = CodigoIntermedio.nuevoTemporal();
     CodigoIntermedio.emitir(temp + " = " + izq.valor + " ^ " + der.valor);
+
     RESULT = new Resultado(temp, tipoRes);
 :}
+
 | factor:f
 {:
     RESULT = f;
@@ -869,7 +932,7 @@ factor ::= elemento_numerico:t
     if (!TablaSimbolos.existe(id.toString())) {
         ErroresSemanticos.agregar(
             "Variable no declarada '" + id.toString() +
-            "' en línea " + idleft + ", columna " + idright + "."
+            "' en línea " + idleft + ", columna " + idright
         );
         RESULT = new Resultado("error", "error");
     }
@@ -1056,6 +1119,9 @@ operando_relacional_eq ::= expresion_aritmetica:e
 | expresion_relacional:r
 {:
     RESULT = r;
+:}| bool_literal:b
+{:
+    RESULT = b;
 :}
 ;
 
