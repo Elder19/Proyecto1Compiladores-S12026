@@ -23,6 +23,7 @@ parser code {:
         System.err.println(msg);
     }
     boolean funcionDeclaradaCorrectamente = true;//para validar duplicidades
+ 
 
 :};
 
@@ -30,18 +31,39 @@ action code {:/*se usa para validar los tipos de retorno*/
     String funcionActual = "";
     String tipoRetornoActual = "";
     boolean retornoEncontrado = false;
+    boolean codigoInalcanzableActivo = false;
+
     boolean tiposCompatibles(String esperado, String recibido) {
-    if (esperado == null || recibido == null) return false;
+        if (esperado == null || recibido == null) return false;
 
-    if (esperado.equals(recibido)) return true;
+        if (esperado.equals(recibido)) return true;
 
-    // Permitir int -> float
-    if (esperado.equals("float") && recibido.equals("int")) return true;
+        // Permitir int -> float
+        if (esperado.equals("float") && recibido.equals("int")) return true;
 
-    
+        return false;
+    }
+    int contextoBreak = 0;
 
-    return false;
-}
+    void validarBreak(int linea, int columna) {
+        if (contextoBreak <= 0) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + linea +
+                ", columna " + columna +
+                ": 'break' solo puede usarse dentro de un ciclo o switch."
+            );
+        }
+    }
+
+    void validarCodigoInalcanzable(int linea, int columna) {
+        if (codigoInalcanzableActivo) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + linea +
+                ", columna " + columna +
+                ": código inalcanzable después de return."
+            );
+        }
+    }
 :};
 
 
@@ -78,7 +100,7 @@ action code {:/*se usa para validar los tipos de retorno*/
  terminal LESS_TE;
  terminal GREATHER_T;
  terminal GREATHER_TE;
- terminal ERROR;
+
  
  terminal ABRIR_BLOQUE;
  terminal CERRAR_BLOQUE;
@@ -109,8 +131,8 @@ terminal DIVISION_ENTERA;
 
 
 /*no terminales*/
-non terminal String elemento_numerico;
 non terminal String elemento;
+
 non terminal String tipo;
 non terminal String tipo_funcion;
 non terminal String tipo_completo;
@@ -123,13 +145,13 @@ non terminal main;
 non terminal lista_params;
 non terminal resto_params;
 non terminal param;
-
+non terminal String elemento_numerico;
 non terminal Boolean  lista_sentencias;
 non terminal Boolean  sentencia;
 non terminal Boolean  bloque;
 non terminal break_sentencia;
 non terminal Boolean  return_sentencia;
-
+non terminal String valor_case;
 non terminal String acceder_arreglo;
 non terminal modificar_arreglo;
 
@@ -156,20 +178,20 @@ non terminal case_default;
 
 non terminal String expresion;
 non terminal String expresion_aritmetica;
-non terminal  resto_aritmetica;
+non terminal  TipoInfo  resto_aritmetica;
 non terminal String termino;
-non terminal  resto_termino;
+non terminal TipoInfo  resto_termino;
 non terminal String potencia;
-non terminal  resto_potencia;
+non terminal  TipoInfo  resto_potencia;
 non terminal String factor;
 non terminal String factor_negativo;
 
 non terminal String expresion_relacional;
 non terminal String operando_relacional_eq;
 non terminal String expresion_logica;
-non terminal  resto_logico;
+non terminal   TipoInfo  resto_logico;
 non terminal String termino_logico;
-non terminal  resto_termino_logico;
+non terminal TipoInfo   resto_termino_logico;
 non terminal  String factor_logico;
 
 non terminal String llamada_funcion;
@@ -192,11 +214,12 @@ lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
 /*guarda el tipo de retorno cuando encuentra el id abre scope y luego lo cierra*/
-funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA lista_params  PARENTESIS_CIERRE
+funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA 
        {:
             funcionActual = id.toString();
             tipoRetornoActual = t.toString();
             retornoEncontrado = false;
+            codigoInalcanzableActivo = false;
 
             funcionDeclaradaCorrectamente = TablaSimbolos.agregar(
                 id.toString(),
@@ -212,7 +235,7 @@ funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA lista_params  PAR
             } else {
                 TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);//scope temporal para notificar errores tremporales
             }
-        :}
+        :}lista_params  PARENTESIS_CIERRE
         bloque
         {:
             if (!"empty".equals(tipoRetornoActual) && !retornoEncontrado) {
@@ -229,6 +252,7 @@ funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA lista_params  PAR
             tipoRetornoActual = null;
             retornoEncontrado = false;
             funcionDeclaradaCorrectamente = true;
+            codigoInalcanzableActivo = false;
         :}
 ;
 /* El bloque principal del programa: "empty main() { ... }"
@@ -248,6 +272,7 @@ bloque
     funcionActual = null;
     tipoRetornoActual = null;
     retornoEncontrado = false;
+    codigoInalcanzableActivo = false;
 :}
 ;
 
@@ -296,11 +321,7 @@ elemento_numerico ::= ENTERO{:RESULT="int";:}
                     | FRACCION {:RESULT="float";:}
 ;
 
-elemento ::= elemento_numerico
-           | bool_literal
-           | CADENA
-           | CARACTER
-;
+
 /*sentencia cubre los controles minimo deintriucciones que pueden generarse  */
 /* sentencia devuelve true si garantiza un return, false si no */
 
@@ -315,7 +336,7 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         :}
 
         | tipo:datotype SEPARADOR ID:id FIN_SENTENCIA
-        {:
+        {:  validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
                 id.toString(),
                 "VARIABLE",
@@ -329,7 +350,7 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         :}
 
         | tipo:datotype SEPARADOR ID:id ASIGNACION expresion:expr FIN_SENTENCIA
-        {:
+        {:validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
                 id.toString(),
                 "VARIABLE",
@@ -377,10 +398,11 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             RESULT = r;
         :}
 
-        | break_sentencia FIN_SENTENCIA
-        {:
-            RESULT = false;
-        :}
+     | break_sentencia FIN_SENTENCIA
+{:
+    RESULT = false;
+:}
+        
 
         | lectura_escritura
         {:
@@ -409,7 +431,11 @@ lista_sentencias ::= sentencia:s lista_sentencias:ls
 {: RESULT = false;:}
 ;
 
-break_sentencia ::= BREAK
+break_sentencia ::= BREAK:br
+{:
+    validarCodigoInalcanzable(brleft, brright);
+    validarBreak(brleft, brright);
+:}
 ;
 /* Tipos válidos tanto para parámetros como para variables locales. */
 tipo_completo ::= INT
@@ -431,9 +457,12 @@ param ::= tipo_completo:tc SEPARADOR ID:id
     String.valueOf(idright),tc.toString()); 
     :}
 ;
-return_sentencia ::= RETURN SEPARADOR expresion:expr
+return_sentencia ::= RETURN:ret SEPARADOR expresion:expr
 {:
+    validarCodigoInalcanzable(retleft, retright);
+
     retornoEncontrado = true;
+    codigoInalcanzableActivo = true;
 
     if ("empty".equals(tipoRetornoActual)) {
         ErroresSemanticos.agregar(
@@ -448,29 +477,51 @@ return_sentencia ::= RETURN SEPARADOR expresion:expr
             "', pero está retornando '" + expr + "'."
         );
     }
-    RESULT=true;
+
+    RESULT = true;
 :}
 ;
 asignar_variable ::= ID:id ASIGNACION expresion:expr
-    {: 
-      String nombreasing=id.toString();
-     if(!TablaSimbolos.existe(id.toString())){
-        ErroresSemanticos.agregar("La variable  "+id.toString()+ "  en la linea " + idleft + "columna " + idright
-        );//valida que la variable exista antes de asginarle un valor
+{:  validarCodigoInalcanzable(idleft, idright);
+    String nombreasing = id.toString();
 
+    if (!TablaSimbolos.existe(nombreasing)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": la variable '" + nombreasing + "' no está declarada."
+        );
     }
-  
-    else { TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);//valida  que no se asignan variables del mismo tipo 
-        String tipoVar = simbolo.tipoDato;
-        String tipoExpr = expr.toString();
-       if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
-            ErroresSemanticos.agregar( "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": no se puede asignar un valor de tipo '" + tipoExpr +
-                "' a la variable '" + nombreasing +
-                "' de tipo '" + tipoVar );
-        }}
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombreasing);
 
+        if (simbolo == null) {
+            ErroresSemanticos.agregar(
+                "Error interno: no se pudo recuperar el símbolo '" + nombreasing + "'."
+            );
+        }
+        else if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombreasing + "' es un arreglo y no se puede asignar como variable. Use índices."
+            );
+        }
+        else {
+            String tipoVar = simbolo.tipoDato;
+            String tipoExpr = expr.toString();
+
+            if (!"error".equals(tipoExpr) && !tiposCompatibles(tipoVar, tipoExpr)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": no se puede asignar un valor de tipo '" + tipoExpr +
+                    "' a la variable '" + nombreasing +
+                    "' de tipo '" + tipoVar + "'."
+                );
+            }
+        }
+    }
 :}
 ;
 
@@ -517,42 +568,49 @@ modificar_arreglo ::=
       ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PARENTESIS_CUADRADO
          ABRIR_PARENTESIS_CUADRADO expresion:expr2 CERRAR_PARENTESIS_CUADRADO
          ASIGNACION expresion:expr
-      {:
-          String nombre = id.toString();
+{:  validarCodigoInalcanzable(idleft, idright);
+    String nombre = id.toString();
 
-          if (!TablaSimbolos.existe(nombre)) {
-              ErroresSemanticos.agregar(
-                  "Arreglo no declarado '" + nombre +
-                  "' en línea " + idleft + ", columna " + idright + "."
-              );
-          } 
-          else if (!expr1.equals("int") || !expr2.equals("int")) {
-              ErroresSemanticos.agregar(
-                  "No se puede acceder un arreglo con índices diferentes de int."
-              );
-          }
-          else {
-              TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": arreglo no declarado '" + nombre + "'."
+        );
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
 
-              if (simbolo == null) {
-                  ErroresSemanticos.agregar(
-                      "Error interno: no se pudo recuperar el símbolo '" + nombre + "'."
-                  );
-              }
-              else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
-                  ErroresSemanticos.agregar(
-                      "'" + nombre + "' no es un arreglo."
-                  );
-              } 
-              else if (!tiposCompatibles(simbolo.tipoDato, expr)) {
-                  ErroresSemanticos.agregar(
-                      "No se puede asignar un valor de tipo '" + expr +
-                      "' al arreglo '" + nombre +
-                      "' de tipo '" + simbolo.tipoDato + "'."
-                  );
-              }
-          }
-      :}
+        if (simbolo == null) {
+            ErroresSemanticos.agregar(
+                "Error interno: no se pudo recuperar el símbolo '" + nombre + "'."
+            );
+        }
+        else if (!"ARREGLO".equals(simbolo.tipoSimbolo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": '" + nombre + "' no es un arreglo."
+            );
+        }
+        else if (!"int".equals(expr1) || !"int".equals(expr2)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": los índices del arreglo '" + nombre + "' deben ser de tipo int."
+            );
+        }
+        else if (!"error".equals(expr) && !tiposCompatibles(simbolo.tipoDato, expr)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": no se puede asignar un valor de tipo '" + expr +
+                "' al arreglo '" + nombre +
+                "' de tipo '" + simbolo.tipoDato + "'."
+            );
+        }
+    }
+:}
 ;
 lista_enteros ::= ENTERO
                 | ENTERO COMA lista_enteros
@@ -641,13 +699,20 @@ instruccion ::= if_sentencia:i
 
 /* Condicional if con else opcional.
    Abre scope propio para el bloque then; el scope del else lo maneja else_bloque. */
-if_sentencia ::= IF PARENTESIS_APERTURA expresion PARENTESIS_CIERRE 
- {:  TablaSimbolos.entrarScope("if");  :}
+if_sentencia ::= IF:ifTok PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE 
+{:
+    ErroresSemanticos.validarCondicionBooleana(cond, "if", ifTokleft, ifTokright);
+    TablaSimbolos.entrarScope("if");
+    :}
     bloque:b
-    {:  TablaSimbolos.salirScope();       :}
-    else_bloque:e {:RESULT=b && e;:}
- 
-;
+    {:
+        TablaSimbolos.salirScope();
+    :}
+    else_bloque:e
+    {:
+        RESULT = b && e;
+    :}
+    ;
 /*abre su propio scope si existe, o produce vacío. */
 else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
     bloque:b
@@ -656,49 +721,135 @@ else_bloque ::= ELSE{: TablaSimbolos.entrarScope("else"); :}
     | /* vacio */{:RESULT=false;:}
 ;
 /* Ciclo do-while: ejecuta el bloque al menos una vez y repite mientras la condición sea verdadera. */
-do_while ::= DO {: TablaSimbolos.entrarScope("do_while"); :}bloque  {: TablaSimbolos.salirScope();            :} WHILE PARENTESIS_APERTURA expresion PARENTESIS_CIERRE FIN_SENTENCIA
+do_while ::= DO:doTok
+{:
+    contextoBreak++;
+    TablaSimbolos.entrarScope("do_while");
+:}
+bloque
+{:
+    TablaSimbolos.salirScope();
+    contextoBreak--;
+:}
+WHILE PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE FIN_SENTENCIA
+{:
+    ErroresSemanticos.validarCondicionBooleana(cond, "while", doTokleft, doTokright);
+:}
 ;
 /* Switch: evalúa una expresión y salta al case correspondiente.
    Abre scope propio para todo el cuerpo del switch. */
-switch_sentencia ::= SWITCH PARENTESIS_APERTURA expresion PARENTESIS_CIERRE {: TablaSimbolos.entrarScope("switch"); :} ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
- {: TablaSimbolos.salirScope();          :}
-;
-cases ::= case_item cases
-        | /* vacio */
-;
-
-case_item ::= CASE SEPARADOR elemento DOS_PUNTOS lista_sentencias
-;
-
-case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
-               | /* vacio */
-;
-
-expresion_aritmetica ::= termino:t resto_aritmetica {:RESULT=t;:}
-;
-/* Continúa sumando o restando términos de forma recursiva, o termina. */
-resto_aritmetica ::= SUMA   termino resto_aritmetica
-                   | RESTA  termino resto_aritmetica
-                   | /* vacio */
-;
-
-termino ::= potencia:p resto_termino{:
-    RESULT = p;
+switch_sentencia ::= SWITCH:sw PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE
+{:
+    ErroresSemanticos.validarCondicionSwitch(cond, swleft, swright);
+    contextoBreak++;
+    TablaSimbolos.entrarScope("switch");
+:}
+ABRIR_BLOQUE cases case_default CERRAR_BLOQUE
+{:
+    TablaSimbolos.salirScope();
+    contextoBreak--;
 :}
 ;
-/* Continúa con *, /, %, división entera de forma recursiva, o termina. */
-resto_termino ::= MULTIPLICACION potencia resto_termino
-                | DIVISION       potencia resto_termino
-                | MODULO         potencia resto_termino
-                | DIVISION_ENTERA potencia resto_termino 
-                | /* vacio */
+
+cases ::= case_item
+        | case_item cases
 ;
 
-potencia ::= factor:f resto_potencia {:RESULT=f;:}
+case_item ::= CASE SEPARADOR valor_case DOS_PUNTOS lista_sentencias
 ;
+
+valor_case ::= ENTERO
+             {: RESULT = "int"; :}
+             | CARACTER
+             {: RESULT = "char"; :}
+;
+case_default ::= DEFAULT DOS_PUNTOS lista_sentencias
+               | /* vacio */
+;// NUEVA - poner esto
+expresion_aritmetica ::= termino:t resto_aritmetica:r
+{:
+    RESULT = r.esVacio() ? t
+           : ErroresSemanticos.validarAritmetica(t, r.tipo, r.op, r.linea, r.columna);
+:}
+;
+        /* Continúa sumando o restando términos de forma recursiva, o termina. */
+      
+resto_aritmetica ::= SUMA:op termino:t resto_aritmetica:r
+{:
+    String base = r.esVacio() ? t
+                : ErroresSemanticos.validarAritmetica(t, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "+", opleft, opright);
+:}
+
+| RESTA:op termino:t resto_aritmetica:r
+{:
+    String base = r.esVacio() ? t
+                : ErroresSemanticos.validarAritmetica(t, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "-", opleft, opright);
+:}
+
+| /* vacio */
+{: RESULT = TipoInfo.VACIO; :}
+;
+
+
+termino ::= potencia:p resto_termino:r
+{:
+    RESULT = r.esVacio() ? p
+           : ErroresSemanticos.validarAritmetica(p, r.tipo, r.op, r.linea, r.columna);
+:}
+
+;
+/* Continúa con *, /, %, división entera de forma recursiva, o termina. */
+resto_termino ::= MULTIPLICACION:op potencia:p resto_termino:r
+{:
+    String base = r.esVacio() ? p
+                : ErroresSemanticos.validarAritmetica(p, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "*", opleft, opright);
+:}
+
+| DIVISION:op potencia:p resto_termino:r
+{:
+    String base = r.esVacio() ? p
+                : ErroresSemanticos.validarAritmetica(p, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "/", opleft, opright);
+:}
+
+| MODULO:op potencia:p resto_termino:r
+{:
+    String base = r.esVacio() ? p
+                : ErroresSemanticos.validarAritmetica(p, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "%", opleft, opright);
+:}
+
+| DIVISION_ENTERA:op potencia:p resto_termino:r
+{:
+    String base = r.esVacio() ? p
+                : ErroresSemanticos.validarAritmetica(p, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "//", opleft, opright);
+:}
+
+| /* vacio */
+{: RESULT = TipoInfo.VACIO; :}
+;
+
+potencia ::= factor:f resto_potencia:r
+{:
+    RESULT = r.esVacio() ? f
+           : ErroresSemanticos.validarAritmetica(f, r.tipo, r.op, r.linea, r.columna);
+:}
+;
+
 /* Continúa elevando a potencias de forma recursiva, o termina. */
-resto_potencia ::= POTENCIA factor resto_potencia
-                 | /* vacio */
+resto_potencia ::= POTENCIA:op factor:f resto_potencia:r
+{:
+    String base = r.esVacio() ? f
+                : ErroresSemanticos.validarAritmetica(f, r.tipo, r.op, r.linea, r.columna);
+    RESULT = new TipoInfo(base, "^", opleft, opright);
+:}
+
+| /* vacio */
+{: RESULT = TipoInfo.VACIO; :}
 ;
 /* 
    literal, variable, expresión entre paréntesis, acceso a arreglo,
@@ -734,8 +885,7 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
          | acceder_arreglo:a {:
             RESULT = a;
         :}
-        
-        | INCREMENTO ID:id
+       | INCREMENTO:op ID:id
         {:
             if (!TablaSimbolos.existe(id.toString())) {
                 ErroresSemanticos.agregar(
@@ -745,11 +895,23 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
                 RESULT = "error";
             } else {
                 TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                RESULT = simbolo.tipoDato;
+                String tipo = simbolo.tipoDato;
+
+                if (!ErroresSemanticos.esNumerico(tipo)) {
+                    ErroresSemanticos.agregar(
+                        "Error semántico en línea " + opleft +
+                        ", columna " + opright +
+                        ": el operador '++' solo puede aplicarse a variables int o float. '" +
+                        id.toString() + "' es de tipo '" + tipo + "'."
+                    );
+                    RESULT = "error";
+                } else {
+                    RESULT = tipo;
+                }
             }
         :}
 
-        | DECREMENTO ID:id
+        | DECREMENTO:op ID:id
         {:
             if (!TablaSimbolos.existe(id.toString())) {
                 ErroresSemanticos.agregar(
@@ -759,7 +921,19 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
                 RESULT = "error";
             } else {
                 TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                RESULT = simbolo.tipoDato;
+                String tipo = simbolo.tipoDato;
+
+                if (!ErroresSemanticos.esNumerico(tipo)) {
+                    ErroresSemanticos.agregar(
+                        "Error semántico en línea " + opleft +
+                        ", columna " + opright +
+                        ": el operador '--' solo puede aplicarse a variables int o float. '" +
+                        id.toString() + "' es de tipo '" + tipo + "'."
+                    );
+                    RESULT = "error";
+                } else {
+                    RESULT = tipo;
+                }
             }
         :}
 
@@ -772,6 +946,10 @@ factor ::= elemento_numerico:t {:RESULT=t;:}
         {:
             RESULT = lf;
         :}
+        | bool_literal:b
+        {:
+            RESULT = b;
+        :}
         
 ;
 
@@ -780,19 +958,32 @@ factor_negativo ::= RESTA elemento_numerico:t
                       RESULT = t;
                   :}
 
-                  | RESTA ID:id
-                  {:
-                      if (!TablaSimbolos.existe(id.toString())) {
-                          ErroresSemanticos.agregar(
-                              "Variable no declarada '" + id.toString() +
-                              "' en línea " + idleft + ", columna " + idright
-                          );
-                          RESULT = "error";
-                      } else {
-                          TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-                          RESULT = simbolo.tipoDato;
-                      }
-                  :}
+                  
+              | RESTA:op ID:id
+                {:
+                    if (!TablaSimbolos.existe(id.toString())) {
+                        ErroresSemanticos.agregar(
+                            "Variable no declarada '" + id.toString() +
+                            "' en línea " + idleft + ", columna " + idright
+                        );
+                        RESULT = "error";
+                    } else {
+                        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+                        String tipo = simbolo.tipoDato;
+
+                        if (!ErroresSemanticos.esNumerico(tipo)) {
+                            ErroresSemanticos.agregar(
+                                "Error semántico en línea " + opleft +
+                                ", columna " + opright +
+                                ": el operador '-' unario solo puede aplicarse a int o float. '" +
+                                id.toString() + "' es de tipo '" + tipo + "'."
+                            );
+                            RESULT = "error";
+                        } else {
+                            RESULT = tipo;
+                        }
+                    }
+                :}
 
                   | RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
                   {:
@@ -805,46 +996,76 @@ factor_negativo ::= RESTA elemento_numerico:t
                   :}
 ;
 
+expresion_relacional ::= EQUAL:op PARENTESIS_APERTURA operando_relacional_eq:e1 COMA operando_relacional_eq:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarIgualdad(
+        e1,
+        e2,
+        "equal",
+        opleft,
+        opright
+    );
+:}
 
+| N_EQUAL:op PARENTESIS_APERTURA operando_relacional_eq:e1 COMA operando_relacional_eq:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarIgualdad(
+        e1,
+        e2,
+        "n_equal",
+        opleft,
+        opright
+    );
+:}
 
-        expresion_relacional ::= EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
+| LESS_T:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarRelacionalNumerica(
+        e1,
+        e2,
+        "less_t",
+        opleft,
+        opright
+    );
+:}
 
-        | N_EQUAL PARENTESIS_APERTURA operando_relacional_eq COMA operando_relacional_eq PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
+| LESS_TE:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarRelacionalNumerica(
+        e1,
+        e2,
+        "less_te",
+        opleft,
+        opright
+    );
+:}
 
-        | LESS_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
+| GREATHER_T:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarRelacionalNumerica(
+        e1,
+        e2,
+        "greather_t",
+        opleft,
+        opright
+    );
+:}
 
-        | LESS_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
+| GREATHER_TE:op PARENTESIS_APERTURA expresion_aritmetica:e1 COMA expresion_aritmetica:e2 PARENTESIS_CIERRE
+{:
+    RESULT = ErroresSemanticos.validarRelacionalNumerica(
+        e1,
+        e2,
+        "greather_te",
+        opleft,
+        opright
+    );
+:}
+;
 
-        | GREATHER_T PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
-
-        | GREATHER_TE PARENTESIS_APERTURA expresion_aritmetica COMA expresion_aritmetica PARENTESIS_CIERRE
-        {:
-            RESULT = "bool";
-        :}
-        ;
         operando_relacional_eq ::= expresion_aritmetica:e
         {:
             RESULT = e;
-        :}
-
-        | bool_literal:b
-        {:
-            RESULT = b;
         :}
 
         | expresion_relacional:r
@@ -852,52 +1073,68 @@ factor_negativo ::= RESTA elemento_numerico:t
             RESULT = r;
         :}
                 ;
+
+
         expresion ::= expresion_logica:t
         {:
             RESULT = t;
         :}
         ;
 
-        expresion_logica ::= termino_logico:t resto_logico
-        {:
-            RESULT = t;
-        :}
-        ;
+     expresion_logica ::= termino_logico:t resto_logico:r
+{:
+    RESULT = r.esVacio() ? t
+           : ErroresSemanticos.validarLogica(t, r.tipo, r.op, r.linea, r.columna);
+:}
+;
 
-        resto_logico ::= OR termino_logico resto_logico
-                    | /* vacio */
-        ;
+resto_logico ::= OR:op termino_logico:t resto_logico:r
+{:
+    String base = r.esVacio() ? t
+                : ErroresSemanticos.validarLogica(t, r.tipo, r.op, r.linea, r.columna);
 
-        termino_logico ::= factor_logico:f resto_termino_logico
-        {:
-            RESULT = f;
-        :}
-        ;
+    RESULT = new TipoInfo(base, "OR", opleft, opright);
+:}
 
-        resto_termino_logico ::= AND factor_logico resto_termino_logico
-                            | /* vacio */
-        ;
+| /* vacio */
+{:
+    RESULT = TipoInfo.VACIO;
+:}
+;termino_logico ::= factor_logico:f resto_termino_logico:r
+{:
+    RESULT = r.esVacio() ? f
+           : ErroresSemanticos.validarLogica(f, r.tipo, r.op, r.linea, r.columna);
+:}
+;
 
-        factor_logico ::= NOT factor_logico:f
-        {:
-            RESULT = f;
-        :}
+resto_termino_logico ::= AND:op factor_logico:f resto_termino_logico:r
+{:
+    String base = r.esVacio() ? f
+                : ErroresSemanticos.validarLogica(f, r.tipo, r.op, r.linea, r.columna);
 
-        | expresion_relacional:r
-        {:
-            RESULT = r;
-        :}
+    RESULT = new TipoInfo(base, "AND", opleft, opright);
+:}
 
-        | expresion_aritmetica:e
-        {:
-            RESULT = e;
-        :}
+| /* vacio */
+{:
+    RESULT = TipoInfo.VACIO;
+:}
+;
+factor_logico ::= NOT:op factor_logico:f
+{:
+    RESULT = ErroresSemanticos.validarNot(f, opleft, opright);
+:}
 
-        | bool_literal:b
-        {:
-            RESULT = b;
-        :}
-        ;
+| expresion_relacional:r
+{:
+    RESULT = r;
+:}
+
+| expresion_aritmetica:e
+{:
+    RESULT = e;
+:}
+;
 declaracion_int ::=
       INT SEPARADOR ID:id
         ABRIR_PARENTESIS_CUADRADO ENTERO CERRAR_PARENTESIS_CUADRADO
@@ -1054,7 +1291,3 @@ lista_expresiones ::= expresion:expr resto_expresiones
 resto_expresiones ::= COMA expresion resto_expresiones
                     | /* vacio */
 ;
-
-
-
-                
