@@ -861,6 +861,8 @@ class CUP$MyParser$actions {
         }
     }
 
+    java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
+
   private final MyParser parser;
 
   /** Constructor */
@@ -1248,12 +1250,9 @@ class CUP$MyParser$actions {
 		
             validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                false
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, false
             );
             RESULT = false;
         
@@ -1277,12 +1276,9 @@ class CUP$MyParser$actions {
 		
             validarCodigoInalcanzable(idleft, idright);
             TablaSimbolos.agregar(
-                id.toString(),
-                "VARIABLE",
-                String.valueOf(idleft),
-                String.valueOf(idright),
-                datotype,
-                true
+                id.toString(), "VARIABLE",
+                String.valueOf(idleft), String.valueOf(idright),
+                datotype, true
             );
 
             CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);

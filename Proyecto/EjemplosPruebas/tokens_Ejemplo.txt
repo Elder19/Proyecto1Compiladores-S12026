@@ -1,4 +1,4 @@
-Token: INT           Lexema: int              
+Token: EMPTY         Lexema: empty            
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: suma             
 Token: PARENTESIS_APERTURA Lexema: <|               
@@ -192,7 +192,7 @@ Token: ID            Lexema: letra
 Token: ASIGNACION    Lexema: <-               
 Token: CARACTER      Lexema: 'z'              
 Token: FIN_SENTENCIA Lexema: !                
-Token: INT           Lexema: int              
+Token: BOOL          Lexema: bool             
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: mat              
 Token: ABRIR_PARENTESIS_CUADRADO Lexema: <<               
@@ -202,7 +202,7 @@ Token: ABRIR_PARENTESIS_CUADRADO Lexema: <<
 Token: ENTERO        Lexema: 3                
 Token: CERRAR_PARENTESIS_CUADRADO Lexema: >>               
 Token: FIN_SENTENCIA Lexema: !                
-Token: FLOAT         Lexema: float            
+Token: BOOL          Lexema: bool             
 Token: SEPARADOR     Lexema: ~                
 Token: ID            Lexema: matF             
 Token: ABRIR_PARENTESIS_CUADRADO Lexema: <<               
