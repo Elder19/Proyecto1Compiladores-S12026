@@ -127,11 +127,6 @@ public class ErroresSemanticos {
         return "error";
     }
 
-    // División normal: siempre produce float
-    if ("/".equals(op)) {
-        return "float";
-    }
-
     // Módulo y división entera: solo int
     if ("%".equals(op) || "//".equals(op)) {
         if (!esEntero(t1) || !esEntero(t2)) {
@@ -142,6 +137,16 @@ public class ErroresSemanticos {
             return "error";
         }
         return "int";
+    }
+
+    // División normal:
+    // int / int -> int
+    // si alguno es float -> float
+    if ("/".equals(op)) {
+        if ("int".equals(t1) && "int".equals(t2)) {
+            return "int";
+        }
+        return "float";
     }
 
     // +, -, *, ^ permiten int/float

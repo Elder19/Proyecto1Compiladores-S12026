@@ -1623,8 +1623,6 @@ class CUP$MyParser$actions {
             else {
                 String tipoVar = simbolo.tipoDato;
 
-                CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
-
                 if (!"error".equals(expr.tipo) && !tiposCompatibles(tipoVar, expr.tipo)) {
                     ErroresSemanticos.agregar(
                         "Error semántico en línea " + idleft +
@@ -1633,6 +1631,10 @@ class CUP$MyParser$actions {
                         "' a la variable '" + nombreAsign +
                         "' de tipo '" + tipoVar + "'."
                     );
+                }
+                else {
+                    TablaSimbolos.marcarInicializada(nombreAsign);
+                    CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
                 }
             }
         }
@@ -1922,6 +1924,10 @@ class CUP$MyParser$actions {
                     ": cin solo puede leer variables de tipo int o float. '" +
                     nombreCin + "' es de tipo '" + tipoCin + "'."
                 );
+                
+            }
+            else{
+                TablaSimbolos.marcarInicializada(nombreCin);
             }
         }
 
@@ -2649,19 +2655,32 @@ class CUP$MyParser$actions {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        if (!TablaSimbolos.existe(id.toString())) {
+    String nombre = id.toString();
+
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombre +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+
+        if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + id.toString() +
-                "' en línea " + idleft + ", columna " + idright
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": la variable '" + nombre + "' no ha sido inicializada antes de usarse."
             );
             RESULT = new Resultado("error", "error");
         }
         else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
             String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + id.toString());
+            CodigoIntermedio.emitir(temp + " = " + nombre);
             RESULT = new Resultado(temp, simbolo.tipoDato);
         }
+    }
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("factor",43, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
