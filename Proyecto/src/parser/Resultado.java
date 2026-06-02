@@ -1,6 +1,10 @@
-
+/** Se utiliza para representar el resultado de una expresion
+ * ya sea el valor asociado a la expresion o el tipo de datos
+ */
 public class Resultado {
+    // puede ser un literal: identificador o un temporal (5, x, t1)
     public String valor;
+    // Es el tipo del dato: float, int, bool, error, etc
     public String tipo;
 
     public Resultado(String valor, String tipo) {

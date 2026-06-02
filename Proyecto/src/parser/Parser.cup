@@ -719,18 +719,18 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
 cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
 ;
 
-lista_cout ::= expresion:e resto_cout
+lista_cout ::= expresion:e 
     {:
         CodigoIntermedio.emitir("print " + e.valor);
     :}
 ;
-
-resto_cout ::= COMA expresion:e resto_cout
+/*
+resto_cout ::= COMA expresion:e resto_cout  
     {:
         CodigoIntermedio.emitir("print " + e.valor);
     :}
     | /* vacio */
-;
+
 
 instruccion ::= if_sentencia:i
     {:

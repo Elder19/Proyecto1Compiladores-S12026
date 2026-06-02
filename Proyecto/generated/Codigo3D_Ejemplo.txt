@@ -1,0 +1,113 @@
+  1.  func doble:
+  2.  param_def int n
+  3.  t1 = 2
+  4.  var int dos
+  5.  dos = t1
+  6.  t2 = n
+  7.  t3 = dos
+  8.  t4 = t2 * t3
+  9.  var int r
+ 10.  r = t4
+ 11.  t5 = r
+ 12.  return t5
+ 13.  end func doble
+ 14.  func esMayor:
+ 15.  param_def int a
+ 16.  param_def int b
+ 17.  t6 = a
+ 18.  t7 = b
+ 19.  t8 = t6 > t7
+ 20.  var bool respuesta
+ 21.  respuesta = t8
+ 22.  t9 = respuesta
+ 23.  return t9
+ 24.  end func esMayor
+ 25.  main:
+ 26.  var int[] mat 3,3
+ 27.  t10 = 0
+ 28.  var int i
+ 29.  i = t10
+ 30.  t11 = 1
+ 31.  var int j
+ 32.  j = t11
+ 33.  t12 = i
+ 34.  t13 = j
+ 35.  t14 = 10
+ 36.  mat[t12][t13] = t14
+ 37.  t15 = i
+ 38.  t16 = j
+ 39.  var int valor
+ 40.  valor = mat[t15][t16]
+ 41.  t17 = 5
+ 42.  var int base
+ 43.  base = t17
+ 44.  t18 = base
+ 45.  param t18
+ 46.  t19 = call doble, 1
+ 47.  var int res
+ 48.  res = t19
+ 49.  t20 = res
+ 50.  t21 = valor
+ 51.  param t21
+ 52.  param t20
+ 53.  t22 = call esMayor, 2
+ 54.  var bool mayor
+ 55.  mayor = t22
+ 56.  t23 = mayor
+ 57.  if_false t23 goto if_else_1
+ 58.  t24 = res
+ 59.  print t24
+ 60.  goto if_end_1
+ 61.  if_else_1:
+ 62.  t25 = valor
+ 63.  print t25
+ 64.  if_end_1:
+ 65.  do_start_1:
+ 66.  t26 = i
+ 67.  t27 = 1
+ 68.  t28 = t26 + t27
+ 69.  i = t28
+ 70.  t29 = i
+ 71.  t30 = 3
+ 72.  t31 = t29 < t30
+ 73.  if_true t31 goto do_start_1
+ 74.  do_end_1:
+ 75.  t32 = j
+ 76.  goto switch_case_1
+ 77.  switch_case_1:
+ 78.  t33 = t32 == 0
+ 79.  if_false t33 goto switch_case_2
+ 80.  t34 = "cero"
+ 81.  print t34
+ 82.  goto switch_end_1
+ 83.  switch_case_2:
+ 84.  t35 = t32 == 1
+ 85.  if_false t35 goto switch_case_3
+ 86.  t36 = "uno"
+ 87.  print t36
+ 88.  goto switch_end_1
+ 89.  switch_case_3:
+ 90.  t37 = "otro"
+ 91.  print t37
+ 92.  switch_end_1:
+ 93.  t38 = 56.6
+ 94.  t39 = 2
+ 95.  t40 = t38 / t39
+ 96.  var float prom
+ 97.  prom = t40
+ 98.  t41 = prom
+ 99.  t42 = 28.3
+100.  t43 = t41 == t42
+101.  var bool ok
+102.  ok = t43
+103.  t44 = 'A'
+104.  var char letra
+105.  letra = t44
+106.  t45 = "fin de prueba"
+107.  var string msg
+108.  msg = t45
+109.  var int entrada
+110.  read entrada
+111.  t46 = ok
+112.  print t46
+113.  main_end:
