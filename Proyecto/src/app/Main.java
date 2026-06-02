@@ -507,6 +507,8 @@ private static void procesarArchivo(
 
     /**
      * Imprime el resultado final del codigo intermedio.
+     * El método obtiene dinámicamente la lista de instrucciones
+     * desde la clase CodigoIntermedio
      */
     private static void mostrarCodigoIntermedio(
             Class<?> codigoIntermedioClass,
@@ -515,23 +517,33 @@ private static void procesarArchivo(
     ) throws Exception {
         System.out.println("\n[ CÓDIGO INTERMEDIO ]");
         System.out.println("──────────────────────────────────────────────────────");
-
+        /**
+         * Obtiene la lista de instrucciones generadas por el
+         * módulo de código intermedio.
+         */
         List<String> instrucciones = (List<String>) codigoIntermedioClass
                 .getMethod("getInstrucciones")
                 .invoke(null);
 
+        // Verifica si se generó alguna instrucción.
         if (instrucciones.isEmpty()) {
             System.out.println(" No se generó código intermedio.");
         } else {
             // mostrar en consola
+            /**
             int numero = 1;
             for (String instruccion : instrucciones) {
                 System.out.printf(" %3d.  %s%n", numero++, instruccion);
             }
+            */
 
-            // guardar en archivo
+            // guardar en 
             String nombreSinExtension = nombreArchivo.replace(".txt", "");
-            String rutaSalida = carpeta + "/Codigo3D_" + nombreSinExtension + ".txt";
+            String rutaSalida = "generated" + "/Codigo3D_" + nombreSinExtension + ".txt";
+
+            // ==========================================================
+            // Escritura del código intermedio en archivo
+            // ==========================================================
 
             try (PrintWriter writer = new PrintWriter(new FileWriter(rutaSalida))) {
                 int num = 1;

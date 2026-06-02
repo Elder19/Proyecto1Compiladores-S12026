@@ -530,8 +530,6 @@ asignar_variable ::= ID:id ASIGNACION expresion:expr
             else {
                 String tipoVar = simbolo.tipoDato;
 
-                CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
-
                 if (!"error".equals(expr.tipo) && !tiposCompatibles(tipoVar, expr.tipo)) {
                     ErroresSemanticos.agregar(
                         "Error semántico en línea " + idleft +
@@ -540,6 +538,10 @@ asignar_variable ::= ID:id ASIGNACION expresion:expr
                         "' a la variable '" + nombreAsign +
                         "' de tipo '" + tipoVar + "'."
                     );
+                }
+                else {
+                    TablaSimbolos.marcarInicializada(nombreAsign);
+                    CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
                 }
             }
         }
@@ -699,6 +701,10 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
                     ": cin solo puede leer variables de tipo int o float. '" +
                     nombreCin + "' es de tipo '" + tipoCin + "'."
                 );
+                
+            }
+            else{
+                TablaSimbolos.marcarInicializada(nombreCin);
             }
         }
 
@@ -713,18 +719,18 @@ cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
 cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
 ;
 
-lista_cout ::= expresion:e resto_cout
+lista_cout ::= expresion:e 
     {:
         CodigoIntermedio.emitir("print " + e.valor);
     :}
 ;
-
-resto_cout ::= COMA expresion:e resto_cout
+/*
+resto_cout ::= COMA expresion:e resto_cout  
     {:
         CodigoIntermedio.emitir("print " + e.valor);
     :}
     | /* vacio */
-;
+
 
 instruccion ::= if_sentencia:i
     {:
@@ -1034,19 +1040,32 @@ factor ::= elemento_numerico:t
     :}
     | ID:id
     {:
-        if (!TablaSimbolos.existe(id.toString())) {
+    String nombre = id.toString();
+
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombre +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+
+        if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + id.toString() +
-                "' en línea " + idleft + ", columna " + idright
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": la variable '" + nombre + "' no ha sido inicializada antes de usarse."
             );
             RESULT = new Resultado("error", "error");
         }
         else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
             String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + id.toString());
+            CodigoIntermedio.emitir(temp + " = " + nombre);
             RESULT = new Resultado(temp, simbolo.tipoDato);
         }
+    }
     :}
     | CADENA:v
     {:

@@ -10,7 +10,7 @@ public class ErroresSemanticos {
     // true  = imprime todos
     // false = imprime solo un error por línea
     public static boolean imprimirTodos = true;
-
+    //ingresa el mensaje a la lista
     public static void agregar(String mensaje) {
         errores.add(mensaje);
     }
@@ -34,7 +34,7 @@ public class ErroresSemanticos {
             System.out.println(error);
         }
     }
-
+    //filtra los mensajes para solo mostrar uno por linea
     public static List<String> obtenerErroresParaImprimir() {
         if (imprimirTodos) {
             return errores;
@@ -61,7 +61,7 @@ public class ErroresSemanticos {
 
         return filtrados;
     }
-
+    //retorna la linea de un error para evitar mostrarmas de un error de la misma
     private static int extraerLinea(String error) {
         try {
             String marcador = "línea ";
@@ -100,14 +100,14 @@ public class ErroresSemanticos {
     // ============================================================
     // VALIDACIONES DE TIPOS
     // ============================================================
-
+    //Esa función sirve para saber si un tipo puede recibir otro tipo en una asignación o inicialización
     public static boolean tiposCompatibles(String esperado, String recibido) {
         if (esperado == null || recibido == null) return false;
         if (esperado.equals(recibido)) return true;
         if (esperado.equals("float") && recibido.equals("int")) return true;
         return false;
     }
-
+    //algunas operaciones solo reciben valores tipo int o float 
     public static boolean esNumerico(String tipo) {
         return "int".equals(tipo) || "float".equals(tipo);
     }
@@ -115,7 +115,9 @@ public class ErroresSemanticos {
     public static boolean esEntero(String tipo) {
         return "int".equals(tipo);
     }
-
+    // Valida operaciones aritméticas.
+    // Revisa que los operandos sean numéricos y retorna el tipo resultante.
+    // Algunas operaciones como % y // solo permiten int.
     public static String validarAritmetica(String t1, String t2, String op, int linea, int columna) {
     if ("error".equals(t1) || "error".equals(t2)) return "error";
 
@@ -127,13 +129,8 @@ public class ErroresSemanticos {
         return "error";
     }
 
-    // División normal: siempre produce float
-    if ("/".equals(op)) {
-        return "float";
-    }
-
     // Módulo y división entera: solo int
-    if ("%".equals(op) || "//".equals(op)) {
+    if ("%".equals(op) || "//".equals(op)) {//algunas facciones o divisiones pueden dar un numero entero o flotante segun sus valores por lo que valida cual debe retornar
         if (!esEntero(t1) || !esEntero(t2)) {
             agregar(
                 "Error semántico en línea " + linea + ", columna " + columna +
@@ -144,10 +141,21 @@ public class ErroresSemanticos {
         return "int";
     }
 
+    // División normal:
+    // int / int -> int
+    // si alguno es float -> float
+    if ("/".equals(op)) {
+        if ("int".equals(t1) && "int".equals(t2)) {
+            return "int";
+        }
+        return "float";
+    }
+
     // +, -, *, ^ permiten int/float
     return ("float".equals(t1) || "float".equals(t2)) ? "float" : "int";
 }
-
+    // Valida operadores relacionales numéricos como <, <=, > y >=.
+    // Solo permite comparar int o float, y si es válido retorna bool.
     public static String validarRelacionalNumerica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";
 
@@ -159,12 +167,13 @@ public class ErroresSemanticos {
             "Error semántico en línea " + linea + ", columna " + columna +
             ": el operador '" + op +
             "' solo permite operandos int o float. Se recibió '" +
-            t1 + "' y '" + t2 + "'."
+            t1 + "' y '" + t2
         );
 
         return "error";
     }
-
+    // Valida operaciones de igualdad como equal y n_equal.
+// En este lenguaje se permite comparar valores numéricos y el resultado es bool.
    public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
     if ("error".equals(t1) || "error".equals(t2)) return "error";
 
@@ -181,7 +190,8 @@ public class ErroresSemanticos {
 
     return "error";
 }
-
+    // Valida operaciones lógicas como AND y OR.
+    // Ambos operandos deben ser bool y el resultado también es bool.   
     public static String validarLogica(String t1, String t2, String op, int linea, int columna) {
         if ("error".equals(t1) || "error".equals(t2)) return "error";
 
@@ -197,7 +207,8 @@ public class ErroresSemanticos {
 
         return "error";
     }
-
+    // Valida el operador NOT.
+// Solo puede aplicarse sobre expresiones de tipo bool.
     public static String validarNot(String tipo, int linea, int columna) {
         if ("error".equals(tipo)) return "error";
 
@@ -213,7 +224,7 @@ public class ErroresSemanticos {
 
         return "error";
     }
-
+        // Valida que la condición de estructuras como if o while sea de tipo bool.
     public static void validarCondicionBooleana(String tipo, String estructura, int linea, int columna) {
         if ("error".equals(tipo)) return;
 
@@ -225,7 +236,8 @@ public class ErroresSemanticos {
             );
         }
     }
-
+        // Valida que la expresión del switch sea de tipo int o char,
+// ya que esos son los tipos permitidos para comparar contra los case.
     public static void validarCondicionSwitch(String tipo, int linea, int columna) {
         if ("error".equals(tipo)) return;
 

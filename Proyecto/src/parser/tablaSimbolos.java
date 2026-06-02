@@ -316,4 +316,21 @@ public static boolean agregar(
             );
         }
     }
+    public static boolean estaInicializada(String nombreToken) {
+    Simbolo s = buscar(nombreToken);
+
+    if (s == null) {
+        return false;
+    }
+
+    return s.VarInicializada;
+}
+
+public static void marcarInicializada(String nombreToken) {
+    Simbolo s = buscar(nombreToken);
+
+    if (s != null) {
+        s.VarInicializada = true;
+    }
+}
 }
