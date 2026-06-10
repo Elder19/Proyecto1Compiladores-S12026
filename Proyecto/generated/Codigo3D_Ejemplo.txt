@@ -1,113 +1,257 @@
-  1.  func doble:
-  2.  param_def int n
-  3.  t1 = 2
-  4.  var int dos
-  5.  dos = t1
-  6.  t2 = n
-  7.  t3 = dos
-  8.  t4 = t2 * t3
-  9.  var int r
- 10.  r = t4
- 11.  t5 = r
- 12.  return t5
- 13.  end func doble
- 14.  func esMayor:
- 15.  param_def int a
- 16.  param_def int b
- 17.  t6 = a
- 18.  t7 = b
- 19.  t8 = t6 > t7
- 20.  var bool respuesta
- 21.  respuesta = t8
- 22.  t9 = respuesta
- 23.  return t9
- 24.  end func esMayor
- 25.  main:
- 26.  var int[] mat 3,3
- 27.  t10 = 0
- 28.  var int i
- 29.  i = t10
- 30.  t11 = 1
- 31.  var int j
- 32.  j = t11
- 33.  t12 = i
- 34.  t13 = j
- 35.  t14 = 10
- 36.  mat[t12][t13] = t14
- 37.  t15 = i
- 38.  t16 = j
- 39.  var int valor
- 40.  valor = mat[t15][t16]
- 41.  t17 = 5
- 42.  var int base
- 43.  base = t17
- 44.  t18 = base
- 45.  param t18
- 46.  t19 = call doble, 1
- 47.  var int res
- 48.  res = t19
- 49.  t20 = res
- 50.  t21 = valor
- 51.  param t21
- 52.  param t20
- 53.  t22 = call esMayor, 2
- 54.  var bool mayor
- 55.  mayor = t22
- 56.  t23 = mayor
- 57.  if_false t23 goto if_else_1
- 58.  t24 = res
- 59.  print t24
- 60.  goto if_end_1
- 61.  if_else_1:
- 62.  t25 = valor
- 63.  print t25
- 64.  if_end_1:
- 65.  do_start_1:
- 66.  t26 = i
- 67.  t27 = 1
- 68.  t28 = t26 + t27
- 69.  i = t28
- 70.  t29 = i
- 71.  t30 = 3
- 72.  t31 = t29 < t30
- 73.  if_true t31 goto do_start_1
- 74.  do_end_1:
- 75.  t32 = j
- 76.  goto switch_case_1
- 77.  switch_case_1:
- 78.  t33 = t32 == 0
- 79.  if_false t33 goto switch_case_2
- 80.  t34 = "cero"
- 81.  print t34
- 82.  goto switch_end_1
- 83.  switch_case_2:
- 84.  t35 = t32 == 1
- 85.  if_false t35 goto switch_case_3
- 86.  t36 = "uno"
- 87.  print t36
- 88.  goto switch_end_1
- 89.  switch_case_3:
- 90.  t37 = "otro"
- 91.  print t37
- 92.  switch_end_1:
- 93.  t38 = 56.6
- 94.  t39 = 2
- 95.  t40 = t38 / t39
- 96.  var float prom
- 97.  prom = t40
- 98.  t41 = prom
- 99.  t42 = 28.3
-100.  t43 = t41 == t42
-101.  var bool ok
-102.  ok = t43
-103.  t44 = 'A'
-104.  var char letra
-105.  letra = t44
-106.  t45 = "fin de prueba"
-107.  var string msg
-108.  msg = t45
-109.  var int entrada
-110.  read entrada
-111.  t46 = ok
-112.  print t46
-113.  main_end:
+  1.  func func1:
+  2.  param_def char x22
+  3.  param_def char x23
+  4.  t1 = "Hola"
+  5.  var string sss
+  6.  sss = t1
+  7.  t2 = 20
+  8.  t3 = 21
+  9.  t4 = t2 + t3
+ 10.  var int numero
+ 11.  numero = t4
+ 12.  var float g
+ 13.  t5 = 'a'
+ 14.  var char letra
+ 15.  letra = t5
+ 16.  var float h
+ 17.  numero = numero + 1
+ 18.  t6 = 10
+ 19.  t7 = 77
+ 20.  t8 = t6 + t7
+ 21.  t9 = numero * t8
+ 22.  t10 = 44
+ 23.  t11 = 88
+ 24.  t12 = t10 ^ t11
+ 25.  t13 = t9 % t12
+ 26.  numero = numero - 1
+ 27.  t14 = t13 % numero
+ 28.  g = t14
+ 29.  t15 = 4.4
+ 30.  t16 = letra
+ 31.  t17 = 'b'
+ 32.  param t17
+ 33.  param t16
+ 34.  t18 = call func1, 2
+ 35.  t19 = t15 * t18
+ 36.  t20 = 9.9
+ 37.  t21 = t19 / t20
+ 38.  t22 = 6
+ 39.  t23 = 7
+ 40.  t24 = t22 // t23
+ 41.  t25 = t21 - t24
+ 42.  h = t25
+ 43.  t26 = numero
+ 44.  print t26
+ 45.  t27 = 0.01
+ 46.  var float ff
+ 47.  ff = -t27
+ 48.  t28 = '!'
+ 49.  var char miChar
+ 50.  miChar = t28
+ 51.  t29 = 1
+ 52.  var int x30
+ 53.  x30 = -t29
+ 54.  t30 = false
+ 55.  var bool x40
+ 56.  x40 = t30
+ 57.  var int[] x50 1,2
+ 58.  t31 = 0
+ 59.  t32 = 1
+ 60.  t33 = t31 * t32
+ 61.  t34 = 1
+ 62.  t35 = 0
+ 63.  t36 = t34 + t35
+ 64.  t37 = 9999
+ 65.  x50[t33][t36] = -t37
+ 66.  var float[] x502 2,2
+ 67.  t38 = "1**"
+ 68.  print t38
+ 69.  t39 = x30
+ 70.  t40 = 2
+ 71.  t41 = t39 + t40
+ 72.  t42 = x30
+ 73.  t43 = 2
+ 74.  t44 = t42 - t43
+ 75.  t45 = letra
+ 76.  t46 = 'c'
+ 77.  param t46
+ 78.  param t45
+ 79.  t47 = call func1, 2
+ 80.  t48 = x502[t41][t44] * t47
+ 81.  ff = t48
+ 82.  t49 = "Hola a todos los que est<<a>> haciendo un compilador nuevo|:n"
+ 83.  var string x503
+ 84.  x503 = t49
+ 85.  t50 = x503
+ 86.  print t50
+ 87.  t51 = numero
+ 88.  t52 = 45
+ 89.  t53 = t51 <= t52
+ 90.  t54 = ff
+ 91.  t55 = 5.6
+ 92.  t56 = t54 < t55
+ 93.  t57 = t53 && t56
+ 94.  t58 = x40
+ 95.  t59 = false
+ 96.  t60 = false
+ 97.  t61 = t59 == t60
+ 98.  t62 = t58 && t61
+ 99.  t63 = t57 || t62
+100.  t64 = false
+101.  t65 = true
+102.  t66 = t64 != t65
+103.  t67 = t63 || t66
+104.  if_false t67 goto if_else_1
+105.  var int y1
+106.  t68 = "2**"
+107.  print t68
+108.  t69 = ff
+109.  t70 = 5.6
+110.  t71 = t69 > t70
+111.  t72 = numero
+112.  t73 = 45
+113.  t74 = t72 > t73
+114.  t75 = t71 || t74
+115.  t76 = !t75
+116.  if_false t76 goto if_else_2
+117.  var int y
+118.  t77 = 'a'
+119.  var char ch33
+120.  ch33 = t77
+121.  goto if_end_2
+122.  if_else_2:
+123.  if_end_2:
+124.  t78 = "2**"
+125.  print t78
+126.  t79 = 'a'
+127.  var char ch33
+128.  ch33 = t79
+129.  goto if_end_1
+130.  if_else_1:
+131.  t80 = "3**"
+132.  print t80
+133.  t81 = 45
+134.  var int y2
+135.  y2 = t81
+136.  t82 = "dddfffddd"
+137.  var string str2
+138.  str2 = t82
+139.  do_start_1:
+140.  t83 = x503
+141.  print t83
+142.  t84 = "4!!!!!!!!!!!!!!!!!"
+143.  print t84
+144.  t85 = y2
+145.  goto switch_case_1
+146.  switch_case_1:
+147.  t86 = t85 == 45
+148.  if_false t86 goto switch_case_2
+149.  t87 = g
+150.  print t87
+151.  t88 = 200000
+152.  g = t88
+153.  t89 = ff
+154.  print t89
+155.  goto switch_end_1
+156.  switch_case_2:
+157.  t90 = t85 == 777
+158.  if_false t90 goto switch_case_3
+159.  t91 = ff
+160.  print t91
+161.  t92 = 211111
+162.  g = t92
+163.  t93 = ff
+164.  print t93
+165.  switch_case_3:
+166.  t94 = t85 == 33
+167.  if_false t94 goto switch_case_4
+168.  t95 = ff
+169.  print t95
+170.  t96 = 211111
+171.  g = t96
+172.  t97 = ff
+173.  print t97
+174.  switch_case_4:
+175.  t98 = g
+176.  print t98
+177.  t99 = 22222222
+178.  g = t99
+179.  t100 = g
+180.  print t100
+181.  switch_end_1:
+182.  t101 = "4!!!!!!!!!!!!!!!!!"
+183.  print t101
+184.  t102 = true
+185.  t103 = false
+186.  t104 = x40
+187.  t105 = t103 && t104
+188.  t106 = t102 || t105
+189.  if_true t106 goto do_end_1
+190.  t85:
+191.  t107 = "3**"
+192.  print t107
+193.  do_start_1:
+194.  t108 = "Hola mundo"
+195.  print t108
+196.  t109 = 5.6
+197.  t110 = ff
+198.  t111 = -t109 / t110
+199.  t112 = letra
+200.  t113 = 'd'
+201.  param t113
+202.  param t112
+203.  t114 = call func1, 2
+204.  t115 = t111 * t114
+205.  return t115
+206.  end func func1
+207.  func func2:
+208.  param_def float b1
+209.  param_def int i1
+210.  var int j
+211.  t116 = i1
+212.  return t116
+213.  end func func2
+214.  func func3:
+215.  var string b1
+216.  t117 = true
+217.  return t117
+218.  end func func3
+219.  main:
+220.  t118 = '!'
+221.  var char miChar
+222.  miChar = t118
+223.  t119 = "Mi string~1"
+224.  var string str1
+225.  str1 = t119
+226.  t120 = 56.6
+227.  var float fl1
+228.  fl1 = t120
+229.  t121 = 10
+230.  var int in1
+231.  in1 = t121
+232.  t122 = 6.7
+233.  t123 = 8.9
+234.  t124 = t122 != t123
+235.  var bool bl0
+236.  bl0 = t124
+237.  var int[] x50 1,2
+238.  t125 = 0
+239.  t126 = miChar
+240.  t127 = 'e'
+241.  param t127
+242.  param t126
+243.  t128 = call func1, 2
+244.  t129 = 5.5
+245.  t130 = t128 * t129
+246.  t131 = in1
+247.  t132 = 0
+248.  t133 = 0
+249.  t134 = t131 / x50[t132][t133]
+250.  param t134
+251.  param t130
+252.  t135 = call func2, 2
+253.  t136 = t125 + t135
+254.  t137 = 0
+255.  t138 = t136 + t137
+256.  in1 = t138
+257.  main_end:

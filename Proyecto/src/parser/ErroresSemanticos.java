@@ -140,6 +140,8 @@ public class ErroresSemanticos {
         }
         return "int";
     }
+   
+    
 
     // División normal:
     // int / int -> int
@@ -148,6 +150,7 @@ public class ErroresSemanticos {
         if ("int".equals(t1) && "int".equals(t2)) {
             return "int";
         }
+        
         return "float";
     }
 
@@ -177,7 +180,7 @@ public class ErroresSemanticos {
    public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
     if ("error".equals(t1) || "error".equals(t2)) return "error";
 
-    if (esNumerico(t1) && esNumerico(t2)) {
+    if (esNumerico(t1) || esNumerico(t2)||"bool".equals(t1)||"bool".equals(t2)) {
         return "bool";
     }
 

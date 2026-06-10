@@ -680,8 +680,10 @@ lectura_escritura ::= cin_sentencia FIN_SENTENCIA
                     | cout_sentencia FIN_SENTENCIA
 ;
 
-cin_sentencia ::= CIN PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
+cin_sentencia ::= CIN:re PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
     {:
+
+        validarCodigoInalcanzable(releft, reright);
         String nombreCin = id.toString();
 
         if (!TablaSimbolos.existe(nombreCin)) {
@@ -1261,7 +1263,7 @@ expresion ::= expresion_logica:t
     :}
 ;
 
-expresion_logica ::= termino_logico:izq OR termino_logico:der
+expresion_logica ::= expresion_logica:izq OR termino_logico:der
     {:
         String tipoRes = ErroresSemanticos.validarLogica(izq.tipo, der.tipo, "OR", izqleft, izqright);
         String temp = CodigoIntermedio.nuevoTemporal();
@@ -1274,7 +1276,7 @@ expresion_logica ::= termino_logico:izq OR termino_logico:der
     :}
 ;
 
-termino_logico ::= factor_logico:izq AND factor_logico:der
+termino_logico ::= termino_logico:izq AND factor_logico:der
     {:
         String tipoRes = ErroresSemanticos.validarLogica(izq.tipo, der.tipo, "AND", izqleft, izqright);
         String temp = CodigoIntermedio.nuevoTemporal();
