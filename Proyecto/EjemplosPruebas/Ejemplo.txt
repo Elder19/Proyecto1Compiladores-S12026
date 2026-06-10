@@ -1,22 +1,77 @@
-empty~__main__<||>
-|:
-    int~x!
-    int~a<-true!
-    bool~b<-5!
-    char~c!
-    y<-3!
-    cout<|z|>!
-    cin<|c|>!
-    int~cond<-1!
-    if<|cond|>
-    |:
-        int~ok<-1!
-    :|
-    int~mat<<3>><<3>>!
-    mat<<1.5>><<0>><-1!
-    int~k<-true+1!
-    break!
-    return~1!
-    int~x<-5!
-    float~f11<-56.6//8!
-:|
+float~func1 <| char~x22,char~x23 |>  |:
+	string~sss<-"Hola"!
+	int~numero<-20 + 21! float~g! char~letra<-'a'! float~h!
+	g <- ++numero * <|10 +77|> % 44 ^ 88 % --numero!
+	h <- 4.4 * func1 <|letra,'b'|> / 9.9 - 6//7!
+	cout <| numero |> !  
+	float~ff <--0.01!
+	char~miChar<-'!' !
+	int~x30<--1!
+	bool~x40<-false!
+	int~x50<<1>><<2>> <- |:|:4,5:|:|!
+	x50<<0*1>><<1+0>> <- -9999!
+	float~x502<<2>><<2>> <- |:|:5.5,6.4:|,|:7.7,8.8:|:|!
+	cout <| "1**" |> !
+	ff <- x502<<x30 + 2>><<x30 - 2>> * func1 <|letra,'c'|>!
+	string~x503<-"Hola a todos los que est<<a>> haciendo un compilador nuevo|:n"!
+	cout <| x503 |> !
+	if <| less_te<|numero,45|> @ less_t<|ff,5.6|>  # x40 @ equal<|false,false|> # n_equal<|false,true|> |>  |: ¡¡ relacional x4
+		int~y1!
+		cout <| "2**" |> !
+		if <| $ <| greather_t<|ff,5.6|> # greather_t<|numero,45|> |>|>  |: ¡¡ relacional x2
+			int~y!
+			char~ch33<-'a'!
+		:|
+		cout <| "2**" |> !
+		char~ch33<-'a'!
+	 :|
+	else |: 
+		cout <| "3**" |> !
+		int~y2<-45!
+		string~str2<-"dddfffddd"!
+		do  |: 
+			cout <| x503 |> !
+			cout <| "4!!!!!!!!!!!!!!!!!" |> !
+					switch <|y2|> |: 
+						case ~45: 
+							cout<|g|>! g <- 200000! cout<|ff|>!
+							break!
+						case ~777: 
+							cout<|ff|>! g <- 211111! cout<|ff|>!
+                        case~33:
+                            cout<|ff|>! g <- 211111! cout<|ff|>!
+						default:
+							cout<|g|>! g <- 22222222! cout<|g|>!
+					:|
+			cout <| "4!!!!!!!!!!!!!!!!!" |> !
+		
+		:| while <|true # false @ x40|>!
+		cout <| "3**" |> !
+	 :|
+	
+	cout <| "Hola mundo" |> !
+	return ~-5.6 / ff * func1 <|letra,'d'|>!
+ :|  
+
+ int~func2  <| float~b1, int~i1 |>   |: 
+	int~j ! 
+	return ~ i1!
+  :|  
+
+bool~func3  <|  |>   |: 
+	string~b1!
+	return ~true! 
+  :|
+ 
+
+empty ~ __main__ <| |>  |: 
+
+	char~miChar<-'!'!
+	string~str1<-"Mi string~1"!
+	float~fl1<-56.6!
+	int~in1<-10!
+	bool~bl0 <-n_equal<| 6.7 ,8.9|>! 
+	int~x50<<1>><<2>> <- |:|:4,5:|:|!
+	in1 <- 0 + func2 <| func1<|miChar,'e'|> * 5.5 , in1 / x50<<0>><<0>> |> + 0 !
+
+ :|
