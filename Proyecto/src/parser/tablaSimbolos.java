@@ -54,6 +54,10 @@ public class TablaSimbolos {
      */
     private static Map<String, Integer> contadores = new HashMap<>();
 
+    /**controla los parametros de funciones  */
+    private static Map<String, List<String>> parametrosFunciones = new HashMap<>();
+
+
     // ============================================================
     // MANEJO DE SCOPES
     // ============================================================
@@ -258,6 +262,7 @@ public static boolean agregar(
         tablas.clear();
         scopes.clear();
         contadores.clear();
+        parametrosFunciones.clear();
 
         tablas.put("global", new ArrayList<>());
     }
@@ -332,5 +337,17 @@ public static void marcarInicializada(String nombreToken) {
     if (s != null) {
         s.VarInicializada = true;
     }
+}
+public static void registrarFuncion(String nombreFuncion) {
+    parametrosFunciones.putIfAbsent(nombreFuncion, new ArrayList<>());
+}
+
+public static void agregarParametroFuncion(String nombreFuncion, String tipoParametro) {
+    parametrosFunciones.putIfAbsent(nombreFuncion, new ArrayList<>());
+    parametrosFunciones.get(nombreFuncion).add(tipoParametro);
+}
+
+public static List<String> obtenerParametrosFuncion(String nombreFuncion) {
+    return parametrosFunciones.get(nombreFuncion);
 }
 }
