@@ -102,11 +102,12 @@ public class ErroresSemanticos {
     // ============================================================
     //Esa función sirve para saber si un tipo puede recibir otro tipo en una asignación o inicialización
     public static boolean tiposCompatibles(String esperado, String recibido) {
-        if (esperado == null || recibido == null) return false;
-        if (esperado.equals(recibido)) return true;
-        if (esperado.equals("float") && recibido.equals("int")) return true;
-        return false;
-    }
+    if (esperado == null || recibido == null) return false;
+    if ("error".equals(esperado) || "error".equals(recibido)) return false;
+
+    // Tipado fuerte: solo son compatibles si son exactamente iguales
+    return esperado.equals(recibido);
+}
     //algunas operaciones solo reciben valores tipo int o float 
     public static boolean esNumerico(String tipo) {
         return "int".equals(tipo) || "float".equals(tipo);
@@ -115,80 +116,114 @@ public class ErroresSemanticos {
     public static boolean esEntero(String tipo) {
         return "int".equals(tipo);
     }
-    // Valida operaciones aritméticas.
-    // Revisa que los operandos sean numéricos y retorna el tipo resultante.
-    // Algunas operaciones como % y // solo permiten int.
-    public static String validarAritmetica(String t1, String t2, String op, int linea, int columna) {
+   public static String validarAritmetica(String t1, String t2, String op, int linea, int columna) {
     if ("error".equals(t1) || "error".equals(t2)) return "error";
 
     if (!esNumerico(t1) || !esNumerico(t2)) {
         agregar(
             "Error semántico en línea " + linea + ", columna " + columna +
-            ": operación aritmética inválida '" + t1 + " " + op + " " + t2 + "'."
+            ": operación aritmética inválida '" + t1 + " " + op + " " + t2 +
+            "'. Solo se permiten operandos int o float."
         );
         return "error";
     }
 
-    // Módulo y división entera: solo int
-    if ("%".equals(op) || "//".equals(op)) {//algunas facciones o divisiones pueden dar un numero entero o flotante segun sus valores por lo que valida cual debe retornar
-        if (!esEntero(t1) || !esEntero(t2)) {
+    // Tipado fuerte: no se permite mezclar int con float.
+    if (!t1.equals(t2)) {
+        agregar(
+            "Error semántico en línea " + linea + ", columna " + columna +
+            ": no se puede aplicar el operador '" + op +
+            "' entre tipos diferentes: '" + t1 + "' y '" + t2 +
+            "'. El lenguaje es de tipado fuerte."
+        );
+        return "error";
+    }
+
+    // El módulo solo permite enteros.
+    if ("%".equals(op)) {
+        if (!"int".equals(t1)) {
             agregar(
                 "Error semántico en línea " + linea + ", columna " + columna +
-                ": el operador '" + op + "' solo permite operandos de tipo int."
+                ": el operador '%' solo permite operandos de tipo int. Se recibió '" +
+                t1 + "'."
             );
             return "error";
         }
+
         return "int";
     }
-   
-    
 
     // División normal:
     // int / int -> int
-    // si alguno es float -> float
+    // float / float -> float
     if ("/".equals(op)) {
-        if ("int".equals(t1) && "int".equals(t2)) {
-            return "int";
-        }
-        
-        return "float";
+        return t1;
     }
 
-    // +, -, *, ^ permiten int/float
-    return ("float".equals(t1) || "float".equals(t2)) ? "float" : "int";
+    // +, -, *, ^:
+    // int con int -> int
+    // float con float -> float
+    return t1;
 }
     // Valida operadores relacionales numéricos como <, <=, > y >=.
     // Solo permite comparar int o float, y si es válido retorna bool.
-    public static String validarRelacionalNumerica(String t1, String t2, String op, int linea, int columna) {
-        if ("error".equals(t1) || "error".equals(t2)) return "error";
+   public static String validarRelacionalNumerica(String t1, String t2, String op, int linea, int columna) {
+    if ("error".equals(t1) || "error".equals(t2)) return "error";
 
-        if (esNumerico(t1) && esNumerico(t2)) {
-            return "bool";
-        }
-
+    if (!esNumerico(t1) || !esNumerico(t2)) {
         agregar(
             "Error semántico en línea " + linea + ", columna " + columna +
             ": el operador '" + op +
             "' solo permite operandos int o float. Se recibió '" +
-            t1 + "' y '" + t2
+            t1 + "' y '" + t2 + "'."
         );
-
         return "error";
     }
+
+    // Tipado fuerte: int con int o float con float.
+    if (!t1.equals(t2)) {
+        agregar(
+            "Error semántico en línea " + linea + ", columna " + columna +
+            ": no se puede comparar con '" + op +
+            "' valores de tipos diferentes: '" + t1 + "' y '" + t2 +
+            "'. El lenguaje es de tipado fuerte."
+        );
+        return "error";
+    }
+
+    return "bool";
+}
     // Valida operaciones de igualdad como equal y n_equal.
 // En este lenguaje se permite comparar valores numéricos y el resultado es bool.
-   public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
+    public static String validarIgualdad(String t1, String t2, String op, int linea, int columna) {
     if ("error".equals(t1) || "error".equals(t2)) return "error";
 
-    if (esNumerico(t1) || esNumerico(t2)||"bool".equals(t1)||"bool".equals(t2)) {
+    // Tipado fuerte: solo se comparan valores del mismo tipo.
+    if (!t1.equals(t2)) {
+        agregar(
+            "Error semántico en línea " + linea + ", columna " + columna +
+            ": no se puede usar '" + op +
+            "' entre tipos diferentes: '" + t1 + "' y '" + t2 +
+            "'. El lenguaje es de tipado fuerte."
+        );
+        return "error";
+    }
+
+    // Tipos permitidos para igualdad.
+    if (
+        "int".equals(t1) ||
+        "float".equals(t1) ||
+        "bool".equals(t1) ||
+        "char".equals(t1) ||
+        "string".equals(t1)
+    ) {
         return "bool";
     }
 
     agregar(
         "Error semántico en línea " + linea + ", columna " + columna +
         ": el operador '" + op +
-        "' solo permite comparar valores int o float. Se recibió '" +
-        t1 + "' y '" + t2 
+        "' no puede aplicarse al tipo '" + t1 + "'."
     );
 
     return "error";

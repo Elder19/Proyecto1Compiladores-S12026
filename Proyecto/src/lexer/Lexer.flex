@@ -35,7 +35,7 @@ DECIMAL            = {DIGITO}+
 ENTERO      = 0|{DIGITO_SINCERO}{DIGITO}*
 FLOTANTE    = {DIGITO}+"."{DIGITO}+
 EXPONENCIAL = {DIGITO}+"e"{DIGITO}+
-
+FRACCION    = {DIGITO}+"//"{DIGITO}+
 
 CADENA             = \"([^\"\\]|\\.)*\"
 CARACTER           = \'([^\'\\]|\\.)\'
@@ -106,7 +106,7 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> "+"   { return symbol(sym.SUMA, yytext()); }
 <YYINITIAL> "-"   { return symbol(sym.RESTA, yytext()); }
 <YYINITIAL> "*"   { return symbol(sym.MULTIPLICACION, yytext()); }
-<YYINITIAL> "//"  { return symbol(sym.DIVISION_ENTERA, yytext()); }
+
 <YYINITIAL> "/"   { return symbol(sym.DIVISION, yytext()); }
 <YYINITIAL> "%"   { return symbol(sym.MODULO, yytext()); }
 <YYINITIAL> "^"   { return symbol(sym.POTENCIA, yytext()); }
@@ -115,11 +115,11 @@ COMENTARIO_BLOQUE  = "\{-"([^*-]|"-"[^}]|"*"[^-])*"-\}"
 <YYINITIAL> "#"   { return symbol(sym.OR, yytext()); }
 <YYINITIAL> "$"   { return symbol(sym.NOT, yytext()); }
 
+
 <YYINITIAL> {EXPONENCIAL}  { return symbol(sym.EXPONENCIAL, yytext()); }
 <YYINITIAL> {FLOTANTE}     { return symbol(sym.FLOTANTE, yytext()); }
-
+<YYINITIAL> {FRACCION}     { return symbol(sym.FRACCION, yytext()); }
 <YYINITIAL> {ENTERO}       { return symbol(sym.ENTERO, yytext()); }
-
 
 <YYINITIAL> {CADENA}       { return symbol(sym.CADENA, yytext()); }
 <YYINITIAL> {CARACTER}     { return symbol(sym.CARACTER, yytext()); }
