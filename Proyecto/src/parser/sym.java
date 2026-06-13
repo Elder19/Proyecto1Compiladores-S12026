@@ -13,7 +13,6 @@ public class sym {
   public static final int ENTERO = 5;
   public static final int CERRAR_BLOQUE = 33;
   public static final int CASE = 15;
-  public static final int DIVISION_ENTERA = 56;
   public static final int RESTA = 46;
   public static final int EXPONENCIAL = 8;
   public static final int DOS_PUNTOS = 44;
@@ -21,6 +20,7 @@ public class sym {
   public static final int SEPARADOR = 42;
   public static final int NOT = 53;
   public static final int AND = 51;
+  public static final int FRACCION = 56;
   public static final int CARACTER = 4;
   public static final int OR = 52;
   public static final int FIN_SENTENCIA = 41;
@@ -120,7 +120,7 @@ public class sym {
   "NOT",
   "MAIN",
   "INT",
-  "DIVISION_ENTERA"
+  "FRACCION"
   };
 }
 

@@ -37,11 +37,12 @@ action code {:
     java.util.Stack<String> pilaBreak = new java.util.Stack<>();
 
     boolean tiposCompatibles(String esperado, String recibido) {
-        if (esperado == null || recibido == null) return false;
-        if (esperado.equals(recibido)) return true;
-        if (esperado.equals("float") && recibido.equals("int")) return true;
-        return false;
-    }
+    if (esperado == null || recibido == null) return false;
+    if ("error".equals(esperado) || "error".equals(recibido)) return false;
+
+    // Tipado fuerte: no hay conversión implícita.
+    return esperado.equals(recibido);
+}
 
     void validarBreak(int linea, int columna) {
         if (contextoBreak <= 0) {
@@ -120,7 +121,7 @@ terminal OR;
 terminal NOT;
 terminal MAIN;
 terminal INT;
-terminal DIVISION_ENTERA;
+terminal FRACCION;
 
 /* No terminales */
 non terminal Resultado elemento_numerico;
@@ -138,7 +139,7 @@ non terminal main;
 non terminal lista_params;
 non terminal resto_params;
 non terminal param;
-
+non terminal Resultado literal_numerico;
 non terminal Boolean lista_sentencias;
 non terminal Boolean sentencia;
 non terminal Boolean bloque;
@@ -148,14 +149,20 @@ non terminal Boolean return_sentencia;
 non terminal Resultado acceder_arreglo;
 non terminal modificar_arreglo;
 
-non terminal lista_enteros;
-non terminal lista_flotantes;
-non terminal fila_enteros;
-non terminal fila_flotantes;
-non terminal filas_enteros;
-non terminal filas_flotantes;
-non terminal matriz_enteros;
-non terminal matriz_flotantes;
+non terminal float_literal;
+
+
+non terminal Integer lista_enteros;
+non terminal Integer lista_flotantes;
+
+non terminal Integer fila_enteros;
+non terminal Integer fila_flotantes;
+
+non terminal InfoMatriz filas_enteros;
+non terminal InfoMatriz filas_flotantes;
+
+non terminal InfoMatriz matriz_enteros;
+non terminal InfoMatriz matriz_flotantes;
 
 non terminal lectura_escritura;
 non terminal cin_sentencia;
@@ -312,27 +319,35 @@ bool_literal ::= TRUE
         RESULT = new Resultado(temp, "bool");
     :}
 ;
-
-elemento_numerico ::= ENTERO:v
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + v.toString());
-        RESULT = new Resultado(temp, "int");
-    :}
-    | FLOTANTE:v
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + v.toString());
-        RESULT = new Resultado(temp, "float");
-    :}
-    | EXPONENCIAL:v
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + v.toString());
-        RESULT = new Resultado(temp, "float");
-    :}
+float_literal ::= FLOTANTE
+                | EXPONENCIAL
+                | FRACCION
 ;
-
+elemento_numerico ::= ENTERO:v
+{:
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + v.toString());
+    RESULT = new Resultado(temp, "int", v.toString());
+:}
+| FLOTANTE:v
+{:
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + v.toString());
+    RESULT = new Resultado(temp, "float", v.toString());
+:}
+| EXPONENCIAL:v
+{:
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + v.toString());
+    RESULT = new Resultado(temp, "float", v.toString());
+:}
+| FRACCION:v
+{:
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + v.toString());
+    RESULT = new Resultado(temp, "float", v.toString());
+:}
+;
 
 
 sentencia ::= declaracion_int FIN_SENTENCIA
@@ -649,40 +664,94 @@ modificar_arreglo ::= ID:id ABRIR_PARENTESIS_CUADRADO expresion:expr1 CERRAR_PAR
 ;
 
 lista_enteros ::= ENTERO
-                | ENTERO COMA lista_enteros
+    {:
+        RESULT = 1;
+    :}
+    | ENTERO COMA lista_enteros:l
+    {:
+        RESULT = 1 + l;
+    :}
 ;
 
-lista_flotantes ::= FLOTANTE
-                  | FLOTANTE COMA lista_flotantes
+lista_flotantes ::= float_literal
+    {:
+        RESULT = 1;
+    :}
+    | float_literal COMA lista_flotantes:l
+    {:
+        RESULT = 1 + l;
+    :}
 ;
 
-fila_enteros ::= ABRIR_BLOQUE lista_enteros CERRAR_BLOQUE
+filas_enteros ::= fila_enteros:f
+    {:
+        RESULT = new InfoMatriz(1, f);
+    :}
+    | fila_enteros:f COMA filas_enteros:resto
+    {:
+        boolean error = resto.error;
+
+        if (f != resto.columnas) {
+            ErroresSemanticos.agregar(
+                "Error semántico: las filas de la matriz int no tienen la misma cantidad de columnas. " +
+                "Se esperaba " + resto.columnas + " y se recibió " + f + "."
+            );
+            error = true;
+        }
+
+        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error);
+    :}
 ;
 
-fila_flotantes ::= ABRIR_BLOQUE lista_flotantes CERRAR_BLOQUE
+fila_flotantes ::= ABRIR_BLOQUE lista_flotantes:l CERRAR_BLOQUE
+    {:
+        RESULT = l;
+    :}
 ;
 
-filas_enteros ::= fila_enteros
-                | fila_enteros COMA filas_enteros
+fila_enteros ::= ABRIR_BLOQUE lista_enteros:l CERRAR_BLOQUE
+    {:
+        RESULT = l;
+    :}
 ;
 
-filas_flotantes ::= fila_flotantes
-                  | fila_flotantes COMA filas_flotantes
+
+filas_flotantes ::= fila_flotantes:f
+    {:
+        RESULT = new InfoMatriz(1, f);
+    :}
+    | fila_flotantes:f COMA filas_flotantes:resto
+    {:
+        boolean error = resto.error;
+
+        if (f != resto.columnas) {
+            ErroresSemanticos.agregar(
+                "Error semántico: las filas de la matriz float no tienen la misma cantidad de columnas. " +
+                "Se esperaba " + resto.columnas + " y se recibió " + f + "."
+            );
+            error = true;
+        }
+
+        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error);
+    :}
 ;
 
-matriz_enteros ::= ABRIR_BLOQUE filas_enteros CERRAR_BLOQUE
+matriz_enteros ::= ABRIR_BLOQUE filas_enteros:m CERRAR_BLOQUE
+    {:
+        RESULT = m;
+    :}
 ;
-
-matriz_flotantes ::= ABRIR_BLOQUE filas_flotantes CERRAR_BLOQUE
+matriz_flotantes ::= ABRIR_BLOQUE filas_flotantes:m CERRAR_BLOQUE
+    {:
+        RESULT = m;
+    :}
 ;
 
 lectura_escritura ::= cin_sentencia FIN_SENTENCIA
                     | cout_sentencia FIN_SENTENCIA
 ;
-
 cin_sentencia ::= CIN:re PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
     {:
-
         validarCodigoInalcanzable(releft, reright);
         String nombreCin = id.toString();
 
@@ -694,27 +763,51 @@ cin_sentencia ::= CIN:re PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
         }
         else {
             TablaSimbolos.Simbolo simboloCin = TablaSimbolos.buscar(nombreCin);
-            String tipoCin = simboloCin.tipoDato;
 
-            if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
+            if ("ARREGLO".equals(simboloCin.tipoSimbolo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + idleft +
                     ", columna " + idright +
-                    ": cin solo puede leer variables de tipo int o float. '" +
-                    nombreCin + "' es de tipo '" + tipoCin + "'."
+                    ": cin no puede leer el arreglo completo '" +
+                    nombreCin + "'. Use índices."
                 );
-                
             }
-            else{
-                TablaSimbolos.marcarInicializada(nombreCin);
+            else {
+                String tipoCin = simboloCin.tipoDato;
+
+                if (!"int".equals(tipoCin) && !"float".equals(tipoCin)) {
+                    ErroresSemanticos.agregar(
+                        "Error semántico en línea " + idleft +
+                        ", columna " + idright +
+                        ": cin solo puede leer variables de tipo int o float. '" +
+                        nombreCin + "' es de tipo '" + tipoCin + "'."
+                    );
+                }
+                else {
+                    TablaSimbolos.marcarInicializada(nombreCin);
+                    CodigoIntermedio.emitir("read " + nombreCin);
+                }
             }
         }
-
-        CodigoIntermedio.emitir("read " + id.toString());
     :}
-    | CIN PARENTESIS_APERTURA acceder_arreglo:a PARENTESIS_CIERRE
+
+    | CIN:re PARENTESIS_APERTURA acceder_arreglo:a PARENTESIS_CIERRE
     {:
-        CodigoIntermedio.emitir("read " + a.valor);
+        validarCodigoInalcanzable(releft, reright);
+
+        if (!"error".equals(a.tipo)) {
+            if (!"int".equals(a.tipo) && !"float".equals(a.tipo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + releft +
+                    ", columna " + reright +
+                    ": cin solo puede leer posiciones de arreglo de tipo int o float. Se recibió '" +
+                    a.tipo + "'."
+                );
+            }
+            else {
+                CodigoIntermedio.emitir("read " + a.valor);
+            }
+        }
     :}
 ;
 
@@ -993,27 +1086,208 @@ termino ::= termino:izq MULTIPLICACION potencia:der
         RESULT = new Resultado(temp, tipoRes);
     :}
 
-    | termino:izq DIVISION_ENTERA potencia:der
-    {:
-        String tipoRes = ErroresSemanticos.validarAritmetica(
-            izq.tipo,
-            der.tipo,
-            "//",
-            izqleft,
-            izqright
-        );
-
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + izq.valor + " // " + der.valor);
-
-        RESULT = new Resultado(temp, tipoRes);
-    :}
-
     | potencia:p
     {:
         RESULT = p;
     :}
 ;
+
+
+
+factor ::= literal_numerico:t
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + t.valor);
+        RESULT = new Resultado(temp, t.tipo);
+    :}
+
+    | ID:id
+    {:
+        String nombre = id.toString();
+
+        if (!TablaSimbolos.existe(nombre)) {
+            ErroresSemanticos.agregar(
+                "Variable no declarada '" + nombre +
+                "' en línea " + idleft + ", columna " + idright
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+
+            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": el arreglo '" + nombre +
+                    "' no puede usarse como valor completo. Use índices."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": la variable '" + nombre +
+                    "' no ha sido inicializada antes de usarse."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else {
+                String temp = CodigoIntermedio.nuevoTemporal();
+                CodigoIntermedio.emitir(temp + " = " + nombre);
+                RESULT = new Resultado(temp, simbolo.tipoDato);
+            }
+        }
+    :}
+
+    | CADENA:v
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + v.toString());
+        RESULT = new Resultado(temp, "string");
+    :}
+
+    | CARACTER:v
+    {:
+        String temp = CodigoIntermedio.nuevoTemporal();
+        CodigoIntermedio.emitir(temp + " = " + v.toString());
+        RESULT = new Resultado(temp, "char");
+    :}
+
+    | PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
+    {:
+        RESULT = e;
+    :}
+
+    | acceder_arreglo:a
+    {:
+        RESULT = a;
+    :}
+
+    | INCREMENTO:op ID:id
+    {:
+        String nombre = id.toString();
+
+        if (!TablaSimbolos.existe(nombre)) {
+            ErroresSemanticos.agregar(
+                "Variable no declarada '" + nombre +
+                "' en línea " + idleft + ", columna " + idright
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+            String tipo = simbolo.tipoDato;
+
+            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + opleft +
+                    ", columna " + opright +
+                    ": el operador '++' no puede aplicarse al arreglo completo '" +
+                    nombre + "'. Use índices."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if (!ErroresSemanticos.esNumerico(tipo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + opleft +
+                    ", columna " + opright +
+                    ": el operador '++' solo puede aplicarse a variables int o float. '" +
+                    nombre + "' es de tipo '" + tipo + "'."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": la variable '" + nombre +
+                    "' no ha sido inicializada antes de usarse."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else {
+                String tempUno = CodigoIntermedio.nuevoTemporal();
+                CodigoIntermedio.emitir(tempUno + " = 1");
+
+                String tempSuma = CodigoIntermedio.nuevoTemporal();
+                CodigoIntermedio.emitir(tempSuma + " = " + nombre + " + " + tempUno);
+
+                CodigoIntermedio.emitir(nombre + " = " + tempSuma);
+
+                RESULT = new Resultado(nombre, tipo);
+            }
+        }
+    :}
+
+    | DECREMENTO:op ID:id
+    {:
+        String nombre = id.toString();
+
+        if (!TablaSimbolos.existe(nombre)) {
+            ErroresSemanticos.agregar(
+                "Variable no declarada '" + nombre +
+                "' en línea " + idleft + ", columna " + idright
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+            String tipo = simbolo.tipoDato;
+
+            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + opleft +
+                    ", columna " + opright +
+                    ": el operador '--' no puede aplicarse al arreglo completo '" +
+                    nombre + "'. Use índices."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if (!ErroresSemanticos.esNumerico(tipo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + opleft +
+                    ", columna " + opright +
+                    ": el operador '--' solo puede aplicarse a variables int o float. '" +
+                    nombre + "' es de tipo '" + tipo + "'."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": la variable '" + nombre +
+                    "' no ha sido inicializada antes de usarse."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else {
+                String tempUno = CodigoIntermedio.nuevoTemporal();
+                CodigoIntermedio.emitir(tempUno + " = 1");
+
+                String tempResta = CodigoIntermedio.nuevoTemporal();
+                CodigoIntermedio.emitir(tempResta + " = " + nombre + " - " + tempUno);
+
+                CodigoIntermedio.emitir(nombre + " = " + tempResta);
+
+                RESULT = new Resultado(nombre, tipo);
+            }
+        }
+    :}
+
+    | factor_negativo:f
+    {:
+        RESULT = f;
+    :}
+
+    | llamada_funcion:lf
+    {:
+        RESULT = lf;
+    :}
+;
+
 potencia ::= factor:izq POTENCIA potencia:der
     {:
         String tipoRes = ErroresSemanticos.validarAritmetica(
@@ -1036,167 +1310,127 @@ potencia ::= factor:izq POTENCIA potencia:der
     :}
 ;
 
-factor ::= elemento_numerico:t
-    {:
-        RESULT = t;
-    :}
-    | ID:id
-    {:
-    String nombre = id.toString();
-
-    if (!TablaSimbolos.existe(nombre)) {
-        ErroresSemanticos.agregar(
-            "Variable no declarada '" + nombre +
-            "' en línea " + idleft + ", columna " + idright
-        );
-        RESULT = new Resultado("error", "error");
-    }
-    else {
-        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
-
-        if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
-            ErroresSemanticos.agregar(
-                "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": la variable '" + nombre + "' no ha sido inicializada antes de usarse."
-            );
-            RESULT = new Resultado("error", "error");
-        }
-        else {
-            String temp = CodigoIntermedio.nuevoTemporal();
-            CodigoIntermedio.emitir(temp + " = " + nombre);
-            RESULT = new Resultado(temp, simbolo.tipoDato);
-        }
-    }
-    :}
-    | CADENA:v
+factor_negativo ::= RESTA:op literal_numerico:t
     {:
         String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + v.toString());
-        RESULT = new Resultado(temp, "string");
+        CodigoIntermedio.emitir(temp + " = -" + t.valor);
+        RESULT = new Resultado(temp, t.tipo);
     :}
-    | CARACTER:v
-    {:
-        String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = " + v.toString());
-        RESULT = new Resultado(temp, "char");
-    :}
-    | PARENTESIS_APERTURA expresion:e PARENTESIS_CIERRE
-    {:
-        RESULT = e;
-    :}
-    | acceder_arreglo:a
-    {:
-        RESULT = a;
-    :}
-    | INCREMENTO:op ID:id
-    {:
-        if (!TablaSimbolos.existe(id.toString())) {
-            ErroresSemanticos.agregar(
-                "Variable no declarada '" + id.toString() +
-                "' en línea " + idleft + ", columna " + idright
-            );
-            RESULT = new Resultado("error", "error");
-        }
-        else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-            String tipo = simbolo.tipoDato;
 
-            if (!ErroresSemanticos.esNumerico(tipo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '++' solo puede aplicarse a variables int o float. '" +
-                    id.toString() + "' es de tipo '" + tipo + "'."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else {
-                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " + 1");
-                RESULT = new Resultado(id.toString(), tipo);
-            }
-        }
-    :}
-    | DECREMENTO:op ID:id
-    {:
-        if (!TablaSimbolos.existe(id.toString())) {
-            ErroresSemanticos.agregar(
-                "Variable no declarada '" + id.toString() +
-                "' en línea " + idleft + ", columna " + idright
-            );
-            RESULT = new Resultado("error", "error");
-        }
-        else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
-            String tipo = simbolo.tipoDato;
-
-            if (!ErroresSemanticos.esNumerico(tipo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '--' solo puede aplicarse a variables int o float. '" +
-                    id.toString() + "' es de tipo '" + tipo + "'."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else {
-                CodigoIntermedio.emitir(id.toString() + " = " + id.toString() + " - 1");
-                RESULT = new Resultado(id.toString(), tipo);
-            }
-        }
-    :}
-    | factor_negativo:f
-    {:
-        RESULT = f;
-    :}
-    | llamada_funcion:lf
-    {:
-        RESULT = lf;
-    :}
-;
-
-factor_negativo ::= RESTA elemento_numerico:t
-    {:
-        RESULT = new Resultado("-" + t.valor, t.tipo);
-    :}
     | RESTA:op ID:id
     {:
-        if (!TablaSimbolos.existe(id.toString())) {
+        String nombre = id.toString();
+
+        if (!TablaSimbolos.existe(nombre)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + id.toString() +
+                "Variable no declarada '" + nombre +
                 "' en línea " + idleft + ", columna " + idright
             );
             RESULT = new Resultado("error", "error");
         }
         else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(id.toString());
+            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
             String tipo = simbolo.tipoDato;
 
-            if (!ErroresSemanticos.esNumerico(tipo)) {
+            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + opleft +
+                    ", columna " + opright +
+                    ": el operador '-' unario no puede aplicarse al arreglo completo '" +
+                    nombre + "'. Use índices."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if (!ErroresSemanticos.esNumerico(tipo)) {
                 ErroresSemanticos.agregar(
                     "Error semántico en línea " + opleft +
                     ", columna " + opright +
                     ": el operador '-' unario solo puede aplicarse a int o float. '" +
-                    id.toString() + "' es de tipo '" + tipo + "'."
+                    nombre + "' es de tipo '" + tipo + "'."
+                );
+                RESULT = new Resultado("error", "error");
+            }
+            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": la variable '" + nombre +
+                    "' no ha sido inicializada antes de usarse."
                 );
                 RESULT = new Resultado("error", "error");
             }
             else {
                 String temp = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(temp + " = -" + id.toString());
+                CodigoIntermedio.emitir(temp + " = -" + nombre);
                 RESULT = new Resultado(temp, tipo);
             }
         }
     :}
-    | RESTA PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
+
+    | RESTA:op acceder_arreglo:a
+    {:
+        if ("error".equals(a.tipo)) {
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!ErroresSemanticos.esNumerico(a.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '-' unario solo puede aplicarse a elementos int o float. Se recibió '" +
+                a.tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = -" + a.valor);
+            RESULT = new Resultado(temp, a.tipo);
+        }
+    :}
+
+    | RESTA:op PARENTESIS_APERTURA expresion_aritmetica:e PARENTESIS_CIERRE
+    {:
+        if ("error".equals(e.tipo)) {
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!ErroresSemanticos.esNumerico(e.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '-' unario solo puede aplicarse a expresiones int o float. Se recibió '" +
+                e.tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else {
+            String temp = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(temp + " = -" + e.valor);
+            RESULT = new Resultado(temp, e.tipo);
+        }
+    :}
+
+    | RESTA RESTA literal_numerico:t
     {:
         String temp = CodigoIntermedio.nuevoTemporal();
-        CodigoIntermedio.emitir(temp + " = -" + e.valor);
-        RESULT = new Resultado(temp, e.tipo);
+        CodigoIntermedio.emitir(temp + " = " + t.valor);
+        RESULT = new Resultado(temp, t.tipo);
     :}
-    | RESTA RESTA elemento_numerico:t
+;
+literal_numerico ::= ENTERO:v
     {:
-        RESULT = new Resultado(t.valor, t.tipo);
+        RESULT = new Resultado(v.toString(), "int");
+    :}
+    | FLOTANTE:v
+    {:
+        RESULT = new Resultado(v.toString(), "float");
+    :}
+    | EXPONENCIAL:v
+    {:
+        RESULT = new Resultado(v.toString(), "float");
+    :}
+    | FRACCION:v
+    {:
+        RESULT = new Resultado(v.toString(), "float");
     :}
 ;
 
@@ -1320,18 +1554,31 @@ declaracion_int ::= INT SEPARADOR ID:id
         CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
     :}
 
-    | INT SEPARADOR ID:id
-    ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
-    ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
-    ASIGNACION matriz_enteros
-    {:
-        TablaSimbolos.agregar(
-            id.toString(), "ARREGLO",
-            String.valueOf(idleft), String.valueOf(idright), "int"
-        );
-        CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
-    :}
+  | INT SEPARADOR ID:id
+ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
+ASIGNACION matriz_enteros:m
+{:
+    int filasDeclaradas = Integer.parseInt(f.toString());
+    int columnasDeclaradas = Integer.parseInt(c.toString());
 
+    TablaSimbolos.agregar(
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "int"
+    );
+
+    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
+
+    if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": el arreglo '" + id.toString() +
+            "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
+            "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
+        );
+    }
+:}
     | INT SEPARADOR ID:id ASIGNACION expresion:expr
     {:
         TablaSimbolos.agregar(
@@ -1372,18 +1619,31 @@ declaracion_float ::= FLOAT SEPARADOR ID:id
         CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
     :}
 
-    | FLOAT SEPARADOR ID:id
-    ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
-    ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
-    ASIGNACION matriz_flotantes
-    {:
-        TablaSimbolos.agregar(
-            id.toString(), "ARREGLO",
-            String.valueOf(idleft), String.valueOf(idright), "float"
-        );
-        CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
-    :}
+  | FLOAT SEPARADOR ID:id
+ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
+ASIGNACION matriz_flotantes:m
+{:
+    int filasDeclaradas = Integer.parseInt(f.toString());
+    int columnasDeclaradas = Integer.parseInt(c.toString());
 
+    TablaSimbolos.agregar(
+        id.toString(), "ARREGLO",
+        String.valueOf(idleft), String.valueOf(idright), "float"
+    );
+
+    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
+
+    if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + idleft +
+            ", columna " + idright +
+            ": el arreglo '" + id.toString() +
+            "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
+            "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
+        );
+    }
+:}
     | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
     {:
         TablaSimbolos.agregar(
