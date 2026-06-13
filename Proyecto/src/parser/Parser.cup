@@ -30,7 +30,10 @@ action code {:
     String funcionActual = "";
     String tipoRetornoActual = "";
     boolean retornoEncontrado = false;
-    boolean codigoInalcanzableActivo = false;
+java.util.Stack<Boolean> pilaCodigoInalcanzable = new java.util.Stack<>();
+java.util.Stack<String> pilaMotivoCorte = new java.util.Stack<>();
+    String tipoSwitchActual = "";
+    
 
     int contextoBreak = 0;
     java.util.Stack<String> pilaEtiquetas = new java.util.Stack<>();
@@ -54,15 +57,40 @@ action code {:
         }
     }
 
-    void validarCodigoInalcanzable(int linea, int columna) {
-        if (codigoInalcanzableActivo) {
-            ErroresSemanticos.agregar(
-                "Error semántico en línea " + linea +
-                ", columna " + columna +
-                ": código inalcanzable después de return."
-            );
-        }
+   void iniciarBloqueCodigo() {
+    pilaCodigoInalcanzable.push(false);
+    pilaMotivoCorte.push("");
+}
+
+boolean finalizarBloqueCodigo() {
+    if (pilaCodigoInalcanzable.isEmpty()) {
+        return false;
     }
+
+    boolean corta = pilaCodigoInalcanzable.pop();
+    pilaMotivoCorte.pop();
+
+    return corta;
+}
+
+void validarCodigoInalcanzable(int linea, int columna) {
+    if (!pilaCodigoInalcanzable.isEmpty() && pilaCodigoInalcanzable.peek()) {
+        String motivo = pilaMotivoCorte.peek();
+
+        ErroresSemanticos.agregar(
+            "Error semántico en línea " + linea +
+            ", columna " + columna +
+            ": código inalcanzable después de " + motivo + "."
+        );
+    }
+}
+
+void marcarCodigoInalcanzable(String motivo) {
+    if (!pilaCodigoInalcanzable.isEmpty()) {
+        pilaCodigoInalcanzable.set(pilaCodigoInalcanzable.size() - 1, true);
+        pilaMotivoCorte.set(pilaMotivoCorte.size() - 1, motivo);
+    }
+}
 :};
 
 /* Terminales */
@@ -124,13 +152,13 @@ terminal INT;
 terminal FRACCION;
 
 /* No terminales */
-non terminal Resultado elemento_numerico;
+
 
 non terminal String tipo;
 non terminal String tipo_funcion;
 non terminal String tipo_completo;
 non terminal Resultado bool_literal;
-non terminal String valor_case;
+non terminal Resultado valor_case;
 
 non terminal programa;
 non terminal lista_funciones;
@@ -143,7 +171,7 @@ non terminal Resultado literal_numerico;
 non terminal Boolean lista_sentencias;
 non terminal Boolean sentencia;
 non terminal Boolean bloque;
-non terminal break_sentencia;
+non terminal Boolean break_sentencia;
 non terminal Boolean return_sentencia;
 
 non terminal Resultado acceder_arreglo;
@@ -190,13 +218,14 @@ non terminal Resultado termino_logico;
 non terminal Resultado factor_logico;
 
 non terminal Resultado llamada_funcion;
-non terminal Integer lista_expresiones;
-non terminal Integer resto_expresiones;
+
 non terminal lista_cout;
 non terminal resto_cout;
 non terminal asignar_variable;
 non terminal declaracion_int;
 non terminal declaracion_float;
+non terminal ArgsFuncion lista_expresiones;
+non terminal ArgsFuncion resto_expresiones;
 
 start with programa;
 
@@ -205,13 +234,11 @@ programa ::= lista_funciones main;
 lista_funciones ::= funcion lista_funciones
                   | /* vacio */
 ;
-
 funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA
     {:
         funcionActual = id.toString();
         tipoRetornoActual = t.toString();
         retornoEncontrado = false;
-        codigoInalcanzableActivo = false;
 
         funcionDeclaradaCorrectamente = TablaSimbolos.agregar(
             id.toString(),
@@ -223,23 +250,27 @@ funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA
         );
 
         if (funcionDeclaradaCorrectamente) {
+            TablaSimbolos.registrarFuncion(id.toString());
+        }
+
+        if (funcionDeclaradaCorrectamente) {
             TablaSimbolos.entrarScope("Funcion " + id.toString());
-           
         } else {
             TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);
-            
         }
+
         CodigoIntermedio.emitir("func " + id.toString() + ":");
     :}
-    lista_params PARENTESIS_CIERRE bloque
+    lista_params PARENTESIS_CIERRE bloque:b
     {:
-        if (!"empty".equals(tipoRetornoActual) && !retornoEncontrado) {
+        if (!"empty".equals(tipoRetornoActual) && !b) {
             ErroresSemanticos.agregar(
                 "La función '" + funcionActual +
                 "' debe retornar un valor de tipo " + tipoRetornoActual +
                 " en todos los caminos."
             );
         }
+
         CodigoIntermedio.emitir("end func " + funcionActual);
         TablaSimbolos.salirScope();
 
@@ -247,16 +278,14 @@ funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA
         tipoRetornoActual = null;
         retornoEncontrado = false;
         funcionDeclaradaCorrectamente = true;
-        codigoInalcanzableActivo = false;
     :}
 ;
-
 main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
     {:
         funcionActual = "__main__";
         tipoRetornoActual = "empty";
         retornoEncontrado = false;
-        codigoInalcanzableActivo = false;
+        
 
         TablaSimbolos.entrarScope("__main__");
            CodigoIntermedio.emitir("main:");
@@ -268,13 +297,17 @@ main ::= EMPTY SEPARADOR MAIN PARENTESIS_APERTURA PARENTESIS_CIERRE
         funcionActual = null;
         tipoRetornoActual = null;
         retornoEncontrado = false;
-        codigoInalcanzableActivo = false;
     :}
 ;
 
-bloque ::= ABRIR_BLOQUE lista_sentencias:ls CERRAR_BLOQUE
+bloque ::= ABRIR_BLOQUE
     {:
-        RESULT = ls;
+        iniciarBloqueCodigo();
+    :}
+    lista_sentencias:ls CERRAR_BLOQUE
+    {:
+        boolean bloqueCorta = finalizarBloqueCodigo();
+        RESULT = bloqueCorta;
     :}
 ;
 
@@ -322,31 +355,6 @@ bool_literal ::= TRUE
 float_literal ::= FLOTANTE
                 | EXPONENCIAL
                 | FRACCION
-;
-elemento_numerico ::= ENTERO:v
-{:
-    String temp = CodigoIntermedio.nuevoTemporal();
-    CodigoIntermedio.emitir(temp + " = " + v.toString());
-    RESULT = new Resultado(temp, "int", v.toString());
-:}
-| FLOTANTE:v
-{:
-    String temp = CodigoIntermedio.nuevoTemporal();
-    CodigoIntermedio.emitir(temp + " = " + v.toString());
-    RESULT = new Resultado(temp, "float", v.toString());
-:}
-| EXPONENCIAL:v
-{:
-    String temp = CodigoIntermedio.nuevoTemporal();
-    CodigoIntermedio.emitir(temp + " = " + v.toString());
-    RESULT = new Resultado(temp, "float", v.toString());
-:}
-| FRACCION:v
-{:
-    String temp = CodigoIntermedio.nuevoTemporal();
-    CodigoIntermedio.emitir(temp + " = " + v.toString());
-    RESULT = new Resultado(temp, "float", v.toString());
-:}
 ;
 
 
@@ -403,14 +411,19 @@ sentencia ::= declaracion_int FIN_SENTENCIA
         {:
             RESULT = false;
         :}
-
         | instruccion:i
         {:
+            if (i) {
+                marcarCodigoInalcanzable("estructura de control");
+            }
             RESULT = i;
         :}
 
         | bloque:b
         {:
+            if (b) {
+                marcarCodigoInalcanzable("bloque");
+            }
             RESULT = b;
         :}
 
@@ -419,9 +432,9 @@ sentencia ::= declaracion_int FIN_SENTENCIA
             RESULT = r;
         :}
 
-        | break_sentencia FIN_SENTENCIA
+      | break_sentencia:b FIN_SENTENCIA
         {:
-            RESULT = false;
+            RESULT = b;
         :}
 
         | lectura_escritura
@@ -458,10 +471,15 @@ break_sentencia ::= BREAK:br
         validarCodigoInalcanzable(brleft, brright);
         validarBreak(brleft, brright);
 
-        // ── código intermedio ──
+        if (contextoBreak > 0) {
+            marcarCodigoInalcanzable("break");
+        }
+
         if (!pilaBreak.isEmpty()) {
             CodigoIntermedio.emitir("goto " + pilaBreak.peek());
         }
+
+        RESULT = true;
     :}
 ;
 
@@ -476,7 +494,6 @@ tipo_completo ::= INT
                 | CHAR
                  {: RESULT = "char"; :}
 ;
-
 param ::= tipo_completo:tc SEPARADOR ID:id
     {:
         TablaSimbolos.agregar(
@@ -486,16 +503,98 @@ param ::= tipo_completo:tc SEPARADOR ID:id
             String.valueOf(idright),
             tc.toString()
         );
+
+        TablaSimbolos.agregarParametroFuncion(funcionActual, tc.toString());
+
         CodigoIntermedio.emitir("param_def " + tc + " " + id.toString());
     :}
 ;
+declaracion_float ::= FLOAT SEPARADOR ID:id
+                    ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+                    ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
+    {:
+        validarCodigoInalcanzable(idleft, idright);
 
+        TablaSimbolos.agregar(
+            id.toString(), "ARREGLO",
+            String.valueOf(idleft), String.valueOf(idright), "float"
+        );
+
+        CodigoIntermedio.emitir(
+            "var float[] " + id.toString() + " " + f.toString() + "," + c.toString()
+        );
+    :}
+
+    | FLOAT SEPARADOR ID:id
+      ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+      ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
+      ASIGNACION matriz_flotantes:m
+    {:
+        validarCodigoInalcanzable(idleft, idright);
+
+        int filasDeclaradas = Integer.parseInt(f.toString());
+        int columnasDeclaradas = Integer.parseInt(c.toString());
+
+        TablaSimbolos.agregar(
+            id.toString(), "ARREGLO",
+            String.valueOf(idleft), String.valueOf(idright), "float"
+        );
+
+        CodigoIntermedio.emitir(
+            "var float[] " + id.toString() + " " + f.toString() + "," + c.toString()
+        );
+
+        if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": el arreglo '" + id.toString() +
+                "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
+                "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
+            );
+        }
+    :}
+
+    | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
+    {:
+        validarCodigoInalcanzable(idleft, idright);
+
+        TablaSimbolos.agregar(
+            id.toString(), "VARIABLE",
+            String.valueOf(idleft), String.valueOf(idright), "float", true
+        );
+
+        CodigoIntermedio.emitir("var float " + id.toString());
+        CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
+
+        if (!"error".equals(expr.tipo) && !tiposCompatibles("float", expr.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": no se puede inicializar la variable '" + id.toString() +
+                "' de tipo 'float' con una expresión de tipo '" + expr.tipo + "'."
+            );
+        }
+    :}
+
+    | FLOAT SEPARADOR ID:id
+    {:
+        validarCodigoInalcanzable(idleft, idright);
+
+        TablaSimbolos.agregar(
+            id.toString(), "VARIABLE",
+            String.valueOf(idleft), String.valueOf(idright), "float", false
+        );
+
+        CodigoIntermedio.emitir("var float " + id.toString());
+    :}
+;
 return_sentencia ::= RETURN:ret SEPARADOR expresion:expr
     {:
         validarCodigoInalcanzable(retleft, retright);
 
         retornoEncontrado = true;
-        codigoInalcanzableActivo = true;
+        marcarCodigoInalcanzable("return");
 
         if ("empty".equals(tipoRetornoActual)) {
             ErroresSemanticos.agregar(
@@ -510,6 +609,7 @@ return_sentencia ::= RETURN:ret SEPARADOR expresion:expr
                 "', pero está retornando '" + expr.tipo + "'."
             );
         }
+
         CodigoIntermedio.emitir("return " + expr.valor);
         RESULT = true;
     :}
@@ -811,9 +911,11 @@ cin_sentencia ::= CIN:re PARENTESIS_APERTURA ID:id PARENTESIS_CIERRE
     :}
 ;
 
-cout_sentencia ::= COUT PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
+cout_sentencia ::= COUT:co PARENTESIS_APERTURA lista_cout PARENTESIS_CIERRE
+    {:
+        validarCodigoInalcanzable(coleft, coright);
+    :}
 ;
-
 lista_cout ::= expresion:e 
     {:
         CodigoIntermedio.emitir("print " + e.valor);
@@ -923,6 +1025,8 @@ do_while ::= DO:doTok
 switch_sentencia ::= SWITCH:sw PARENTESIS_APERTURA expresion:cond PARENTESIS_CIERRE
     {:
         ErroresSemanticos.validarCondicionSwitch(cond.tipo, swleft, swright);
+        tipoSwitchActual = cond.tipo;
+
         contextoBreak++;
         TablaSimbolos.entrarScope("switch");
 
@@ -941,19 +1045,33 @@ switch_sentencia ::= SWITCH:sw PARENTESIS_APERTURA expresion:cond PARENTESIS_CIE
     {:
         TablaSimbolos.salirScope();
         contextoBreak--;
+
         String eFin = pilaBreak.pop();
-        if (!pilaEtiquetas.isEmpty()) pilaEtiquetas.pop();
+
+        if (!pilaEtiquetas.isEmpty()) {
+            pilaEtiquetas.pop();
+        }
+
         CodigoIntermedio.emitir(eFin + ":");
+
+        tipoSwitchActual = "";
     :}
 ;
 
 cases ::= case_item
         | case_item cases
 ;
-
-case_item ::= CASE SEPARADOR valor_case:val DOS_PUNTOS
+case_item ::= CASE:cs SEPARADOR valor_case:val DOS_PUNTOS
     {:
-        // pila: [condValor, eSiguiente, eFin]
+        if (!"error".equals(tipoSwitchActual) && !tipoSwitchActual.equals(val.tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + csleft +
+                ", columna " + csright +
+                ": el case es de tipo '" + val.tipo +
+                "', pero el switch es de tipo '" + tipoSwitchActual + "'."
+            );
+        }
+
         String eFin       = pilaEtiquetas.pop();
         String eSiguiente = pilaEtiquetas.pop();
         String condValor  = pilaEtiquetas.peek();
@@ -962,27 +1080,36 @@ case_item ::= CASE SEPARADOR valor_case:val DOS_PUNTOS
         String temp     = CodigoIntermedio.nuevoTemporal();
 
         CodigoIntermedio.emitir(eSiguiente + ":");
-        CodigoIntermedio.emitir(temp + " = " + condValor + " == " + val);
+        CodigoIntermedio.emitir(temp + " = " + condValor + " == " + val.valor);
         CodigoIntermedio.emitir("if_false " + temp + " goto " + eProximo);
 
         pilaEtiquetas.push(eProximo);
         pilaEtiquetas.push(eFin);
+
+        // Cada case maneja su propio código inalcanzable.
+        iniciarBloqueCodigo();
     :}
     lista_sentencias
-
+    {:
+        finalizarBloqueCodigo();
+    :}
 ;
 
-case_default ::= DEFAULT DOS_PUNTOS
+case_default ::= DEFAULT:def DOS_PUNTOS
     {:
-        // pila: [condValor, eUltimo, eFin]
-        // eUltimo actúa directamente como el default
         String eFin    = pilaEtiquetas.pop();
         String eUltimo = pilaEtiquetas.pop();
         pilaEtiquetas.push(eFin);
 
         CodigoIntermedio.emitir(eUltimo + ":");
+
+        // El default también tiene su propio control.
+        iniciarBloqueCodigo();
     :}
     lista_sentencias
+    {:
+        finalizarBloqueCodigo();
+    :}
 
     | /* vacio */
     {:
@@ -992,11 +1119,14 @@ case_default ::= DEFAULT DOS_PUNTOS
         CodigoIntermedio.emitir(eUltimo + ":");
     :}
 ;
-
 valor_case ::= ENTERO:v
-             {: RESULT = v.toString(); :}
-             | CARACTER:v
-             {: RESULT = v.toString(); :}
+    {:
+        RESULT = new Resultado(v.toString(), "int");
+    :}
+    | CARACTER:v
+    {:
+        RESULT = new Resultado(v.toString(), "char");
+    :}
 ;
 
 expresion_aritmetica ::= expresion_aritmetica:izq SUMA termino:der
@@ -1547,6 +1677,8 @@ declaracion_int ::= INT SEPARADOR ID:id
                     ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
                     ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
     {:
+        validarCodigoInalcanzable(idleft, idright);
+
         TablaSimbolos.agregar(
             id.toString(), "ARREGLO",
             String.valueOf(idleft), String.valueOf(idright), "int"
@@ -1554,39 +1686,46 @@ declaracion_int ::= INT SEPARADOR ID:id
         CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
     :}
 
-  | INT SEPARADOR ID:id
-ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
-ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
-ASIGNACION matriz_enteros:m
-{:
-    int filasDeclaradas = Integer.parseInt(f.toString());
-    int columnasDeclaradas = Integer.parseInt(c.toString());
+        | INT SEPARADOR ID:id
+        ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
+        ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
+        ASIGNACION matriz_enteros:m
+        {:
+            validarCodigoInalcanzable(idleft, idright);
 
-    TablaSimbolos.agregar(
-        id.toString(), "ARREGLO",
-        String.valueOf(idleft), String.valueOf(idright), "int"
-    );
+            int filasDeclaradas = Integer.parseInt(f.toString());
+            int columnasDeclaradas = Integer.parseInt(c.toString());
 
-    CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
+            TablaSimbolos.agregar(
+                id.toString(), "ARREGLO",
+                String.valueOf(idleft), String.valueOf(idright), "int"
+            );
 
-    if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
-        ErroresSemanticos.agregar(
-            "Error semántico en línea " + idleft +
-            ", columna " + idright +
-            ": el arreglo '" + id.toString() +
-            "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
-            "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
-        );
-    }
-:}
-    | INT SEPARADOR ID:id ASIGNACION expresion:expr
+            CodigoIntermedio.emitir(
+                "var int[] " + id.toString() + " " + f.toString() + "," + c.toString()
+            );
+
+            if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
+                ErroresSemanticos.agregar(
+                    "Error semántico en línea " + idleft +
+                    ", columna " + idright +
+                    ": el arreglo '" + id.toString() +
+                    "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
+                    "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
+                );
+            }
+        :}
+   | INT SEPARADOR ID:id ASIGNACION expresion:expr
     {:
+        validarCodigoInalcanzable(idleft, idright);
+
         TablaSimbolos.agregar(
             id.toString(), "VARIABLE",
             String.valueOf(idleft), String.valueOf(idright), "int", true
         );
         CodigoIntermedio.emitir("var int " + id.toString());
         CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
+
         if (!"error".equals(expr.tipo) && !tiposCompatibles("int", expr.tipo)) {
             ErroresSemanticos.agregar(
                 "Error semántico en línea " + idleft +
@@ -1596,9 +1735,10 @@ ASIGNACION matriz_enteros:m
             );
         }
     :}
-
     | INT SEPARADOR ID:id
     {:
+        validarCodigoInalcanzable(idleft, idright);
+
         TablaSimbolos.agregar(
             id.toString(), "VARIABLE",
             String.valueOf(idleft), String.valueOf(idright), "int", false
@@ -1608,71 +1748,7 @@ ASIGNACION matriz_enteros:m
     ;
 
 
-declaracion_float ::= FLOAT SEPARADOR ID:id
-                    ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
-                    ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
-    {:
-        TablaSimbolos.agregar(
-            id.toString(), "ARREGLO",
-            String.valueOf(idleft), String.valueOf(idright), "float"
-        );
-        CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
-    :}
-
-  | FLOAT SEPARADOR ID:id
-ABRIR_PARENTESIS_CUADRADO ENTERO:f CERRAR_PARENTESIS_CUADRADO
-ABRIR_PARENTESIS_CUADRADO ENTERO:c CERRAR_PARENTESIS_CUADRADO
-ASIGNACION matriz_flotantes:m
-{:
-    int filasDeclaradas = Integer.parseInt(f.toString());
-    int columnasDeclaradas = Integer.parseInt(c.toString());
-
-    TablaSimbolos.agregar(
-        id.toString(), "ARREGLO",
-        String.valueOf(idleft), String.valueOf(idright), "float"
-    );
-
-    CodigoIntermedio.emitir("var float[] " + id.toString() + " " + f.toString() + "," + c.toString());
-
-    if (m.filas != filasDeclaradas || m.columnas != columnasDeclaradas) {
-        ErroresSemanticos.agregar(
-            "Error semántico en línea " + idleft +
-            ", columna " + idright +
-            ": el arreglo '" + id.toString() +
-            "' fue declarado como [" + filasDeclaradas + "][" + columnasDeclaradas +
-            "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
-        );
-    }
-:}
-    | FLOAT SEPARADOR ID:id ASIGNACION expresion:expr
-    {:
-        TablaSimbolos.agregar(
-            id.toString(), "VARIABLE",
-            String.valueOf(idleft), String.valueOf(idright), "float", true
-        );
-        CodigoIntermedio.emitir("var float " + id.toString());
-        CodigoIntermedio.emitir(id.toString() + " = " + expr.valor);
-        if (!"error".equals(expr.tipo) && !tiposCompatibles("float", expr.tipo)) {
-            ErroresSemanticos.agregar(
-                "Error semántico en línea " + idleft +
-                ", columna " + idright +
-                ": no se puede inicializar la variable '" + id.toString() +
-                "' de tipo 'float' con una expresión de tipo '" + expr.tipo + "'."
-            );
-        }
-    :}
-
-    | FLOAT SEPARADOR ID:id
-    {:
-        TablaSimbolos.agregar(
-            id.toString(), "VARIABLE",
-            String.valueOf(idleft), String.valueOf(idright), "float", false
-        );
-        CodigoIntermedio.emitir("var float " + id.toString());
-    :}
-;
-
-llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones:n PARENTESIS_CIERRE
+llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones:args PARENTESIS_CIERRE
     {:
         String nombreFuncion = id.toString();
 
@@ -1695,11 +1771,58 @@ llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones:n PARENTESIS_CIE
                 RESULT = new Resultado("error", "error");
             }
             else {
-                String temp = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(
-                    temp + " = call " + nombreFuncion + ", " + n
-                );
-                RESULT = new Resultado(temp, simbolo.tipoDato);
+                List<String> esperados = TablaSimbolos.obtenerParametrosFuncion(nombreFuncion);
+
+                if (esperados == null) {
+                    esperados = new ArrayList<String>();
+                }
+
+                boolean errorParametros = false;
+
+                if (args.cantidad() != esperados.size()) {
+                    ErroresSemanticos.agregar(
+                        "Error semántico en línea " + idleft +
+                        ", columna " + idright +
+                        ": la función '" + nombreFuncion +
+                        "' espera " + esperados.size() +
+                        " parámetro(s), pero recibió " + args.cantidad() + "."
+                    );
+                    errorParametros = true;
+                }
+                else {
+                    for (int i = 0; i < esperados.size(); i++) {
+                        String tipoEsperado = esperados.get(i);
+                        String tipoRecibido = args.tipos.get(i);
+
+                        if (!"error".equals(tipoRecibido) && !tiposCompatibles(tipoEsperado, tipoRecibido)) {
+                            ErroresSemanticos.agregar(
+                                "Error semántico en línea " + idleft +
+                                ", columna " + idright +
+                                ": en la llamada a '" + nombreFuncion +
+                                "', el parámetro " + (i + 1) +
+                                " debe ser de tipo '" + tipoEsperado +
+                                "', pero se recibió '" + tipoRecibido + "'."
+                            );
+                            errorParametros = true;
+                        }
+                    }
+                }
+
+                if (errorParametros) {
+                    RESULT = new Resultado("error", "error");
+                }
+                else {
+                    for (String valorArg : args.valores) {
+                        CodigoIntermedio.emitir("param " + valorArg);
+                    }
+
+                    String temp = CodigoIntermedio.nuevoTemporal();
+                    CodigoIntermedio.emitir(
+                        temp + " = call " + nombreFuncion + ", " + args.cantidad()
+                    );
+
+                    RESULT = new Resultado(temp, simbolo.tipoDato);
+                }
             }
         }
     :}
@@ -1707,22 +1830,31 @@ llamada_funcion ::= ID:id PARENTESIS_APERTURA lista_expresiones:n PARENTESIS_CIE
 
 lista_expresiones ::= expresion:expr resto_expresiones:r
     {:
-        CodigoIntermedio.emitir("param " + expr.valor);
-        RESULT = 1 + r;
+        ArgsFuncion args = new ArgsFuncion();
+
+        args.agregar(expr.tipo, expr.valor);
+        args.agregarTodos(r);
+
+        RESULT = args;
     :}
+
     | /* vacio */
     {:
-        RESULT = 0;
+        RESULT = new ArgsFuncion();
     :}
 ;
-
 resto_expresiones ::= COMA expresion:expr resto_expresiones:r
     {:
-        CodigoIntermedio.emitir("param " + expr.valor);
-        RESULT = 1 + r;
+        ArgsFuncion args = new ArgsFuncion();
+
+        args.agregar(expr.tipo, expr.valor);
+        args.agregarTodos(r);
+
+        RESULT = args;
     :}
+
     | /* vacio */
     {:
-        RESULT = 0;
+        RESULT = new ArgsFuncion();
     :}
 ;
