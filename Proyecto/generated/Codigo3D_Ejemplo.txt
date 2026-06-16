@@ -1,9 +1,160 @@
-  1.  func func1:
-  2.  t1 = 5.5
-  3.  return t1
-  4.  end func func1
-  5.  main:
-  6.  t2 = call func1, 0
-  7.  var float x
-  8.  x = t2
-  9.  main_end:
+  1.  func doble:
+  2.  param_def int n
+  3.  t1 = n
+  4.  t2 = 2
+  5.  t3 = t1 * t2
+  6.  return t3
+  7.  end func doble
+  8.  func mitad:
+  9.  param_def float x
+ 10.  t4 = x
+ 11.  t5 = 2.0
+ 12.  t6 = t4 / t5
+ 13.  return t6
+ 14.  end func mitad
+ 15.  func es_mayor:
+ 16.  param_def int a
+ 17.  param_def int b
+ 18.  t7 = a
+ 19.  t8 = b
+ 20.  t9 = t7 > t8
+ 21.  return t9
+ 22.  end func es_mayor
+ 23.  main:
+ 24.  t10 = 5
+ 25.  var int a
+ 26.  a = t10
+ 27.  t11 = 3
+ 28.  var int b
+ 29.  b = t11
+ 30.  var int c
+ 31.  t12 = 0
+ 32.  var int i
+ 33.  i = t12
+ 34.  t13 = 3.5
+ 35.  var float fa
+ 36.  fa = t13
+ 37.  t14 = 2.5
+ 38.  var float fb
+ 39.  fb = t14
+ 40.  var float fc
+ 41.  var int[] mat 2,2
+ 42.  mat[0][0] = 1
+ 43.  mat[0][1] = 2
+ 44.  mat[1][0] = 3
+ 45.  mat[1][1] = 4
+ 46.  var float[] mf 2,2
+ 47.  mf[0][0] = 1.1
+ 48.  mf[0][1] = 2.2
+ 49.  mf[1][0] = 3.3
+ 50.  mf[1][1] = 4.4
+ 51.  t15 = a
+ 52.  t16 = b
+ 53.  t17 = 2
+ 54.  t18 = t16 * t17
+ 55.  t19 = t15 + t18
+ 56.  c = t19
+ 57.  t20 = fa
+ 58.  t21 = fb
+ 59.  t22 = 2.0
+ 60.  t23 = t21 * t22
+ 61.  t24 = t20 + t23
+ 62.  fc = t24
+ 63.  t25 = c
+ 64.  param t25
+ 65.  t26 = call doble, 1
+ 66.  c = t26
+ 67.  t27 = fc
+ 68.  param t27
+ 69.  t28 = call mitad, 1
+ 70.  fc = t28
+ 71.  t29 = 0
+ 72.  t30 = 1
+ 73.  t31 = c
+ 74.  mat[t29][t30] = t31
+ 75.  t32 = 1
+ 76.  t33 = 0
+ 77.  t34 = fc
+ 78.  mf[t32][t33] = t34
+ 79.  t35 = 0
+ 80.  t36 = 1
+ 81.  t37 = mat[t35][t36]
+ 82.  t38 = 10
+ 83.  t39 = t37 + t38
+ 84.  c = t39
+ 85.  t40 = 1
+ 86.  t41 = 0
+ 87.  t42 = mf[t40][t41]
+ 88.  t43 = 1.0
+ 89.  t44 = t42 + t43
+ 90.  fc = t44
+ 91.  t45 = a
+ 92.  t46 = 1
+ 93.  t47 = t45 + t46
+ 94.  a = t47
+ 95.  c = t47
+ 96.  t48 = b
+ 97.  t49 = 1
+ 98.  t50 = t48 - t49
+ 99.  b = t50
+100.  t51 = -10
+101.  c = t51
+102.  t52 = -3.5
+103.  fc = t52
+104.  t53 = c
+105.  t54 = b
+106.  param t53
+107.  param t54
+108.  t55 = call es_mayor, 2
+109.  if_false t55 goto if_else_1
+110.  t56 = "C es mayor que B"
+111.  print t56
+112.  t57 = c
+113.  print t57
+114.  goto if_end_1
+115.  if_else_1:
+116.  t58 = "C no es mayor que B"
+117.  print t58
+118.  t59 = b
+119.  print t59
+120.  if_end_1:
+121.  t60 = fa
+122.  t61 = fb
+123.  t62 = t60 > t61
+124.  if_false t62 goto if_else_2
+125.  t63 = "FA es mayor"
+126.  print t63
+127.  goto if_end_2
+128.  if_else_2:
+129.  if_end_2:
+130.  do_start_1:
+131.  t64 = i
+132.  t65 = 1
+133.  t66 = t64 + t65
+134.  i = t66
+135.  t67 = i
+136.  print t67
+137.  t68 = i
+138.  t69 = 3
+139.  t70 = t68 < t69
+140.  if_true t70 goto do_start_1
+141.  do_end_1:
+142.  t71 = c
+143.  switch_case_1:
+144.  t72 = t71 == 10
+145.  if_false t72 goto switch_case_2
+146.  t73 = "Caso 10"
+147.  print t73
+148.  goto switch_end_1
+149.  switch_case_2:
+150.  t74 = t71 == 20
+151.  if_false t74 goto switch_case_3
+152.  t75 = "Caso 20"
+153.  print t75
+154.  switch_case_3:
+155.  t76 = "Default"
+156.  print t76
+157.  switch_end_1:
+158.  t77 = "Fin prueba 3D"
+159.  print t77
+160.  main_end:

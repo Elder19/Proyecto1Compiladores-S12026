@@ -31,8 +31,8 @@ public class MyParser extends java_cup.runtime.lr_parser {
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
     "\000\231\000\002\002\004\000\002\007\004\000\002\010" +
-    "\004\000\002\010\002\000\002\075\002\000\002\011\012" +
-    "\000\002\076\002\000\002\012\011\000\002\077\002\000" +
+    "\004\000\002\010\002\000\002\074\002\000\002\011\012" +
+    "\000\002\075\002\000\002\012\011\000\002\076\002\000" +
     "\002\021\006\000\002\013\004\000\002\013\002\000\002" +
     "\014\005\000\002\014\002\000\002\002\003\000\002\002" +
     "\003\000\002\002\003\000\002\003\003\000\002\003\003" +
@@ -45,20 +45,20 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\020\004\000\002\020\004\000\002\017\004\000\002\017" +
     "\002\000\002\022\003\000\002\004\003\000\002\004\003" +
     "\000\002\004\003\000\002\004\003\000\002\004\003\000" +
-    "\002\015\005\000\002\072\013\000\002\072\015\000\002" +
-    "\072\007\000\002\072\005\000\002\023\005\000\002\070" +
+    "\002\015\005\000\002\071\013\000\002\071\015\000\002" +
+    "\071\007\000\002\071\005\000\002\023\005\000\002\067" +
     "\005\000\002\024\011\000\002\025\013\000\002\027\003" +
-    "\000\002\027\005\000\002\030\003\000\002\030\005\000" +
-    "\002\033\003\000\002\033\005\000\002\032\005\000\002" +
-    "\031\005\000\002\034\003\000\002\034\005\000\002\035" +
+    "\000\002\027\005\000\002\031\005\000\002\033\003\000" +
+    "\002\033\005\000\002\035\005\000\002\030\003\000\002" +
+    "\030\005\000\002\032\005\000\002\034\003\000\002\034" +
     "\005\000\002\036\005\000\002\037\004\000\002\037\004" +
     "\000\002\040\006\000\002\040\006\000\002\041\006\000" +
     "\002\066\003\000\002\042\003\000\002\042\003\000\002" +
-    "\042\003\000\002\100\002\000\002\101\002\000\002\043" +
-    "\012\000\002\102\002\000\002\044\005\000\002\044\002" +
-    "\000\002\103\002\000\002\104\002\000\002\045\013\000" +
-    "\002\105\002\000\002\046\013\000\002\047\003\000\002" +
-    "\047\004\000\002\106\002\000\002\050\010\000\002\107" +
+    "\042\003\000\002\077\002\000\002\100\002\000\002\043" +
+    "\012\000\002\101\002\000\002\044\005\000\002\044\002" +
+    "\000\002\102\002\000\002\103\002\000\002\045\013\000" +
+    "\002\104\002\000\002\046\013\000\002\047\003\000\002" +
+    "\047\004\000\002\105\002\000\002\050\010\000\002\106" +
     "\002\000\002\051\006\000\002\051\002\000\002\006\003" +
     "\000\002\006\003\000\002\053\005\000\002\053\005\000" +
     "\002\053\003\000\002\054\005\000\002\054\005\000\002" +
@@ -74,10 +74,10 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\003\000\002\061\003\000\002\061\003\000\002\052\003" +
     "\000\002\062\005\000\002\062\003\000\002\063\005\000" +
     "\002\063\003\000\002\064\004\000\002\064\003\000\002" +
-    "\064\003\000\002\064\003\000\002\071\013\000\002\071" +
-    "\015\000\002\071\007\000\002\071\005\000\002\065\006" +
-    "\000\002\073\004\000\002\073\002\000\002\074\005\000" +
-    "\002\074\002" });
+    "\064\003\000\002\064\003\000\002\070\013\000\002\070" +
+    "\015\000\002\070\007\000\002\070\005\000\002\065\006" +
+    "\000\002\072\004\000\002\072\002\000\002\073\005\000" +
+    "\002\073\002" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -333,15 +333,15 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\004\050\237\001\002\000\004\047\240\001\002\000\004" +
     "\007\241\001\002\000\004\050\242\001\002\000\006\044" +
     "\243\053\uffd0\001\002\000\004\042\244\001\002\000\004" +
-    "\042\247\001\002\000\004\053\uffcf\001\002\000\004\043" +
-    "\263\001\002\000\010\010\257\012\254\072\256\001\002" +
-    "\000\006\043\uffc0\055\251\001\002\000\004\042\247\001" +
-    "\002\000\004\043\uffbf\001\002\000\004\043\262\001\002" +
-    "\000\006\043\uffe8\055\uffe8\001\002\000\006\043\uffc6\055" +
-    "\260\001\002\000\006\043\uffe7\055\uffe7\001\002\000\006" +
-    "\043\uffe9\055\uffe9\001\002\000\010\010\257\012\254\072" +
-    "\256\001\002\000\004\043\uffc5\001\002\000\006\043\uffc2" +
-    "\055\uffc2\001\002\000\004\053\uffbd\001\002\000\004\053" +
+    "\042\246\001\002\000\004\053\uffcf\001\002\000\010\010" +
+    "\260\012\255\072\257\001\002\000\004\043\253\001\002" +
+    "\000\006\043\uffbf\055\251\001\002\000\004\042\246\001" +
+    "\002\000\004\043\uffbe\001\002\000\004\053\uffbd\001\002" +
+    "\000\004\043\263\001\002\000\006\043\uffe8\055\uffe8\001" +
+    "\002\000\006\043\uffc2\055\261\001\002\000\006\043\uffe7" +
+    "\055\uffe7\001\002\000\006\043\uffe9\055\uffe9\001\002\000" +
+    "\010\010\260\012\255\072\257\001\002\000\004\043\uffc1" +
+    "\001\002\000\006\043\uffc0\055\uffc0\001\002\000\004\053" +
     "\uffce\001\002\000\114\003\uffe1\004\uffe1\005\uffe1\006\uffe1" +
     "\007\uffe1\010\uffe1\011\uffe1\012\uffe1\013\uffe1\014\uffe1\015" +
     "\uffe1\016\uffe1\020\uffe1\021\uffe1\022\uffe1\023\uffe1\024\uffe1" +
@@ -549,11 +549,11 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\004\050\u0115\001\002\000\006\044\u0116\053\uff71\001\002" +
     "\000\004\042\u0117\001\002\000\004\042\u0119\001\002\000" +
     "\004\053\uff70\001\002\000\004\007\u0120\001\002\000\004" +
-    "\043\u011e\001\002\000\006\043\uffc4\055\u011c\001\002\000" +
-    "\004\042\u0119\001\002\000\004\043\uffc3\001\002\000\004" +
-    "\053\uffbe\001\002\000\004\043\u0123\001\002\000\006\043" +
+    "\043\u011e\001\002\000\006\043\uffc5\055\u011c\001\002\000" +
+    "\004\042\u0119\001\002\000\004\043\uffc4\001\002\000\004" +
+    "\053\uffc3\001\002\000\004\043\u0123\001\002\000\006\043" +
     "\uffc8\055\u0121\001\002\000\004\007\u0120\001\002\000\004" +
-    "\043\uffc7\001\002\000\006\043\uffc1\055\uffc1\001\002\000" +
+    "\043\uffc7\001\002\000\006\043\uffc6\055\uffc6\001\002\000" +
     "\004\053\uff6f\001\002\000\032\046\uff8a\050\uff8a\053\uff8a" +
     "\055\uff8a\057\uff8a\060\uff8a\061\uff8a\062\uff8a\063\uff8a\064" +
     "\uff8a\065\uff8a\066\uff8a\001\002\000\032\046\uff8c\050\uff8c" +
@@ -593,19 +593,19 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\000\010\003\011\010\u0139\011\006\001\001\000\004\012" +
     "\u0131\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\004\075\017\001\001\000\010\004\023\013\021" +
+    "\001\000\004\074\017\001\001\000\010\004\023\013\021" +
     "\015\025\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
     "\014\031\001\001\000\002\001\001\000\002\001\001\000" +
     "\006\004\023\015\032\001\001\000\002\001\001\000\004" +
     "\014\033\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\004\021\040\001\001\000\004\077\041" +
+    "\002\001\001\000\004\021\040\001\001\000\004\076\041" +
     "\001\001\000\002\001\001\000\100\002\116\005\137\016" +
     "\117\017\063\020\124\021\054\022\064\023\135\024\042" +
     "\025\121\037\047\040\101\041\055\042\070\043\107\045" +
     "\120\046\072\052\104\053\066\054\115\055\111\056\131" +
-    "\057\133\060\056\062\123\063\044\064\102\065\045\070" +
-    "\126\071\112\072\136\001\001\000\002\001\001\000\002" +
+    "\057\133\060\056\062\123\063\044\064\102\065\045\067" +
+    "\126\070\112\071\136\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\006\016\u0125" +
     "\024\u0124\001\001\000\002\001\001\000\002\001\001\000" +
@@ -627,31 +627,31 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\022\064\023\135\024\042\025\121\037\047\040\101\041" +
     "\055\042\070\043\107\045\120\046\072\052\104\053\066" +
     "\054\115\055\111\056\131\057\133\060\056\062\123\063" +
-    "\044\064\102\065\045\070\126\071\112\072\136\001\001" +
+    "\044\064\102\065\045\067\126\070\112\071\136\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\036\005\137\016\117\024\042\052\214\053\066\054\115" +
     "\055\111\056\131\057\133\060\056\062\123\063\044\064" +
     "\102\065\045\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
-    "\103\142\001\001\000\004\021\143\001\001\000\004\104" +
+    "\102\142\001\001\000\004\021\143\001\001\000\004\103" +
     "\144\001\001\000\002\001\001\000\002\001\001\000\036" +
     "\005\137\016\117\024\042\052\147\053\066\054\115\055" +
     "\111\056\131\057\133\060\056\062\123\063\044\064\102" +
     "\065\045\001\001\000\002\001\001\000\002\001\001\000" +
     "\040\005\137\016\117\024\042\052\160\053\066\054\115" +
     "\055\111\056\131\057\133\060\056\062\123\063\044\064" +
-    "\102\065\045\073\161\001\001\000\036\005\137\016\117" +
+    "\102\065\045\072\161\001\001\000\036\005\137\016\117" +
     "\024\042\052\153\053\066\054\115\055\111\056\131\057" +
     "\133\060\056\062\123\063\044\064\102\065\045\001\001" +
     "\000\002\001\001\000\002\001\001\000\036\005\137\016" +
     "\117\024\042\052\156\053\066\054\115\055\111\056\131" +
     "\057\133\060\056\062\123\063\044\064\102\065\045\001" +
-    "\001\000\002\001\001\000\002\001\001\000\004\074\164" +
+    "\001\000\002\001\001\000\002\001\001\000\004\073\164" +
     "\001\001\000\002\001\001\000\002\001\001\000\036\005" +
     "\137\016\117\024\042\052\165\053\066\054\115\055\111" +
     "\056\131\057\133\060\056\062\123\063\044\064\102\065" +
-    "\045\001\001\000\002\001\001\000\004\074\166\001\001" +
+    "\045\001\001\000\002\001\001\000\004\073\166\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\022\016\117\024\042" +
     "\053\174\054\115\055\111\056\131\057\133\065\045\001" +
@@ -682,12 +682,12 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\131\057\133\060\056\062\123\063\044\064\102\065\045" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\004\036\244\001\001\000\006\032\247\034\245\001" +
-    "\001\000\002\001\001\000\002\001\001\000\006\026\254" +
-    "\030\252\001\001\000\002\001\001\000\006\032\247\034" +
+    "\000\004\036\244\001\001\000\006\032\247\034\246\001" +
+    "\001\000\002\001\001\000\006\026\255\030\253\001\001" +
+    "\000\002\001\001\000\002\001\001\000\006\032\247\034" +
     "\251\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\006\026\254\030\260\001\001\000\002\001\001" +
+    "\001\000\002\001\001\000\006\026\255\030\261\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\036\005\137\016\117\024\042\052\271\053" +
@@ -705,23 +705,23 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\036\005\137\016\117\024\042\052\311\053\066\054\115" +
     "\055\111\056\131\057\133\060\056\062\123\063\044\064" +
-    "\102\065\045\001\001\000\002\001\001\000\004\105\313" +
+    "\102\065\045\001\001\000\002\001\001\000\004\104\313" +
     "\001\001\000\002\001\001\000\006\047\316\050\315\001" +
     "\001\000\006\047\335\050\315\001\001\000\004\051\330" +
     "\001\001\000\002\001\001\000\004\006\321\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
-    "\106\325\001\001\000\100\002\116\005\137\016\117\017" +
+    "\105\325\001\001\000\100\002\116\005\137\016\117\017" +
     "\326\020\124\021\054\022\064\023\135\024\042\025\121" +
     "\037\047\040\101\041\055\042\070\043\107\045\120\046" +
     "\072\052\104\053\066\054\115\055\111\056\131\057\133" +
-    "\060\056\062\123\063\044\064\102\065\045\070\126\071" +
-    "\112\072\136\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\002\001\001\000\004\107\333\001" +
+    "\060\056\062\123\063\044\064\102\065\045\067\126\070" +
+    "\112\071\136\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\106\333\001" +
     "\001\000\100\002\116\005\137\016\117\017\334\020\124" +
     "\021\054\022\064\023\135\024\042\025\121\037\047\040" +
     "\101\041\055\042\070\043\107\045\120\046\072\052\104" +
     "\053\066\054\115\055\111\056\131\057\133\060\056\062" +
-    "\123\063\044\064\102\065\045\070\126\071\112\072\136" +
+    "\123\063\044\064\102\065\045\067\126\070\112\071\136" +
     "\001\001\000\002\001\001\000\002\001\001\000\004\024" +
     "\340\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
@@ -752,9 +752,9 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\001\000\036\005\137\016\117\024\042\052\376\053\066" +
     "\054\115\055\111\056\131\057\133\060\056\062\123\063" +
     "\044\064\102\065\045\001\001\000\002\001\001\000\004" +
-    "\100\u0100\001\001\000\004\021\u0101\001\001\000\004\101" +
+    "\077\u0100\001\001\000\004\021\u0101\001\001\000\004\100" +
     "\u0102\001\001\000\004\044\u0103\001\001\000\002\001\001" +
-    "\000\004\102\u0105\001\001\000\004\021\u0106\001\001\000" +
+    "\000\004\101\u0105\001\001\000\004\021\u0106\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\036\005\137\016\117\024\042" +
@@ -776,7 +776,7 @@ public class MyParser extends java_cup.runtime.lr_parser {
     "\001\000\022\016\117\024\042\053\u012f\054\115\055\111" +
     "\056\131\057\133\065\045\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\002\001\001\000\004\076" +
+    "\001\001\000\002\001\001\000\002\001\001\000\004\075" +
     "\u0137\001\001\000\004\021\u0138\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001" });
 
@@ -1009,7 +1009,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         CodigoIntermedio.emitir("func " + id.toString() + ":");
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$0",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$0",58, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1062,7 +1062,7 @@ void marcarCodigoInalcanzable(String motivo) {
         TablaSimbolos.entrarScope("__main__");
            CodigoIntermedio.emitir("main:");
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$1",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$1",59, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1090,7 +1090,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         iniciarBloqueCodigo();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$2",61, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$2",60, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1248,8 +1248,13 @@ void marcarCodigoInalcanzable(String motivo) {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 24: // float_literal ::= FLOTANTE 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        RESULT = v.toString();
+    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("float_literal",20, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1257,8 +1262,13 @@ void marcarCodigoInalcanzable(String motivo) {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 25: // float_literal ::= EXPONENCIAL 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        RESULT = v.toString();
+    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("float_literal",20, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1266,8 +1276,13 @@ void marcarCodigoInalcanzable(String motivo) {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 26: // float_literal ::= FRACCION 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        RESULT = v.toString();
+    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("float_literal",20, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -1625,7 +1640,7 @@ void marcarCodigoInalcanzable(String motivo) {
             "var float[] " + id.toString() + " " + f.toString() + "," + c.toString()
         );
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1669,8 +1684,19 @@ void marcarCodigoInalcanzable(String motivo) {
                 "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
             );
         }
+        if (m.filas == filasDeclaradas && m.columnas == columnasDeclaradas && !m.error) {
+            for (int i = 0; i < m.valores.size(); i++) {
+                java.util.List fila = (java.util.List) m.valores.get(i);
+
+                for (int j = 0; j < fila.size(); j++) {
+                    CodigoIntermedio.emitir(
+                        id.toString() + "[" + i + "][" + j + "] = " + fila.get(j).toString()
+                    );
+                }
+            }
+        }
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1704,7 +1730,7 @@ void marcarCodigoInalcanzable(String motivo) {
             );
         }
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1725,7 +1751,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         CodigoIntermedio.emitir("var float " + id.toString());
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_float",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1816,12 +1842,15 @@ void marcarCodigoInalcanzable(String motivo) {
                 }
                 else {
                     TablaSimbolos.marcarInicializada(nombreAsign);
-                    CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
+
+                    if (expr.variableModificada == null || !expr.variableModificada.equals(nombreAsign)) {
+                        CodigoIntermedio.emitir(nombreAsign + " = " + expr.valor);
+                    }
                 }
             }
         }
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("asignar_variable",54, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("asignar_variable",53, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -1876,9 +1905,13 @@ void marcarCodigoInalcanzable(String motivo) {
                 RESULT = new Resultado("error", "error");
             }
             else {
-                String temp = nombreArreglo + "[" + expr1.valor + "][" + expr2.valor + "]";
-                RESULT = new Resultado(temp, simbolo.tipoDato);
-            }
+    String direccion = nombreArreglo + "[" + expr1.valor + "][" + expr2.valor + "]";
+
+    String temp = CodigoIntermedio.nuevoTemporal();
+    CodigoIntermedio.emitir(temp + " = " + direccion);
+
+    RESULT = new Resultado(temp, simbolo.tipoDato, direccion);
+}
         }
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("acceder_arreglo",18, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-6)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
@@ -1956,9 +1989,14 @@ void marcarCodigoInalcanzable(String motivo) {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 57: // lista_enteros ::= ENTERO 
             {
-              Integer RESULT =null;
+              java.util.List RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        RESULT = 1;
+        java.util.List lista = new java.util.ArrayList();
+        lista.add(v.toString());
+        RESULT = lista;
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_enteros",21, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
@@ -1967,104 +2005,30 @@ void marcarCodigoInalcanzable(String motivo) {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 58: // lista_enteros ::= ENTERO COMA lista_enteros 
             {
-              Integer RESULT =null;
+              java.util.List RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
+		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
 		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
 		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
-		Integer l = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		java.util.List l = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        RESULT = 1 + l;
+        java.util.List lista = new java.util.ArrayList();
+        lista.add(v.toString());
+        lista.addAll(l);
+        RESULT = lista;
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_enteros",21, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 59: // lista_flotantes ::= float_literal 
+          case 59: // fila_enteros ::= ABRIR_BLOQUE lista_enteros CERRAR_BLOQUE 
             {
-              Integer RESULT =null;
-		
-        RESULT = 1;
-    
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_flotantes",22, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
-            }
-          return CUP$MyParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 60: // lista_flotantes ::= float_literal COMA lista_flotantes 
-            {
-              Integer RESULT =null;
-		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
-		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
-		Integer l = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
-		
-        RESULT = 1 + l;
-    
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_flotantes",22, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
-            }
-          return CUP$MyParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 61: // filas_enteros ::= fila_enteros 
-            {
-              InfoMatriz RESULT =null;
-		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
-		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
-		Integer f = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
-		
-        RESULT = new InfoMatriz(1, f);
-    
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_enteros",25, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
-            }
-          return CUP$MyParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 62: // filas_enteros ::= fila_enteros COMA filas_enteros 
-            {
-              InfoMatriz RESULT =null;
-		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
-		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
-		Integer f = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
-		int restoleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
-		int restoright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
-		InfoMatriz resto = (InfoMatriz)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
-		
-        boolean error = resto.error;
-
-        if (f != resto.columnas) {
-            ErroresSemanticos.agregar(
-                "Error semántico: las filas de la matriz int no tienen la misma cantidad de columnas. " +
-                "Se esperaba " + resto.columnas + " y se recibió " + f + "."
-            );
-            error = true;
-        }
-
-        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error);
-    
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_enteros",25, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
-            }
-          return CUP$MyParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 63: // fila_flotantes ::= ABRIR_BLOQUE lista_flotantes CERRAR_BLOQUE 
-            {
-              Integer RESULT =null;
+              java.util.List RESULT =null;
 		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
 		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
-		Integer l = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
-		
-        RESULT = l;
-    
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("fila_flotantes",24, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
-            }
-          return CUP$MyParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 64: // fila_enteros ::= ABRIR_BLOQUE lista_enteros CERRAR_BLOQUE 
-            {
-              Integer RESULT =null;
-		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
-		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
-		Integer l = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
+		java.util.List l = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
 		
         RESULT = l;
     
@@ -2073,48 +2037,55 @@ void marcarCodigoInalcanzable(String motivo) {
           return CUP$MyParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 65: // filas_flotantes ::= fila_flotantes 
+          case 60: // filas_enteros ::= fila_enteros 
             {
               InfoMatriz RESULT =null;
 		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
 		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
-		Integer f = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		java.util.List f = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        RESULT = new InfoMatriz(1, f);
+        java.util.List valores = new java.util.ArrayList();
+        valores.add(f);
+
+        RESULT = new InfoMatriz(1, f.size(), false, valores);
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_flotantes",26, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_enteros",25, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 66: // filas_flotantes ::= fila_flotantes COMA filas_flotantes 
+          case 61: // filas_enteros ::= fila_enteros COMA filas_enteros 
             {
               InfoMatriz RESULT =null;
 		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
 		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
-		Integer f = (Integer)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
+		java.util.List f = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
 		int restoleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
 		int restoright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		InfoMatriz resto = (InfoMatriz)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
         boolean error = resto.error;
 
-        if (f != resto.columnas) {
+        if (f.size() != resto.columnas) {
             ErroresSemanticos.agregar(
-                "Error semántico: las filas de la matriz float no tienen la misma cantidad de columnas. " +
-                "Se esperaba " + resto.columnas + " y se recibió " + f + "."
+                "Error semántico: las filas de la matriz int no tienen la misma cantidad de columnas. " +
+                "Se esperaba " + resto.columnas + " y se recibió " + f.size() + "."
             );
             error = true;
         }
 
-        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error);
+        java.util.List valores = new java.util.ArrayList();
+        valores.add(f);
+        valores.addAll(resto.valores);
+
+        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error, valores);
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_flotantes",26, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_enteros",25, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 67: // matriz_enteros ::= ABRIR_BLOQUE filas_enteros CERRAR_BLOQUE 
+          case 62: // matriz_enteros ::= ABRIR_BLOQUE filas_enteros CERRAR_BLOQUE 
             {
               InfoMatriz RESULT =null;
 		int mleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
@@ -2124,6 +2095,104 @@ void marcarCodigoInalcanzable(String motivo) {
         RESULT = m;
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("matriz_enteros",27, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+            }
+          return CUP$MyParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 63: // lista_flotantes ::= float_literal 
+            {
+              java.util.List RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		String v = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        java.util.List lista = new java.util.ArrayList();
+        lista.add(v.toString());
+        RESULT = lista;
+    
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_flotantes",22, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+            }
+          return CUP$MyParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 64: // lista_flotantes ::= float_literal COMA lista_flotantes 
+            {
+              java.util.List RESULT =null;
+		int vleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
+		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
+		String v = (String)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
+		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		java.util.List l = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        java.util.List lista = new java.util.ArrayList();
+        lista.add(v.toString());
+        lista.addAll(l);
+        RESULT = lista;
+    
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_flotantes",22, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+            }
+          return CUP$MyParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 65: // fila_flotantes ::= ABRIR_BLOQUE lista_flotantes CERRAR_BLOQUE 
+            {
+              java.util.List RESULT =null;
+		int lleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).left;
+		int lright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).right;
+		java.util.List l = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)).value;
+		
+        RESULT = l;
+    
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("fila_flotantes",24, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+            }
+          return CUP$MyParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 66: // filas_flotantes ::= fila_flotantes 
+            {
+              InfoMatriz RESULT =null;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		java.util.List f = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        java.util.List valores = new java.util.ArrayList();
+        valores.add(f);
+
+        RESULT = new InfoMatriz(1, f.size(), false, valores);
+    
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_flotantes",26, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+            }
+          return CUP$MyParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 67: // filas_flotantes ::= fila_flotantes COMA filas_flotantes 
+            {
+              InfoMatriz RESULT =null;
+		int fleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).right;
+		java.util.List f = (java.util.List)((java_cup.runtime.Symbol) CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)).value;
+		int restoleft = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).left;
+		int restoright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
+		InfoMatriz resto = (InfoMatriz)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
+		
+        boolean error = resto.error;
+
+        if (f.size() != resto.columnas) {
+            ErroresSemanticos.agregar(
+                "Error semántico: las filas de la matriz float no tienen la misma cantidad de columnas. " +
+                "Se esperaba " + resto.columnas + " y se recibió " + f.size() + "."
+            );
+            error = true;
+        }
+
+        java.util.List valores = new java.util.ArrayList();
+        valores.add(f);
+        valores.addAll(resto.valores);
+
+        RESULT = new InfoMatriz(1 + resto.filas, resto.columnas, error, valores);
+    
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("filas_flotantes",26, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2328,7 +2397,7 @@ void marcarCodigoInalcanzable(String motivo) {
         pilaEtiquetas.push(eFin);
         CodigoIntermedio.emitir("if_false " + cond.valor + " goto " + eElse);
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$3",62, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$3",61, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2354,7 +2423,7 @@ void marcarCodigoInalcanzable(String motivo) {
         CodigoIntermedio.emitir("goto " + eFin);
         CodigoIntermedio.emitir(eElse + ":");
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$4",63, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$4",62, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2395,7 +2464,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         TablaSimbolos.entrarScope("else");
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$5",64, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$5",63, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2446,7 +2515,7 @@ void marcarCodigoInalcanzable(String motivo) {
         pilaBreak.push(eFin);
         CodigoIntermedio.emitir(eInicio + ":");
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$6",65, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$6",64, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2462,7 +2531,7 @@ void marcarCodigoInalcanzable(String motivo) {
         contextoBreak--;
         pilaBreak.pop();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$7",66, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$7",65, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2511,7 +2580,7 @@ void marcarCodigoInalcanzable(String motivo) {
         String eFin     = CodigoIntermedio.nuevaEtiqueta("switch_end");
         String ePrimero = CodigoIntermedio.nuevaEtiqueta("switch_case");
 
-        CodigoIntermedio.emitir("goto " + ePrimero);
+        //CodigoIntermedio.emitir("goto " + ePrimero);
 
         // pila: [condValor, ePrimero, eFin]
         pilaEtiquetas.push(cond.valor);
@@ -2519,7 +2588,7 @@ void marcarCodigoInalcanzable(String motivo) {
         pilaEtiquetas.push(eFin);
         pilaBreak.push(eFin);
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$8",67, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$8",66, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2608,7 +2677,7 @@ void marcarCodigoInalcanzable(String motivo) {
         // Cada case maneja su propio código inalcanzable.
         iniciarBloqueCodigo();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$9",68, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$9",67, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -2648,7 +2717,7 @@ void marcarCodigoInalcanzable(String motivo) {
         // El default también tiene su propio control.
         iniciarBloqueCodigo();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$10",69, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$10",68, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3014,59 +3083,65 @@ void marcarCodigoInalcanzable(String motivo) {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        String nombre = id.toString();
+    String nombre = id.toString();
 
-        if (!TablaSimbolos.existe(nombre)) {
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombre +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+        String tipo = simbolo.tipoDato;
+
+        if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + nombre +
-                "' en línea " + idleft + ", columna " + idright
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '++' no puede aplicarse al arreglo completo '" +
+                nombre + "'. Use índices."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!ErroresSemanticos.esNumerico(tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '++' solo puede aplicarse a variables int o float. '" +
+                nombre + "' es de tipo '" + tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": la variable '" + nombre +
+                "' no ha sido inicializada antes de usarse."
             );
             RESULT = new Resultado("error", "error");
         }
         else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
-            String tipo = simbolo.tipoDato;
+            String tempVar = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(tempVar + " = " + nombre);
 
-            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '++' no puede aplicarse al arreglo completo '" +
-                    nombre + "'. Use índices."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else if (!ErroresSemanticos.esNumerico(tipo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '++' solo puede aplicarse a variables int o float. '" +
-                    nombre + "' es de tipo '" + tipo + "'."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + idleft +
-                    ", columna " + idright +
-                    ": la variable '" + nombre +
-                    "' no ha sido inicializada antes de usarse."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else {
-                String tempUno = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(tempUno + " = 1");
+            String tempUno = CodigoIntermedio.nuevoTemporal();
+            String uno = "float".equals(tipo) ? "1.0" : "1";
+            CodigoIntermedio.emitir(tempUno + " = " + uno);
 
-                String tempSuma = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(tempSuma + " = " + nombre + " + " + tempUno);
+            String tempSuma = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(tempSuma + " = " + tempVar + " + " + tempUno);
 
-                CodigoIntermedio.emitir(nombre + " = " + tempSuma);
+            CodigoIntermedio.emitir(nombre + " = " + tempSuma);
 
-                RESULT = new Resultado(nombre, tipo);
-            }
+            Resultado r = new Resultado(tempSuma, tipo);
+            r.variableModificada = nombre;
+            RESULT = r;
         }
-    
+    }
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("factor",44, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -3082,59 +3157,65 @@ void marcarCodigoInalcanzable(String motivo) {
 		int idright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object id = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        String nombre = id.toString();
+    String nombre = id.toString();
 
-        if (!TablaSimbolos.existe(nombre)) {
+    if (!TablaSimbolos.existe(nombre)) {
+        ErroresSemanticos.agregar(
+            "Variable no declarada '" + nombre +
+            "' en línea " + idleft + ", columna " + idright
+        );
+        RESULT = new Resultado("error", "error");
+    }
+    else {
+        TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
+        String tipo = simbolo.tipoDato;
+
+        if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
             ErroresSemanticos.agregar(
-                "Variable no declarada '" + nombre +
-                "' en línea " + idleft + ", columna " + idright
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '--' no puede aplicarse al arreglo completo '" +
+                nombre + "'. Use índices."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if (!ErroresSemanticos.esNumerico(tipo)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + opleft +
+                ", columna " + opright +
+                ": el operador '--' solo puede aplicarse a variables int o float. '" +
+                nombre + "' es de tipo '" + tipo + "'."
+            );
+            RESULT = new Resultado("error", "error");
+        }
+        else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
+            ErroresSemanticos.agregar(
+                "Error semántico en línea " + idleft +
+                ", columna " + idright +
+                ": la variable '" + nombre +
+                "' no ha sido inicializada antes de usarse."
             );
             RESULT = new Resultado("error", "error");
         }
         else {
-            TablaSimbolos.Simbolo simbolo = TablaSimbolos.buscar(nombre);
-            String tipo = simbolo.tipoDato;
+            String tempVar = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(tempVar + " = " + nombre);
 
-            if ("ARREGLO".equals(simbolo.tipoSimbolo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '--' no puede aplicarse al arreglo completo '" +
-                    nombre + "'. Use índices."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else if (!ErroresSemanticos.esNumerico(tipo)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + opleft +
-                    ", columna " + opright +
-                    ": el operador '--' solo puede aplicarse a variables int o float. '" +
-                    nombre + "' es de tipo '" + tipo + "'."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else if ("VARIABLE".equals(simbolo.tipoSimbolo) && !TablaSimbolos.estaInicializada(nombre)) {
-                ErroresSemanticos.agregar(
-                    "Error semántico en línea " + idleft +
-                    ", columna " + idright +
-                    ": la variable '" + nombre +
-                    "' no ha sido inicializada antes de usarse."
-                );
-                RESULT = new Resultado("error", "error");
-            }
-            else {
-                String tempUno = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(tempUno + " = 1");
+            String tempUno = CodigoIntermedio.nuevoTemporal();
+            String uno = "float".equals(tipo) ? "1.0" : "1";
+            CodigoIntermedio.emitir(tempUno + " = " + uno);
 
-                String tempResta = CodigoIntermedio.nuevoTemporal();
-                CodigoIntermedio.emitir(tempResta + " = " + nombre + " - " + tempUno);
+            String tempResta = CodigoIntermedio.nuevoTemporal();
+            CodigoIntermedio.emitir(tempResta + " = " + tempVar + " - " + tempUno);
 
-                CodigoIntermedio.emitir(nombre + " = " + tempResta);
+            CodigoIntermedio.emitir(nombre + " = " + tempResta);
 
-                RESULT = new Resultado(nombre, tipo);
-            }
+            Resultado r = new Resultado(tempResta, tipo);
+            r.variableModificada = nombre;
+            RESULT = r;
         }
-    
+    }
+
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("factor",44, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -3774,7 +3855,7 @@ void marcarCodigoInalcanzable(String motivo) {
         );
         CodigoIntermedio.emitir("var int[] " + id.toString() + " " + f.toString() + "," + c.toString());
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",54, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-8)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3818,8 +3899,19 @@ void marcarCodigoInalcanzable(String motivo) {
                     "], pero se inicializó con [" + m.filas + "][" + m.columnas + "]."
                 );
             }
+            if (m.filas == filasDeclaradas && m.columnas == columnasDeclaradas && !m.error) {
+                for (int i = 0; i < m.valores.size(); i++) {
+                    java.util.List fila = (java.util.List) m.valores.get(i);
+
+                    for (int j = 0; j < fila.size(); j++) {
+                        CodigoIntermedio.emitir(
+                            id.toString() + "[" + i + "][" + j + "] = " + fila.get(j).toString()
+                        );
+                    }
+                }
+            }
         
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",54, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-10)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3852,7 +3944,7 @@ void marcarCodigoInalcanzable(String motivo) {
             );
         }
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",54, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-4)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3872,7 +3964,7 @@ void marcarCodigoInalcanzable(String motivo) {
         );
         CodigoIntermedio.emitir("var int " + id.toString());
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",55, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("declaracion_int",54, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3985,7 +4077,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         RESULT = args;
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-1)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -3996,7 +4088,7 @@ void marcarCodigoInalcanzable(String motivo) {
 		
         RESULT = new ArgsFuncion();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",56, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -4018,7 +4110,7 @@ void marcarCodigoInalcanzable(String motivo) {
 
         RESULT = args;
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("resto_expresiones",58, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("resto_expresiones",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.elementAt(CUP$MyParser$top-2)), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
@@ -4029,7 +4121,7 @@ void marcarCodigoInalcanzable(String motivo) {
 		
         RESULT = new ArgsFuncion();
     
-              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("resto_expresiones",58, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
+              CUP$MyParser$result = parser.getSymbolFactory().newSymbol("resto_expresiones",57, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
 
