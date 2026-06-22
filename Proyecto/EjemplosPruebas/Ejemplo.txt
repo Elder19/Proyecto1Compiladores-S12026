@@ -1,5 +1,58 @@
-empty ~ __main__ <| |>
-|:
-    int ~ x <- 5 !
-    cout<|x|> !
+empty ~ __main__ <| |> |:
+
+    ¡¡ === Variables int ===
+    int ~ a <- 10 !
+    int ~ b <- 3 !
+    int ~ suma !
+    suma <- a + b !
+
+    int ~ resta !
+    resta <- a - b !
+
+    int ~ mult !
+    mult <- a * b !
+
+    int ~ div !
+    div <- a / b !
+
+    int ~ mod !
+    mod <- a % b !
+
+    ¡¡ === Variables float ===
+    float ~ x <- 4.5 !
+    float ~ y <- 1.5 !
+
+    float ~ fsuma !
+    fsuma <- x + y !
+
+    float ~ fresta !
+    fresta <- x - y !
+
+    float ~ fmult !
+    fmult <- x * y !
+
+    float ~ fdiv !
+    fdiv <- x / y !
+
+    ¡¡ === Arreglo int 2x3 ===
+    int ~ mat <<2>><<3>> <- |: |:1,2,3:| , |:4,5,6:| :| !
+
+    int ~ celda !
+    celda <- mat<<0>><<0>> !
+    celda <- mat<<0>><<2>> !
+    celda <- mat<<1>><<1>> !
+
+    mat<<1>><<2>> <- 99 !
+    celda <- mat<<1>><<2>> !
+
+    ¡¡ === Arreglo float 2x2 ===
+    float ~ fmat <<2>><<2>> <- |: |:1.1,2.2:| , |:3.3,4.4:| :| !
+
+    float ~ fcelda !
+    fcelda <- fmat<<0>><<0>> !
+    fcelda <- fmat<<1>><<1>> !
+
+    fmat<<0>><<1>> <- 9.9 !
+    fcelda <- fmat<<0>><<1>> !
+
 :|
