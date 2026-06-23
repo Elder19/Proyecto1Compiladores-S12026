@@ -142,7 +142,8 @@ public class Main {
                 "-d", "src/parser",
                 "src/parser/TablaSimbolos.java",
                 "src/parser/ErroresSemanticos.java",
-                "src/parser/CodigoIntermedio.java"   // ← línea nueva
+                "src/parser/CodigoIntermedio.java",
+                "src/parser/GeneradorMIPS.java"
         );
     }
 
@@ -211,7 +212,8 @@ public class Main {
                     parserClass,
                     EOF,
                     terminalNames,
-                    campoErroresLex
+                    campoErroresLex,
+                    loader
             );
         }
     }
@@ -235,7 +237,8 @@ private static void procesarArchivo(
         Class<?> parserClass,
         int EOF,
         String[] terminalNames,
-        Field campoErroresLex
+        Field campoErroresLex,
+        URLClassLoader loader
 ) throws Exception {
 
     tablaClass.getMethod("limpiar").invoke(null);
@@ -303,6 +306,27 @@ private static void procesarArchivo(
         System.out.println(" No se genera código intermedio por presencia de errores.");
     } else {
         mostrarCodigoIntermedio(codigoIntermedioClass, archivo.getName(), carpeta);
+    }
+
+    // ── generar MIPS si no hay errores ──
+    if (!hayErrores) {
+        String nombreSinExt = archivo.getName().replace(".txt", "");
+        String rutaMips = "generated/" + nombreSinExt + ".asm";
+
+        Class<?> generadorClass = Class.forName("GeneradorMIPS", true, loader);
+        // instanciar con la lista de instrucciones
+        List<String> instrucciones = (List<String>) codigoIntermedioClass
+            .getMethod("getInstrucciones")
+            .invoke(null);
+
+        Object generador = generadorClass
+            .getConstructor(List.class)
+            .newInstance(instrucciones);
+
+        generadorClass.getMethod("generar", String.class)
+            .invoke(generador, rutaMips);
+
+        System.out.println("\n Código MIPS generado en: " + rutaMips);
     }
 
     mostrarVeredictoFinal(

@@ -1,77 +1,58 @@
-int~doble <| int~n |> |:
-    return~ n * 2!
-:|
+empty ~ __main__ <| |> |:
 
-float~mitad <| float~x |> |:
-    return~ x / 2.0!
-:|
+    ¡¡ === Variables int ===
+    int ~ a <- 10 !
+    int ~ b <- 3 !
+    int ~ suma !
+    suma <- a + b !
 
-bool~es_mayor <| int~a, int~b |> |:
-    return~ greather_t<|a,b|>!
-:|
+    int ~ resta !
+    resta <- a - b !
 
-empty~ __main__ <| |> |:
+    int ~ mult !
+    mult <- a * b !
 
-    int~a<-5!
-    int~b<-3!
-    int~c!
-    int~i<-0!
+    int ~ div !
+    div <- a / b !
 
-    float~fa<-3.5!
-    float~fb<-2.5!
-    float~fc!
+    int ~ mod !
+    mod <- a % b !
 
-    int~mat<<2>><<2>> <- |:|:1,2:|,|:3,4:|:|!
-    float~mf<<2>><<2>> <- |:|:1.1,2.2:|,|:3.3,4.4:|:|!
+    ¡¡ === Variables float ===
+    float ~ x <- 4.5 !
+    float ~ y <- 1.5 !
 
-    c <- a + b * 2!
-    fc <- fa + fb * 2.0!
+    float ~ fsuma !
+    fsuma <- x + y !
 
-    c <- doble<|c|>!
-    fc <- mitad<|fc|>!
+    float ~ fresta !
+    fresta <- x - y !
 
-    mat<<0>><<1>> <- c!
-    mf<<1>><<0>> <- fc!
+    float ~ fmult !
+    fmult <- x * y !
 
-    c <- mat<<0>><<1>> + 10!
-    fc <- mf<<1>><<0>> + 1.0!
+    float ~ fdiv !
+    fdiv <- x / y !
 
-    c <- ++a!
-    b <- --b!
+    ¡¡ === Arreglo int 2x3 ===
+    int ~ mat <<2>><<3>> <- |: |:1,2,3:| , |:4,5,6:| :| !
 
-    c <- -10!
-    fc <- -3.5!
+    int ~ celda !
+    celda <- mat<<0>><<0>> !
+    celda <- mat<<0>><<2>> !
+    celda <- mat<<1>><<1>> !
 
-    if <| es_mayor<|c,b|> |> |:
-        cout<|"C es mayor que B"|>!
-        cout<|c|>!
-    :|
-    else |:
-        cout<|"C no es mayor que B"|>!
-        cout<|b|>!
-    :|
+    mat<<1>><<2>> <- 99 !
+    celda <- mat<<1>><<2>> !
 
-    if <| greather_t<|fa,fb|> |> |:
-        cout<|"FA es mayor"|>!
-    :|
+    ¡¡ === Arreglo float 2x2 ===
+    float ~ fmat <<2>><<2>> <- |: |:1.1,2.2:| , |:3.3,4.4:| :| !
 
-    do |:
-        i <- i + 1!
-        cout<|i|>!
-    :| while <| less_t<|i,3|> |>!
+    float ~ fcelda !
+    fcelda <- fmat<<0>><<0>> !
+    fcelda <- fmat<<1>><<1>> !
 
-    switch <|c|> |:
-        case~10:
-            cout<|"Caso 10"|>!
-            break!
-
-        case~20:
-            cout<|"Caso 20"|>!
-
-        default:
-            cout<|"Default"|>!
-    :|
-
-    cout<|"Fin prueba 3D"|>!
+    fmat<<0>><<1>> <- 9.9 !
+    fcelda <- fmat<<0>><<1>> !
 
 :|
