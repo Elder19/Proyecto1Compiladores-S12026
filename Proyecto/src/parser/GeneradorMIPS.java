@@ -34,6 +34,7 @@ public class GeneradorMIPS {
         data.append(".data\n");
         data.append("    newline: .asciiz \"\\n\"\n");
         text.append("\n.text\n");
+        text.append(".globl main\n");
 
         // Primer paso: registrar arreglos en .data
         for (String instruccion : instrucciones) {
@@ -73,7 +74,12 @@ public class GeneradorMIPS {
         data.append("    " + etiqueta + ": .space " + totalBytes + "\n");
     }
     private void traducir(String inst) {
-
+                // ── inicio de función: func f1:
+        if (inst.startsWith("func ") && inst.endsWith(":")) {
+            String nombreFuncion = inst.substring("func ".length(), inst.length() - 1).trim();
+            text.append("\n").append(nombreFuncion).append(":\n");
+            return;
+        }
         // ── etiqueta ─────────────────────────────────────────
         if (inst.endsWith(":")) {
             String etiqueta = inst.substring(0, inst.length() - 1).trim();
@@ -87,6 +93,30 @@ public class GeneradorMIPS {
                 text.append("    li $v0, 10\n");
                 text.append("    syscall\n");
             }
+            return;
+        }
+            // ── if_true condicion goto etiqueta  para el do while─────────────────────
+        if (inst.startsWith("if_true ")) {
+            emitirIfTrue(inst);
+            return;
+        }
+
+        // ── goto etiqueta ─────────────────────────────
+        if (inst.startsWith("goto ")) {
+            String etiqueta = inst.substring("goto ".length()).trim();
+            text.append("    j ").append(etiqueta).append("\n");
+            return;
+                }
+                // ── if_false condicion goto etiqueta ─────────────────────
+        if (inst.startsWith("if_false ")) {
+            emitirIfFalse(inst);
+            return;
+        }
+
+        // ── goto etiqueta ───────────────────────────────────────
+        if (inst.startsWith("goto ")) {
+            String etiqueta = inst.substring("goto ".length()).trim();
+            text.append("    j ").append(etiqueta).append("\n");
             return;
         }
 
@@ -136,11 +166,46 @@ public class GeneradorMIPS {
         }
 
         // ── asignación / operación aritmética ─────────────────
-        if (inst.contains(" = ") && !inst.contains("==")) {
+        if (inst.contains(" = ") ){//&& !inst.contains("==")) {
             String[] partes = inst.split(" = ", 2);
             String dest     = partes[0].trim();
             String fuente   = partes[1].trim();
+            for (String op : new String[]{" >= ", " <= ", " == ", " != ", " > ", " < "}) {
+                if (fuente.contains(op)) {
+                    String[] ops = fuente.split(Pattern.quote(op), 2);
 
+                    String izq = ops[0].trim();
+                    String der = ops[1].trim();
+
+                    cargarInt(izq, "$t0");
+                    cargarInt(der, "$t1");
+
+                    switch (op.trim()) {
+                        case ">":
+                            text.append("    sgt $t2, $t0, $t1\n");
+                            break;
+                        case "<":
+                            text.append("    slt $t2, $t0, $t1\n");
+                            break;
+                        case ">=":
+                            text.append("    sge $t2, $t0, $t1\n");
+                            break;
+                        case "<=":
+                            text.append("    sle $t2, $t0, $t1\n");
+                            break;
+                        case "==":
+                            text.append("    seq $t2, $t0, $t1\n");
+                            break;
+                        case "!=":
+                            text.append("    sne $t2, $t0, $t1\n");
+                            break;
+                    }
+
+                    tipoVars.put(dest, "int");
+                    guardarInt("$t2", dest);
+                    return;
+                }
+            }
             // operación aritmética binaria
             for (String op : new String[]{" + ", " - ", " * ", " / ", " % "}) {
                 if (fuente.contains(op)) {
@@ -189,9 +254,61 @@ public class GeneradorMIPS {
             return;
         }
 
+        
+
         // instrucción no manejada aún
-        text.append("    # TODO: " + inst + "\n");
+       // text.append("    # TODO: " + inst + "\n");
+
+
+
+
+
+
+
     }
+    private void emitirIfTrue(String inst) {
+   
+
+    String resto = inst.substring("if_true ".length()).trim();
+
+    int posGoto = resto.lastIndexOf(" goto ");
+
+    if (posGoto == -1) {
+        text.append("    # ERROR if_true mal formado: ")
+            .append(inst)
+            .append("\n");
+        return;
+    }
+
+    String condicion = resto.substring(0, posGoto).trim();
+    String etiqueta = resto.substring(posGoto + " goto ".length()).trim();
+
+    cargarInt(condicion, "$t0");
+
+    text.append("    bne $t0, $zero, ")
+        .append(etiqueta)
+        .append("\n");
+}
+    ///if false  metodo para trabajar la etiqueta if false 
+    private void emitirIfFalse(String inst) {
+  
+
+    String resto = inst.substring("if_false ".length()).trim();//toma la intruccion despues del if false
+
+    int posGoto = resto.lastIndexOf(" goto ");
+
+    if (posGoto == -1) {
+        text.append("    # ERROR if_false mal formado: ").append(inst).append("\n");
+        return;
+    }
+
+    String condicion = resto.substring(0, posGoto).trim();
+    String etiqueta = resto.substring(posGoto + " goto ".length()).trim();
+
+    cargarInt(condicion, "$t0");
+
+    text.append("    beq $t0, $zero, ").append(etiqueta).append("\n");
+}
 
     // ── Arreglos ──────────────────────────────────────────────
 
