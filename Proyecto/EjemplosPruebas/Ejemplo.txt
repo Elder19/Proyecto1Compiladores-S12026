@@ -1,12 +1,34 @@
 empty ~ __main__ <| |> |:
 
-    int ~ i <- 0 !
-    int ~ limite <- 3 !
+    int ~ a <- 5 !
+    int ~ b <- 3 !
+    int ~ c <- 10 !
+
+    bool ~ rAnd !
+    bool ~ rOr !
+    bool ~ rNot !
+
     int ~ resultado <- 0 !
 
-    do |:
-        i <- i + 1 !
-        resultado <- i !
-    :| while <| less_t <| i , limite |> |> !
+    ¡¡ AND: true @ true = true
+    rAnd <- greather_t <| a , b |> @ less_t <| b , c |> !
+
+    ¡¡ OR: false # true = true
+    rOr <- less_t <| a , b |> # greather_t <| c , b |> !
+
+    ¡¡ NOT: !(a > c) = true
+    rNot <- $ greather_t <| a , c |> !
+
+    cout <| rAnd |> !
+    cout <| rOr |> !
+    cout <| rNot |> !
+
+    if <| rAnd @ rNot |> |:
+        resultado <- 1 !
+    :| else |:
+        resultado <- 0 !
+    :|
+
+    cout <| resultado |> !
 
 :|
