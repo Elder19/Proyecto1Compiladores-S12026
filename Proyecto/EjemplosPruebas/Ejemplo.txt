@@ -1,12 +1,9 @@
+int ~ f1 <| int ~ x |> |:
+    return ~ x !
+:|
+
 empty ~ __main__ <| |> |:
 
-    int ~ i <- 0 !
-    int ~ limite <- 3 !
-    int ~ resultado <- 0 !
-
-    do |:
-        i <- i + 1 !
-        resultado <- i !
-    :| while <| less_t <| i , limite |> |> !
+    int ~ z <- f1 <| 10 |> !
 
 :|
