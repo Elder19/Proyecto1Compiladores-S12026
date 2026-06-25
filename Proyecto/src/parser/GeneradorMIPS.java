@@ -91,12 +91,11 @@ public class GeneradorMIPS {
 
         if (inst.startsWith("func ") && inst.endsWith(":")) {
             String nombreFuncion = inst.substring("func ".length(), inst.length() - 1).trim();
-
             indiceParametroActual = 0;
-
             text.append("\n").append(nombreFuncion).append(":\n");
+            text.append("    addiu $sp, $sp, -4\n");
+            text.append("    sw $ra, 0($sp)\n");    // guardar $ra
             text.append("    move $fp, $sp\n");
-
             return;
         }
 
@@ -203,6 +202,12 @@ public class GeneradorMIPS {
             escribirReturn(inst);
             return;
         }
+
+        if (inst.startsWith("param_def ")) {
+            escribirParamDef(inst);
+            return;
+        }
+        
         // ── asignación / operación aritmética
         if (inst.contains(" = ")) {
             String[] partes = inst.split(" = ", 2);
@@ -700,9 +705,10 @@ public class GeneradorMIPS {
 
     private void escribirReturn(String inst) {
         String valor = inst.substring("return ".length()).trim();
-
         cargarInt(valor, "$v0");
-
+        text.append("    lw $ra, 0($fp)\n");   // restaurar $ra
+        text.append("    move $sp, $fp\n");    // liberar stack de la función
+        text.append("    addiu $sp, $sp, 4\n");
         text.append("    jr $ra\n");
     }
 
