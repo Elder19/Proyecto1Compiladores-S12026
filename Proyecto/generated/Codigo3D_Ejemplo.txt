@@ -1,12 +1,65 @@
-  1.  func f1:
-  2.  param_def int x
-  3.  t1 = x
-  4.  return t1
-  5.  end func f1
-  6.  main:
-  7.  t2 = 10
-  8.  param t2
-  9.  t3 = call f1, 1
- 10.  var int z
- 11.  z = t3
- 12.  main_end:
+  1.  main:
+  2.  var int numero
+  3.  t1 = 1
+  4.  var int contador
+  5.  contador = t1
+  6.  t2 = 0
+  7.  var int suma
+  8.  suma = t2
+  9.  var bool valido
+ 10.  t3 = "Ingrese un numero del 1 al 10:"
+ 11.  print t3
+ 12.  read numero
+ 13.  t4 = numero
+ 14.  t5 = 1
+ 15.  t6 = t4 >= t5
+ 16.  t7 = numero
+ 17.  t8 = 10
+ 18.  t9 = t7 <= t8
+ 19.  t10 = t6 && t9
+ 20.  valido = t10
+ 21.  t11 = valido
+ 22.  if_false t11 goto if_else_1
+ 23.  t12 = "Numero valido:"
+ 24.  print t12
+ 25.  t13 = numero
+ 26.  print t13
+ 27.  t14 = numero
+ 28.  t15 = 5
+ 29.  t16 = t14 > t15
+ 30.  if_false t16 goto if_else_2
+ 31.  t17 = "El numero es mayor que 5"
+ 32.  print t17
+ 33.  goto if_end_2
+ 34.  if_else_2:
+ 35.  t18 = "El numero es menor o igual que 5"
+ 36.  print t18
+ 37.  if_end_2:
+ 38.  t19 = "Contando hasta el numero ingresado:"
+ 39.  print t19
+ 40.  do_start_1:
+ 41.  t20 = contador
+ 42.  print t20
+ 43.  t21 = suma
+ 44.  t22 = contador
+ 45.  t23 = t21 + t22
+ 46.  suma = t23
+ 47.  t24 = contador
+ 48.  t25 = 1
+ 49.  t26 = t24 + t25
+ 50.  contador = t26
+ 51.  t27 = contador
+ 52.  t28 = numero
+ 53.  t29 = t27 <= t28
+ 54.  if_true t29 goto do_start_1
+ 55.  do_end_1:
+ 56.  t30 = "La suma total es:"
+ 57.  print t30
+ 58.  t31 = suma
+ 59.  print t31
+ 60.  goto if_end_1
+ 61.  if_else_1:
+ 62.  t32 = "Numero fuera de rango"
+ 63.  print t32
+ 64.  if_end_1:
+ 65.  main_end:

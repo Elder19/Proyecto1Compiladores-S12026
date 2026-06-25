@@ -57,7 +57,9 @@ public class GeneradorMIPS {
 
         // Segundo paso: generar código
         for (String instruccion : instrucciones) {
-            traducir(instruccion.trim());
+            String inst = instruccion.trim();
+            System.out.println("CI -> [" + inst + "]"); // opcional para depurar
+            traducir(inst);
         }
 
         PrintWriter writer = new PrintWriter(new FileWriter(rutaSalida));
@@ -97,89 +99,42 @@ public class GeneradorMIPS {
 
             return;
         }
-        // ── etiqueta ─────────────────────────────────────────
-        if (inst.endsWith("cout ")) {// recibe un tipo de dato y su valor lo carga al resgistro segun conrresponda y
-                                     // hace la llamada a sistema.
 
-            String valor = inst.substring("cout ".length()).trim();
-            String tipo = tipoVars.get(valor);// tipo de dato que se imprime
-
-            if (esCadenaLiteral(valor)) {
-                String etiqueta = obtenerEtiquetaCadena(valor);
-                text.append("    la $a0, ").append(etiqueta).append("\n");
-                text.append("    li $v0, 4\n");
-                text.append("    syscall\n");
-            } else if (esCharLiteral(valor)) {
-                int ascii = obtenerAsciiChar(valor);
-                text.append("    li $a0, ").append(ascii).append("\n");
-                text.append("    li $v0, 11\n");
-                text.append("    syscall\n");
-            }
-
-            else if ("float".equals(tipo) || esFloatLiteral(valor)) {
-                cargarFloat(valor, "$f12");
-                text.append("    li $v0, 2\n");
-                text.append("    syscall\n");
-            } else if ("char".equals(tipo)) {
-                cargarInt(valor, "$a0");
-                text.append("    li $v0, 11\n");
-                text.append("    syscall\n");
-            } else if ("string".equals(tipo)) {
-                String etiqueta = etiquetasCadenas.get(valor);
-
-                if (etiqueta != null) {
-                    text.append("    la $a0, ").append(etiqueta).append("\n");
-                    text.append("    li $v0, 4\n");
-                    text.append("    syscall\n");
-                } else {
-                    text.append("    # ERROR: string sin etiqueta para cout: ")
-                            .append(valor)
-                            .append("\n");
-                }
-            } else {
-                cargarInt(valor, "$a0");
-                text.append("    li $v0, 1\n");
-                text.append("    syscall\n");
-            }
-
-            // salto de línea
-            text.append("    la $a0, newline\n");
-            text.append("    li $v0, 4\n");
-            text.append("    syscall\n");
-        }
-        /*if (inst.startsWith("param_def ")) {
-            escribirParamDef(inst);
-            return;
-        }*/
-
-        if (inst.endsWith("cin ")) {
-            String destino = inst.substring("cin ".length()).trim();
-            String tipo = tipoVars.get(destino);
-
-            if ("float".equals(tipo)) {
-                text.append("    li $v0, 6\n");
-                text.append("    syscall\n");
-                guardarFloat("$f0", destino);
-            }
-
-            else {
-                text.append("    li $v0, 5\n");
-                text.append("    syscall\n");
-                guardarInt("$v0", destino);
-            }
-        }
+        // ── etiquetas normales: main:, if_else_1:, do_start_1:, etc. ──
         if (inst.endsWith(":")) {
             String etiqueta = inst.substring(0, inst.length() - 1).trim();
+
             if (etiqueta.equals("main")) {
                 text.append("\nmain:\n");
                 text.append("    move $fp, $sp\n");
-            } else {
-                text.append("\n" + etiqueta + ":\n");
-            }
-            if (etiqueta.equals("main_end")) {
+            } else if (etiqueta.equals("main_end")) {
+                text.append("\nmain_end:\n");
                 text.append("    li $v0, 10\n");
                 text.append("    syscall\n");
+            } else {
+                text.append("\n").append(etiqueta).append(":\n");
             }
+
+            return;
+        }
+        // ── etiqueta ─────────────────────────────────────────
+        if (inst.startsWith("print ")) {
+            escribirPrint(inst);
+            return;
+        }
+
+        if (inst.startsWith("read ")) {
+            escribirRead(inst);
+            return;
+        }
+
+        if (inst.startsWith("cout ")) {
+            escribirCout(inst);
+            return;
+        }
+
+        if (inst.startsWith("cin ")) {
+            escribirCin(inst);
             return;
         }
         // ── if_true condicion goto etiqueta para el do while─────────────────────
@@ -253,6 +208,16 @@ public class GeneradorMIPS {
             String[] partes = inst.split(" = ", 2);
             String dest = partes[0].trim();
             String fuente = partes[1].trim();
+            // ── asignación de string literal: t1 = "Hola" ─────────
+            if (esCadenaLiteral(fuente)) {
+                String etiqueta = obtenerEtiquetaCadena(fuente);
+
+                tipoVars.put(dest, "string");
+                etiquetasCadenas.put(dest, etiqueta);
+
+                return;
+            }
+
             if (fuente.startsWith("call ")) {
                 Escribir_llamada(fuente, dest);
                 return;
@@ -510,13 +475,15 @@ public class GeneradorMIPS {
             text.append("    li ").append(reg).append(", 0\n");
         } else if (esCharLiteral(val)) {
             text.append("    li ").append(reg).append(", ")
-                    .append(obtenerAsciiChar(val)).append("\n");
+                    .append(obtenerAsciiChar(val))
+                    .append("\n");
         } else if (esEnteroLiteral(val)) {
             text.append("    li ").append(reg).append(", ").append(val).append("\n");
         } else {
             int off = obtenerOffset(val);
             text.append("    lw ").append(reg).append(", ")
-                    .append(off).append("($fp)\n");
+                    .append(off)
+                    .append("($fp)\n");
         }
     }
 
@@ -737,5 +704,137 @@ public class GeneradorMIPS {
         cargarInt(valor, "$v0");
 
         text.append("    jr $ra\n");
+    }
+
+    private void escribirParamDef(String inst) {
+        String[] partes = inst.split("\\s+");
+
+        if (partes.length < 3) {
+            text.append("    # ERROR param_def mal formado: ")
+                    .append(inst)
+                    .append("\n");
+            return;
+        }
+
+        String tipo = partes[1].trim();
+        String nombre = partes[2].trim();
+
+        String[] registrosParametros = { "$a0", "$a1", "$a2", "$a3" };
+
+        if (indiceParametroActual >= registrosParametros.length) {
+            text.append("    # ERROR: demasiados parametros para ")
+                    .append(nombre)
+                    .append("\n");
+            return;
+        }
+
+        offsetActual -= 4;
+        offsetVars.put(nombre, offsetActual);
+        tipoVars.put(nombre, tipo);
+
+        text.append("    addiu $sp, $sp, -4  # parametro ")
+                .append(nombre)
+                .append(" (")
+                .append(tipo)
+                .append(") @ ")
+                .append(offsetActual)
+                .append("($fp)\n");
+
+        text.append("    sw ")
+                .append(registrosParametros[indiceParametroActual])
+                .append(", ")
+                .append(offsetActual)
+                .append("($fp)\n");
+
+        indiceParametroActual++;
+    }
+
+    private void escribirCout(String inst) {
+        String valor = inst.substring("cout ".length()).trim();
+        String tipo = tipoVars.get(valor);
+
+        if (esCadenaLiteral(valor)) {
+            String etiqueta = obtenerEtiquetaCadena(valor);
+            text.append("    la $a0, ").append(etiqueta).append("\n");
+            text.append("    li $v0, 4\n");
+            text.append("    syscall\n");
+        }
+
+        else if ("string".equals(tipo)) {
+            String etiqueta = etiquetasCadenas.get(valor);
+
+            if (etiqueta != null) {
+                text.append("    la $a0, ").append(etiqueta).append("\n");
+                text.append("    li $v0, 4\n");
+                text.append("    syscall\n");
+            } else {
+                text.append("    # ERROR: string sin etiqueta: ")
+                        .append(valor)
+                        .append("\n");
+            }
+        }
+
+        else if (esCharLiteral(valor)) {
+            int ascii = obtenerAsciiChar(valor);
+            text.append("    li $a0, ").append(ascii).append("\n");
+            text.append("    li $v0, 11\n");
+            text.append("    syscall\n");
+        }
+
+        else if ("float".equals(tipo) || esFloatLiteral(valor)) {
+            cargarFloat(valor, "$f12");
+            text.append("    li $v0, 2\n");
+            text.append("    syscall\n");
+        }
+
+        else if ("char".equals(tipo)) {
+            cargarInt(valor, "$a0");
+            text.append("    li $v0, 11\n");
+            text.append("    syscall\n");
+        }
+
+        else {
+            cargarInt(valor, "$a0");
+            text.append("    li $v0, 1\n");
+            text.append("    syscall\n");
+        }
+
+        text.append("    la $a0, newline\n");
+        text.append("    li $v0, 4\n");
+        text.append("    syscall\n");
+    }
+
+    private void escribirCin(String inst) {
+        String destino = inst.substring("cin ".length()).trim();
+        String tipo = tipoVars.get(destino);
+
+        if ("float".equals(tipo)) {
+            text.append("    li $v0, 6\n");
+            text.append("    syscall\n");
+            guardarFloat("$f0", destino);
+        } else if ("char".equals(tipo)) {
+            text.append("    li $v0, 12\n");
+            text.append("    syscall\n");
+            guardarInt("$v0", destino);
+        } else {
+            text.append("    li $v0, 5\n");
+            text.append("    syscall\n");
+            guardarInt("$v0", destino);
+        }
+    }
+
+    private void escribirPrint(String inst) {
+        String valor = inst.substring("print ".length()).trim();
+
+        // Reutiliza el método de cout
+        escribirCout("cout " + valor);
+
+    }
+
+    private void escribirRead(String inst) {
+        String destino = inst.substring("read ".length()).trim();
+
+        // Reutiliza el método de cin
+        escribirCin("cin " + destino);
     }
 }
