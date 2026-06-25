@@ -1,9 +1,41 @@
-int ~ f1 <| int ~ x |> |:
-    return ~ x !
-:|
-
 empty ~ __main__ <| |> |:
 
-    int ~ z <- f1 <| 10 |> !
+    int ~ numero !
+    int ~ contador <- 1 !
+    int ~ suma <- 0 !
+    bool ~ valido !
+
+    cout <| "Ingrese un numero del 1 al 10:" |> !
+    cin <| numero |> !
+
+    valido <- greather_te <| numero , 1 |> @ less_te <| numero , 10 |> !
+
+    if <| valido |> |:
+
+        cout <| "Numero valido:" |> !
+        cout <| numero |> !
+
+        if <| greather_t <| numero , 5 |> |> |:
+            cout <| "El numero es mayor que 5" |> !
+        :| else |:
+            cout <| "El numero es menor o igual que 5" |> !
+        :|
+
+        cout <| "Contando hasta el numero ingresado:" |> !
+
+        do |:
+            cout <| contador |> !
+            suma <- suma + contador !
+            contador <- contador + 1 !
+        :| while <| less_te <| contador , numero |> |> !
+
+        cout <| "La suma total es:" |> !
+        cout <| suma |> !
+
+    :| else |:
+
+        cout <| "Numero fuera de rango" |> !
+
+    :|
 
 :|
