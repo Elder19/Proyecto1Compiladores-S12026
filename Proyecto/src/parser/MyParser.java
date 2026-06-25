@@ -1007,7 +1007,7 @@ void marcarCodigoInalcanzable(String motivo) {
             TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);
         }
 
-        CodigoIntermedio.emitir("func " + id.toString() + ":");
+        CodigoIntermedio.emitir("func " + t + " " + id.toString() + ":");
     
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("NT$0",58, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }

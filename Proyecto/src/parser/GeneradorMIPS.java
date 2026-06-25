@@ -90,11 +90,23 @@ public class GeneradorMIPS {
     private void traducir(String inst) {
 
         if (inst.startsWith("func ") && inst.endsWith(":")) {
-            String nombreFuncion = inst.substring("func ".length(), inst.length() - 1).trim();
+            // formato: "func <tipo> <nombre>:"
+            String sinFunc = inst.substring("func ".length(), inst.length() - 1).trim();
+            String[] partes = sinFunc.split(" ", 2);
+            String tipoRetorno  = partes[0]; // "int", "float", etc.
+            String nombreFuncion = partes[1];
+
+            tipoVars.put(nombreFuncion, tipoRetorno); // registrar tipo de retorno
+
+            offsetVars.clear();
+            offsetActual = 0;
+            tipoVars.entrySet().removeIf(e -> 
+                !etiquetaArreglo.containsKey(e.getKey()) && !e.getKey().equals(nombreFuncion));
             indiceParametroActual = 0;
+
             text.append("\n").append(nombreFuncion).append(":\n");
             text.append("    addiu $sp, $sp, -4\n");
-            text.append("    sw $ra, 0($sp)\n");    // guardar $ra
+            text.append("    sw $ra, 0($sp)\n");
             text.append("    move $fp, $sp\n");
             return;
         }
@@ -104,6 +116,9 @@ public class GeneradorMIPS {
             String etiqueta = inst.substring(0, inst.length() - 1).trim();
 
             if (etiqueta.equals("main")) {
+                offsetVars.clear();
+                offsetActual = 0;
+                tipoVars.entrySet().removeIf(e -> !etiquetaArreglo.containsKey(e.getKey()));
                 text.append("\nmain:\n");
                 text.append("    move $fp, $sp\n");
             } else if (etiqueta.equals("main_end")) {
@@ -207,7 +222,7 @@ public class GeneradorMIPS {
             escribirParamDef(inst);
             return;
         }
-        
+
         // ── asignación / operación aritmética
         if (inst.contains(" = ")) {
             String[] partes = inst.split(" = ", 2);
@@ -699,15 +714,26 @@ public class GeneradorMIPS {
 
         text.append("    jal ").append(nombreFuncion).append("\n");
 
-        tipoVars.put(dest, "int");
-        guardarInt("$v0", dest);
+        String tipoRetorno = tipoVars.getOrDefault(nombreFuncion, "int");
+        tipoVars.put(dest, tipoRetorno);
+        if ("float".equals(tipoRetorno)) {
+            guardarFloat("$f0", dest);
+        } else {
+            guardarInt("$v0", dest);
+        }
     }
 
     private void escribirReturn(String inst) {
         String valor = inst.substring("return ".length()).trim();
-        cargarInt(valor, "$v0");
-        text.append("    lw $ra, 0($fp)\n");   // restaurar $ra
-        text.append("    move $sp, $fp\n");    // liberar stack de la función
+
+        if (esFloat(valor)) {
+            cargarFloat(valor, "$f0");   // retorno float en $f0
+        } else {
+            cargarInt(valor, "$v0");     // retorno int en $v0
+        }
+
+        text.append("    lw $ra, 0($fp)\n");
+        text.append("    move $sp, $fp\n");
         text.append("    addiu $sp, $sp, 4\n");
         text.append("    jr $ra\n");
     }
