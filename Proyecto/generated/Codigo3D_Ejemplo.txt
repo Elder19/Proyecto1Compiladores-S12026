@@ -1,57 +1,12 @@
-  1.  main:
-  2.  t1 = 5
-  3.  var int a
-  4.  a = t1
-  5.  t2 = 3
-  6.  var int b
-  7.  b = t2
-  8.  t3 = 10
-  9.  var int c
- 10.  c = t3
- 11.  var bool rAnd
- 12.  var bool rOr
- 13.  var bool rNot
- 14.  t4 = 0
- 15.  var int resultado
- 16.  resultado = t4
- 17.  t5 = a
- 18.  t6 = b
- 19.  t7 = t5 > t6
- 20.  t8 = b
- 21.  t9 = c
- 22.  t10 = t8 < t9
- 23.  t11 = t7 && t10
- 24.  rAnd = t11
- 25.  t12 = a
- 26.  t13 = b
- 27.  t14 = t12 < t13
- 28.  t15 = c
- 29.  t16 = b
- 30.  t17 = t15 > t16
- 31.  t18 = t14 || t17
- 32.  rOr = t18
- 33.  t19 = a
- 34.  t20 = c
- 35.  t21 = t19 > t20
- 36.  t22 = !t21
- 37.  rNot = t22
- 38.  t23 = rAnd
- 39.  print t23
- 40.  t24 = rOr
- 41.  print t24
- 42.  t25 = rNot
- 43.  print t25
- 44.  t26 = rAnd
- 45.  t27 = rNot
- 46.  t28 = t26 && t27
- 47.  if_false t28 goto if_else_1
- 48.  t29 = 1
- 49.  resultado = t29
- 50.  goto if_end_1
- 51.  if_else_1:
- 52.  t30 = 0
- 53.  resultado = t30
- 54.  if_end_1:
- 55.  t31 = resultado
- 56.  print t31
- 57.  main_end:
+  1.  func f1:
+  2.  param_def int x
+  3.  t1 = x
+  4.  return t1
+  5.  end func f1
+  6.  main:
+  7.  t2 = 10
+  8.  param t2
+  9.  t3 = call f1, 1
+ 10.  var int z
+ 11.  z = t3
+ 12.  main_end:

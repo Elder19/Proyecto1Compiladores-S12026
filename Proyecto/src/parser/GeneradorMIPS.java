@@ -23,6 +23,9 @@ public class GeneradorMIPS {
     private int contadorCadenas = 0;
     private int contadorLabelsMips = 0;
 
+    private java.util.List<String> parametrosPendientes = new java.util.ArrayList<>();// contador de parametros
+    private int indiceParametroActual = 0; // funciones
+
     private String nuevaEtiquetaMips(String base) {
         return base + "_" + (contadorLabelsMips++);
     }
@@ -86,12 +89,17 @@ public class GeneradorMIPS {
 
         if (inst.startsWith("func ") && inst.endsWith(":")) {
             String nombreFuncion = inst.substring("func ".length(), inst.length() - 1).trim();
+
+            indiceParametroActual = 0;
+
             text.append("\n").append(nombreFuncion).append(":\n");
+            text.append("    move $fp, $sp\n");
+
             return;
         }
         // ── etiqueta ─────────────────────────────────────────
-        if (inst.endsWith("cout")) {// recibe un tipo de dato y su valor lo carga al resgistro segun conrresponda y
-                                    // hace la llamada a sistema.
+        if (inst.endsWith("cout ")) {// recibe un tipo de dato y su valor lo carga al resgistro segun conrresponda y
+                                     // hace la llamada a sistema.
 
             String valor = inst.substring("cout ".length()).trim();
             String tipo = tipoVars.get(valor);// tipo de dato que se imprime
@@ -139,8 +147,12 @@ public class GeneradorMIPS {
             text.append("    li $v0, 4\n");
             text.append("    syscall\n");
         }
+        /*if (inst.startsWith("param_def ")) {
+            escribirParamDef(inst);
+            return;
+        }*/
 
-        if (inst.endsWith("cin")) {
+        if (inst.endsWith("cin ")) {
             String destino = inst.substring("cin ".length()).trim();
             String tipo = tipoVars.get(destino);
 
@@ -205,7 +217,7 @@ public class GeneradorMIPS {
             return;
         }
 
-        // ── escritura en arreglo: nombre[i][j] = val ─────────
+        // ── escritura en arreglo: nombre[i][j] = val
         if (inst.matches("^\\w+\\[.+\\]\\[.+\\]\\s*=\\s*.+$") && !inst.contains("==")) {
             int posEq = inst.indexOf(" = ");
             String ladoIzq = inst.substring(0, posEq).trim();
@@ -219,7 +231,7 @@ public class GeneradorMIPS {
             return;
         }
 
-        // ── lectura de arreglo: dest = nombre[i][j] ──────────
+        // ── lectura de arreglo: dest = nombre[i][j]
         if (inst.matches("^\\w+\\s*=\\s*\\w+\\[.+\\]\\[.+\\]$") && !inst.contains("==")) {
             int posEq = inst.indexOf(" = ");
             String dest = inst.substring(0, posEq).trim();
@@ -232,28 +244,18 @@ public class GeneradorMIPS {
             emitirLecturaArreglo(nombreArr, idxI, idxJ, dest);
             return;
         }
-        // ── NOT lógico: t1 = !a ─────────────────────────────
-        // ── asignación / operación aritmética ─────────────────
+        if (inst.startsWith("return ")) {
+            escribirReturn(inst);
+            return;
+        }
+        // ── asignación / operación aritmética
         if (inst.contains(" = ")) {
             String[] partes = inst.split(" = ", 2);
             String dest = partes[0].trim();
             String fuente = partes[1].trim();
-
-            if (fuente.startsWith("!") || fuente.startsWith("$")) {
-                String valor = fuente.substring(1).trim();
-                escribirNot(valor, dest);
+            if (fuente.startsWith("call ")) {
+                Escribir_llamada(fuente, dest);
                 return;
-            }
-            for (String opLog : new String[] { " && ", " || ", " @ ", " # " }) {
-                if (fuente.contains(opLog)) {
-                    String[] ops = fuente.split(Pattern.quote(opLog), 2);
-
-                    String izq = ops[0].trim();
-                    String der = ops[1].trim();
-
-                    escribirLogicoBinario(izq, opLog.trim(), der, dest);
-                    return;
-                }
             }
 
             if (fuente.startsWith("!") || fuente.startsWith("$")) {
@@ -403,7 +405,12 @@ public class GeneradorMIPS {
 
             }
         }
-
+        // VALIDA PARAMETOS DE UNA FUNCION.
+        if (inst.startsWith("param ")) {
+            String valor = inst.substring("param ".length()).trim();
+            parametrosPendientes.add(valor);
+            return;
+        }
         // instrucción no manejada aún
         // text.append(" # TODO: " + inst + "\n");
 
@@ -497,11 +504,19 @@ public class GeneradorMIPS {
     // ── Carga / guardado int ──────────────────────────────────
 
     private void cargarInt(String val, String reg) {
-        if (esEnteroLiteral(val)) {
-            text.append("    li " + reg + ", " + val + "\n");
+        if ("true".equals(val)) {
+            text.append("    li ").append(reg).append(", 1\n");
+        } else if ("false".equals(val)) {
+            text.append("    li ").append(reg).append(", 0\n");
+        } else if (esCharLiteral(val)) {
+            text.append("    li ").append(reg).append(", ")
+                    .append(obtenerAsciiChar(val)).append("\n");
+        } else if (esEnteroLiteral(val)) {
+            text.append("    li ").append(reg).append(", ").append(val).append("\n");
         } else {
             int off = obtenerOffset(val);
-            text.append("    lw " + reg + ", " + off + "($fp)\n");
+            text.append("    lw ").append(reg).append(", ")
+                    .append(off).append("($fp)\n");
         }
     }
 
@@ -694,5 +709,33 @@ public class GeneradorMIPS {
         } else {
             cargarInt(val, reg);
         }
+    }
+
+    private void Escribir_llamada(String fuente, String dest) {
+        String resto = fuente.substring("call ".length()).trim();
+        String[] partes = resto.split(",", 2);
+
+        String nombreFuncion = partes[0].trim();
+
+        String[] regsArgs = { "$a0", "$a1", "$a2", "$a3" };
+
+        for (int i = 0; i < parametrosPendientes.size() && i < regsArgs.length; i++) {
+            cargarInt(parametrosPendientes.get(i), regsArgs[i]);
+        }
+
+        parametrosPendientes.clear();
+
+        text.append("    jal ").append(nombreFuncion).append("\n");
+
+        tipoVars.put(dest, "int");
+        guardarInt("$v0", dest);
+    }
+
+    private void escribirReturn(String inst) {
+        String valor = inst.substring("return ".length()).trim();
+
+        cargarInt(valor, "$v0");
+
+        text.append("    jr $ra\n");
     }
 }
