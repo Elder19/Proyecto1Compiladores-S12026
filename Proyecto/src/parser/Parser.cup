@@ -85,12 +85,13 @@ void validarCodigoInalcanzable(int linea, int columna) {
     }
 }
 
+
 void marcarCodigoInalcanzable(String motivo) {
     if (!pilaCodigoInalcanzable.isEmpty()) {
         pilaCodigoInalcanzable.set(pilaCodigoInalcanzable.size() - 1, true);
         pilaMotivoCorte.set(pilaMotivoCorte.size() - 1, motivo);
-    }
-}
+    }}
+
 :};
 
 /* Terminales */
@@ -353,10 +354,6 @@ bool_literal ::= TRUE
     :}
 ;
 float_literal ::= FLOTANTE:v
-    {:
-        RESULT = v.toString();
-    :}
-    | EXPONENCIAL:v
     {:
         RESULT = v.toString();
     :}
@@ -1614,17 +1611,36 @@ literal_numerico ::= ENTERO:v
     {:
         RESULT = new Resultado(v.toString(), "int");
     :}
+
     | FLOTANTE:v
     {:
         RESULT = new Resultado(v.toString(), "float");
     :}
+
     | EXPONENCIAL:v
     {:
-        RESULT = new Resultado(v.toString(), "float");
+        String lexema = v.toString();
+        String[] partes = lexema.split("e");
+
+        int base = Integer.parseInt(partes[0]);
+        int exponente = Integer.parseInt(partes[1]);
+
+        int valor = (int) Math.pow(base, exponente);
+
+        RESULT = new Resultado(String.valueOf(valor), "int");
     :}
+
     | FRACCION:v
     {:
-        RESULT = new Resultado(v.toString(), "float");
+        String lexema = v.toString();
+        String[] partes = lexema.split("//");
+
+        float numerador = Float.parseFloat(partes[0]);
+        float denominador = Float.parseFloat(partes[1]);
+
+        float valor = numerador / denominador;
+
+        RESULT = new Resultado(String.valueOf(valor), "float");
     :}
 ;
 

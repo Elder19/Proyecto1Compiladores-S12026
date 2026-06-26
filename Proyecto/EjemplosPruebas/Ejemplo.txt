@@ -1,41 +1,106 @@
-empty ~ __main__ <| |> |:
+int~sumar <| int~a,int~b |> |:
+    int~resultado!
+    resultado <- a + b!
+    return~5!
+:|
 
-    int ~ numero !
-    int ~ contador <- 1 !
-    int ~ suma <- 0 !
-    bool ~ valido !
+float~calcular <| float~x,float~y |> |:
+    float~r!
+    int~hi <- 2e5!
+    float~expo <- 16.3!
+    float~frac <- 6//7!
+    r <- x + y / 2.4!
+    r <- r + expo - frac!
+    return~r!
+:|
 
-    cout <| "Ingrese un numero del 1 al 10:" |> !
-    cin <| numero |> !
-
-    valido <- greather_te <| numero , 1 |> @ less_te <| numero , 10 |> !
-
-    if <| valido |> |:
-
-        cout <| "Numero valido:" |> !
-        cout <| numero |> !
-
-        if <| greather_t <| numero , 5 |> |> |:
-            cout <| "El numero es mayor que 5" |> !
-        :| else |:
-            cout <| "El numero es menor o igual que 5" |> !
-        :|
-
-        cout <| "Contando hasta el numero ingresado:" |> !
-
-        do |:
-            cout <| contador |> !
-            suma <- suma + contador !
-            contador <- contador + 1 !
-        :| while <| less_te <| contador , numero |> |> !
-
-        cout <| "La suma total es:" |> !
-        cout <| suma |> !
-
+char~escogerLetra <| bool~bandera,char~letra1,char~letra2 |> |:
+    if<| bandera |>|:
+        return~letra1!
     :| else |:
+        return~letra2!
+    :|
+:|
 
-        cout <| "Numero fuera de rango" |> !
+empty~__main__ <| |> |:
+    string~mensaje2!
+    string~mensaje!
+    int~entrada!
+    int~a <- 5!
+    int~b <- 7!
+    int~total!
+    int~contador <- 0!
+    float~decimal <- 4.4!
+    float~otroDecimal <- 9.9!
+    float~resultadoFloat!
+    char~letra <- 'x'!
+    char~letraFinal!
+    bool~activo <- true!
+    bool~condicion1!
+    bool~condicion2!
+    bool~condicionFinal!
 
+    int~matriz<<2>><<2>> <- |:
+        |:1,2:|,
+        |:3,4:|
+    :|!
+
+    float~tabla<<2>><<2>> <- |:
+        |:1.1,2.2:|,
+        |:3.3,4.4:|
+    :|!
+
+    
+    total <- sumar<|a,b|>!
+    resultadoFloat <- calcular<|decimal,otroDecimal|>!
+    letraFinal <- escogerLetra<|activo,'A','B'|>!
+
+    matriz<<0>><<1>> <- total!
+    total <- matriz<<1>><<0>>!
+
+    tabla<<1>><<1>> <- resultadoFloat!
+    resultadoFloat <- tabla<<0>><<1>>!
+
+    condicion1 <- less_t<|a,b|>!
+    condicion2 <- n_equal<|total,contador|>!
+    condicionFinal <- condicion1 @ condicion2!
+
+    
+    cout<|total|>!
+    cout<|resultadoFloat|>!
+    cout<|letraFinal|>!
+    cout<|condicionFinal|>!
+
+    cin<|entrada|>!
+
+
+
+    if<| condicionFinal |>|:
+        total <- ++a + b!
+        cout<|total|>!
+    :| else |:
+        total <- --b + a!
+        cout<|total|>!
     :|
 
+    do|:
+        contador <- contador + 1!
+        cout<|contador|>!
+    :| while<| less_t<|contador,3|> |>!
+
+    mensaje2 <- "YA YA CORRALO"!
+    cout<|mensaje2|>!
+    switch<|entrada|>|:
+        case~1:
+            total <- total + 10!
+            cout<|total|>!
+            break!
+        case~2:
+            total <- total + 20!
+            cout<|total|>!
+            break!
+        default:
+            cout<|"Valor diferente"|>!
+    :|
+    mensaje  <- "Hola erin fea"!
 :|
