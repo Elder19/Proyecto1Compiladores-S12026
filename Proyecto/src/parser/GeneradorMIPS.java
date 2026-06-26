@@ -105,7 +105,6 @@ public class GeneradorMIPS {
             text.append("    sw $ra, 4($sp)\n");
             text.append("    sw $fp, 0($sp)\n");
             text.append("    move $fp, $sp\n");
-
             return;
         }
 
@@ -228,6 +227,12 @@ public class GeneradorMIPS {
             escribirReturn(inst);
             return;
         }
+
+        if (inst.startsWith("param_def ")) {
+            escribirParamDef(inst);
+            return;
+        }
+
         // ── asignación / operación aritmética
         if (inst.contains(" = ")) {
             String[] partes = inst.split(" = ", 2);

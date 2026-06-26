@@ -260,7 +260,7 @@ funcion ::= tipo_funcion:t SEPARADOR ID:id PARENTESIS_APERTURA
             TablaSimbolos.entrarScope("Funcion " + id.toString() + "_DUP_" + idleft + "_" + idright);
         }
 
-        CodigoIntermedio.emitir("func " + id.toString() + ":");
+        CodigoIntermedio.emitir("func " + t + " " + id.toString() + ":");
     :}
     lista_params PARENTESIS_CIERRE bloque:b
     {:
