@@ -85,12 +85,13 @@ void validarCodigoInalcanzable(int linea, int columna) {
     }
 }
 
+
 void marcarCodigoInalcanzable(String motivo) {
     if (!pilaCodigoInalcanzable.isEmpty()) {
         pilaCodigoInalcanzable.set(pilaCodigoInalcanzable.size() - 1, true);
         pilaMotivoCorte.set(pilaMotivoCorte.size() - 1, motivo);
-    }
-}
+    }}
+
 :};
 
 /* Terminales */
@@ -353,10 +354,6 @@ bool_literal ::= TRUE
     :}
 ;
 float_literal ::= FLOTANTE:v
-    {:
-        RESULT = v.toString();
-    :}
-    | EXPONENCIAL:v
     {:
         RESULT = v.toString();
     :}
@@ -1614,18 +1611,21 @@ literal_numerico ::= ENTERO:v
     {:
         RESULT = new Resultado(v.toString(), "int");
     :}
+
     | FLOTANTE:v
     {:
         RESULT = new Resultado(v.toString(), "float");
     :}
+
     | EXPONENCIAL:v
-    {:
-        RESULT = new Resultado(v.toString(), "float");
-    :}
+{:
+    RESULT = new Resultado(v.toString(), "int");
+:}
+
     | FRACCION:v
-    {:
-        RESULT = new Resultado(v.toString(), "float");
-    :}
+{:
+    RESULT = new Resultado(v.toString(), "float");
+:}
 ;
 
 expresion_relacional ::= EQUAL:op PARENTESIS_APERTURA operando_relacional_eq:e1 COMA operando_relacional_eq:e2 PARENTESIS_CIERRE

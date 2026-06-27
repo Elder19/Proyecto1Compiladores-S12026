@@ -18,13 +18,17 @@ public class GeneradorMIPS {
     // arreglos en .data
     private HashMap<String, String> etiquetaArreglo; // nombre -> "arr_nombre"
     private HashMap<String, int[]> dimensionesArreglo; // nombre -> {filas, columnas}
-
+    private HashMap<String, String> tipoArreglos;
     private HashMap<String, String> etiquetasCadenas = new HashMap<>();
     private int contadorCadenas = 0;
     private int contadorLabelsMips = 0;
 
     private java.util.List<String> parametrosPendientes = new java.util.ArrayList<>();// contador de parametros
     private int indiceParametroActual = 0; // funciones
+
+    private HashMap<String, String> tipoRetornoFunciones = new HashMap<>();
+    private String funcionActualMips = "";
+    private int contadorEtiquetas = 0;
 
     private String nuevaEtiquetaMips(String base) {
         return base + "_" + (contadorLabelsMips++);
@@ -39,6 +43,53 @@ public class GeneradorMIPS {
         this.etiquetaArreglo = new HashMap<>();
         this.dimensionesArreglo = new HashMap<>();
         this.offsetActual = 0;
+        this.tipoArreglos = new HashMap<>();
+    }
+
+    private void emitirSubrutinasPotencia() {
+
+        // ── Potencia entera ───────────────────────────────────────
+        // base en $a0, exponente en $a1, resultado en $v0
+        text.append("\n__potencia_int:\n");
+        text.append("    addiu $sp, $sp, -8\n");
+        text.append("    sw $ra, 4($sp)\n");
+        text.append("    sw $fp, 0($sp)\n");
+        text.append("    move $fp, $sp\n");
+        text.append("    li $v0, 1\n");
+        text.append("    ble $a1, $zero, __pot_int_fin\n");
+        text.append("__pot_int_loop:\n");
+        text.append("    mul $v0, $v0, $a0\n");
+        text.append("    addiu $a1, $a1, -1\n");
+        text.append("    bgt $a1, $zero, __pot_int_loop\n");
+        text.append("__pot_int_fin:\n");
+        text.append("    move $sp, $fp\n");
+        text.append("    lw $fp, 0($sp)\n");
+        text.append("    lw $ra, 4($sp)\n");
+        text.append("    addiu $sp, $sp, 8\n");
+        text.append("    jr $ra\n");
+
+        // ── Potencia float ────────────────────────────────────────
+        // base en $f12, exponente en $f14, resultado en $f0
+        text.append("\n__potencia_float:\n");
+        text.append("    addiu $sp, $sp, -8\n");
+        text.append("    sw $ra, 4($sp)\n");
+        text.append("    sw $fp, 0($sp)\n");
+        text.append("    move $fp, $sp\n");
+        text.append("    li $t9, 0x3f800000\n");
+        text.append("    mtc1 $t9, $f0\n");
+        text.append("    cvt.w.s $f14, $f14\n");
+        text.append("    mfc1 $t0, $f14\n");
+        text.append("    ble $t0, $zero, __pot_float_fin\n");
+        text.append("__pot_float_loop:\n");
+        text.append("    mul.s $f0, $f0, $f12\n");
+        text.append("    addiu $t0, $t0, -1\n");
+        text.append("    bgt $t0, $zero, __pot_float_loop\n");
+        text.append("__pot_float_fin:\n");
+        text.append("    move $sp, $fp\n");
+        text.append("    lw $fp, 0($sp)\n");
+        text.append("    lw $ra, 4($sp)\n");
+        text.append("    addiu $sp, $sp, 8\n");
+        text.append("    jr $ra\n");
     }
 
     public void generar(String rutaSalida) throws IOException {
@@ -46,6 +97,7 @@ public class GeneradorMIPS {
         data.append("    newline: .asciiz \"\\n\"\n");
         text.append("\n.text\n");
         text.append(".globl main\n");
+        emitirSubrutinasPotencia(); 
 
         // Primer paso: registrar arreglos en .data
         for (String instruccion : instrucciones) {
@@ -58,7 +110,7 @@ public class GeneradorMIPS {
         // Segundo paso: generar código
         for (String instruccion : instrucciones) {
             String inst = instruccion.trim();
-            System.out.println("CI -> [" + inst + "]"); // opcional para depurar
+           
             traducir(inst);
         }
 
@@ -81,7 +133,7 @@ public class GeneradorMIPS {
 
         etiquetaArreglo.put(nombre, etiqueta);
         dimensionesArreglo.put(nombre, new int[] { filas, columnas });
-        tipoVars.put(nombre, tipoBase);
+        tipoArreglos.put(nombre, tipoBase);
 
         data.append("    .align 2\n");
         data.append("    " + etiqueta + ": .space " + totalBytes + "\n");
@@ -90,35 +142,42 @@ public class GeneradorMIPS {
     private void traducir(String inst) {
 
         if (inst.startsWith("func ") && inst.endsWith(":")) {
-            // formato: "func <tipo> <nombre>:"
-            String sinFunc = inst.substring("func ".length(), inst.length() - 1).trim();
-            String[] partes = sinFunc.split(" ", 2);
-            String tipoRetorno  = partes[0]; // "int", "float", etc.
-            String nombreFuncion = partes[1];
+    String encabezado = inst.substring("func ".length(), inst.length() - 1).trim();
 
-            tipoVars.put(nombreFuncion, tipoRetorno); // registrar tipo de retorno
+    String tipoFuncion = "int";
+    String nombreFuncion = encabezado;
 
-            offsetVars.clear();
-            offsetActual = 0;
-            tipoVars.entrySet().removeIf(e -> 
-                !etiquetaArreglo.containsKey(e.getKey()) && !e.getKey().equals(nombreFuncion));
-            indiceParametroActual = 0;
+    String[] partes = encabezado.split("\\s+");
 
-            text.append("\n").append(nombreFuncion).append(":\n");
-            text.append("    addiu $sp, $sp, -4\n");
-            text.append("    sw $ra, 0($sp)\n");
-            text.append("    move $fp, $sp\n");
-            return;
-        }
+    if (partes.length == 2) {
+        tipoFuncion = partes[0].trim();
+        nombreFuncion = partes[1].trim();
+    }
+
+    funcionActualMips = nombreFuncion;
+    tipoRetornoFunciones.put(nombreFuncion, tipoFuncion);
+
+    indiceParametroActual = 0;
+    reiniciarFrameActual();
+
+    text.append("\n").append(nombreFuncion).append(":\n");
+    text.append("    addiu $sp, $sp, -8\n");
+    text.append("    sw $ra, 4($sp)\n");
+    text.append("    sw $fp, 0($sp)\n");
+    text.append("    move $fp, $sp\n");
+
+    return;
+}
 
         // ── etiquetas normales: main:, if_else_1:, do_start_1:, etc. ──
         if (inst.endsWith(":")) {
             String etiqueta = inst.substring(0, inst.length() - 1).trim();
 
             if (etiqueta.equals("main")) {
-                offsetVars.clear();
-                offsetActual = 0;
-                tipoVars.entrySet().removeIf(e -> !etiquetaArreglo.containsKey(e.getKey()));
+                funcionActualMips = "main";
+                indiceParametroActual = 0;
+                reiniciarFrameActual();
+
                 text.append("\nmain:\n");
                 text.append("    move $fp, $sp\n");
             } else if (etiqueta.equals("main_end")) {
@@ -129,6 +188,14 @@ public class GeneradorMIPS {
                 text.append("\n").append(etiqueta).append(":\n");
             }
 
+            return;
+        }
+        if (inst.startsWith("param_def ")) {
+            escribirParamDef(inst);
+            return;
+        }
+
+        if (inst.startsWith("end func ")) {
             return;
         }
         // ── etiqueta ─────────────────────────────────────────
@@ -154,6 +221,10 @@ public class GeneradorMIPS {
         // ── if_true condicion goto etiqueta para el do while─────────────────────
         if (inst.startsWith("if_true ")) {
             emitirIfTrue(inst);
+            return;
+        }
+        if (inst.startsWith("return ")) {
+            escribirReturn(inst);
             return;
         }
 
@@ -229,17 +300,37 @@ public class GeneradorMIPS {
             String dest = partes[0].trim();
             String fuente = partes[1].trim();
             // ── asignación de string literal: t1 = "Hola" ─────────
+
             if (esCadenaLiteral(fuente)) {
                 String etiqueta = obtenerEtiquetaCadena(fuente);
 
                 tipoVars.put(dest, "string");
                 etiquetasCadenas.put(dest, etiqueta);
 
+                text.append("    la $t0, ").append(etiqueta).append("\n");
+                guardarInt("$t0", dest);
+
                 return;
             }
 
             if (fuente.startsWith("call ")) {
                 Escribir_llamada(fuente, dest);
+                return;
+            }
+            if (tipoVars.containsKey(fuente)) {
+                String tipoFuente = tipoVars.get(fuente);
+                tipoVars.put(dest, tipoFuente);
+
+                if ("float".equals(tipoFuente)) {
+                    cargarFloat(fuente, "$f0");
+                    guardarFloat("$f0", dest);
+                } else {
+                    // int, bool, char y string se copian con registros enteros.
+                    // En string se copia la dirección.
+                    cargarInt(fuente, "$t0");
+                    guardarInt("$t0", dest);
+                }
+
                 return;
             }
 
@@ -264,109 +355,79 @@ public class GeneradorMIPS {
                 for (String opRel : new String[] { " >= ", " <= ", " == ", " != ", " > ", " < " }) {
                     if (fuente.contains(opRel)) {
                         String[] ops = fuente.split(Pattern.quote(opRel), 2);
-
                         String izq = ops[0].trim();
                         String der = ops[1].trim();
                         String operador = opRel.trim();
-
                         boolean flt = esFloat(izq) || esFloat(der);
-
                         if (flt) {
                             EscribirComparacionFloat(izq, operador, der, dest);
                         } else {
                             cargarInt(izq, "$t0");
                             cargarInt(der, "$t1");
-
                             switch (operador) {
-                                case ">":
-                                    text.append("    sgt $t2, $t0, $t1\n");
-                                    break;
-                                case "<":
-                                    text.append("    slt $t2, $t0, $t1\n");
-                                    break;
-                                case ">=":
-                                    text.append("    sge $t2, $t0, $t1\n");
-                                    break;
-                                case "<=":
-                                    text.append("    sle $t2, $t0, $t1\n");
-                                    break;
-                                case "==":
-                                    text.append("    seq $t2, $t0, $t1\n");
-                                    break;
-                                case "!=":
-                                    text.append("    sne $t2, $t0, $t1\n");
-                                    break;
+                                case ">":  text.append("    sgt $t2, $t0, $t1\n"); break;
+                                case "<":  text.append("    slt $t2, $t0, $t1\n"); break;
+                                case ">=": text.append("    sge $t2, $t0, $t1\n"); break;
+                                case "<=": text.append("    sle $t2, $t0, $t1\n"); break;
+                                case "==": text.append("    seq $t2, $t0, $t1\n"); break;
+                                case "!=": text.append("    sne $t2, $t0, $t1\n"); break;
                             }
-
                             tipoVars.put(dest, "int");
                             guardarInt("$t2", dest);
                         }
-
                         return;
                     }
                 }
 
                 // ── operación aritmética binaria: +, -, *, /, %
-                for (String opArit : new String[] { " + ", " - ", " * ", " / ", " % " }) {
+                for (String opArit : new String[] { " + ", " - ", " * ", " / ", " % ", " ^ " }) {
                     if (fuente.contains(opArit)) {
                         String[] ops = fuente.split(Pattern.quote(opArit), 2);
-
                         String izq = ops[0].trim();
                         String der = ops[1].trim();
-
                         boolean flt = esFloat(izq) || esFloat(der);
                         tipoVars.put(dest, flt ? "float" : "int");
+
+                        // caso especial potencia
+                        if (opArit.trim().equals("^")) {
+                            if (flt) {
+                                cargarFloat(izq, "$f12");
+                                cargarFloat(der, "$f14");
+                                text.append("    jal __potencia_float\n");
+                                guardarFloat("$f0", dest);
+                            } else {
+                                cargarInt(izq, "$a0");
+                                cargarInt(der, "$a1");
+                                text.append("    jal __potencia_int\n");
+                                guardarInt("$v0", dest);
+                            }
+                            return;
+                        }
 
                         if (flt) {
                             cargarFloat(izq, "$f0");
                             cargarFloat(der, "$f1");
-
                             String mips;
-
                             switch (opArit.trim()) {
-                                case "+":
-                                    mips = "add.s";
-                                    break;
-                                case "-":
-                                    mips = "sub.s";
-                                    break;
-                                case "*":
-                                    mips = "mul.s";
-                                    break;
-                                default:
-                                    mips = "div.s";
-                                    break;
+                                case "+": mips = "add.s"; break;
+                                case "-": mips = "sub.s"; break;
+                                case "*": mips = "mul.s"; break;
+                                default:  mips = "div.s"; break;
                             }
-
                             text.append("    ").append(mips).append(" $f2, $f0, $f1\n");
                             guardarFloat("$f2", dest);
                         } else {
                             cargarInt(izq, "$t0");
                             cargarInt(der, "$t1");
-
                             switch (opArit.trim()) {
-                                case "/":
-                                    text.append("    div $t0, $t1\n");
-                                    text.append("    mflo $t2\n");
-                                    break;
-                                case "%":
-                                    text.append("    div $t0, $t1\n");
-                                    text.append("    mfhi $t2\n");
-                                    break;
-                                case "+":
-                                    text.append("    add $t2, $t0, $t1\n");
-                                    break;
-                                case "-":
-                                    text.append("    sub $t2, $t0, $t1\n");
-                                    break;
-                                default:
-                                    text.append("    mul $t2, $t0, $t1\n");
-                                    break;
+                                case "/": text.append("    div $t0, $t1\n    mflo $t2\n"); break;
+                                case "%": text.append("    div $t0, $t1\n    mfhi $t2\n"); break;
+                                case "+": text.append("    add $t2, $t0, $t1\n"); break;
+                                case "-": text.append("    sub $t2, $t0, $t1\n"); break;
+                                default:  text.append("    mul $t2, $t0, $t1\n"); break;
                             }
-
                             guardarInt("$t2", dest);
                         }
-
                         return;
                     }
                 }
@@ -464,7 +525,7 @@ public class GeneradorMIPS {
 
     private void emitirEscrituraArreglo(String arr, String idxI, String idxJ, String fuente) {
         calcularDireccionArreglo(arr, idxI, idxJ);
-        if ("float".equals(tipoVars.get(arr))) {
+        if ("float".equals(tipoArreglos.get(arr))) {
             cargarFloat(fuente, "$f0");
             text.append("    s.s $f0, 0($t8)\n");
         } else {
@@ -475,7 +536,7 @@ public class GeneradorMIPS {
 
     private void emitirLecturaArreglo(String arr, String idxI, String idxJ, String dest) {
         calcularDireccionArreglo(arr, idxI, idxJ);
-        boolean flt = "float".equals(tipoVars.get(arr));
+        boolean flt = "float".equals(tipoArreglos.get(arr));
         tipoVars.put(dest, flt ? "float" : "int");
         if (flt) {
             text.append("    l.s $f0, 0($t8)\n");
@@ -489,7 +550,10 @@ public class GeneradorMIPS {
     // ── Carga / guardado int ──────────────────────────────────
 
     private void cargarInt(String val, String reg) {
-        if ("true".equals(val)) {
+        if (esCadenaLiteral(val)) {
+            String etiqueta = obtenerEtiquetaCadena(val);
+            text.append("    la ").append(reg).append(", ").append(etiqueta).append("\n");
+        } else if ("true".equals(val)) {
             text.append("    li ").append(reg).append(", 1\n");
         } else if ("false".equals(val)) {
             text.append("    li ").append(reg).append(", 0\n");
@@ -497,32 +561,66 @@ public class GeneradorMIPS {
             text.append("    li ").append(reg).append(", ")
                     .append(obtenerAsciiChar(val))
                     .append("\n");
+        } else if (esExponencialEnteroLiteral(val)) {
+        emitirExponencialBase10(val, reg);
         } else if (esEnteroLiteral(val)) {
-            text.append("    li ").append(reg).append(", ").append(val).append("\n");
-        } else {
-            int off = obtenerOffset(val);
-            text.append("    lw ").append(reg).append(", ")
-                    .append(off)
-                    .append("($fp)\n");
-        }
-    }
+                    text.append("    li ").append(reg).append(", ").append(val).append("\n");
+                } else {
+                    int off = obtenerOffset(val);
+                    text.append("    lw ").append(reg).append(", ")
+                            .append(off)
+                            .append("($fp)\n");
+                }
+            }
 
-    private void guardarInt(String reg, String dest) {
-        int off = obtenerOffset(dest);
-        text.append("    sw " + reg + ", " + off + "($fp)\n");
-    }
+            private void guardarInt(String reg, String dest) {
+                int off = obtenerOffset(dest);
+                text.append("    sw " + reg + ", " + off + "($fp)\n");
+            }
 
     // ── Carga / guardado float ────────────────────────────────
 
     private void cargarFloat(String val, String reg) {
-        if (esFloatLiteral(val)) {
-            String hex = "0x" + Integer.toHexString(Float.floatToIntBits(Float.parseFloat(val)));
-            text.append("    li $t9, " + hex + "\n");
-            text.append("    mtc1 $t9, " + reg + "\n");
-        } else {
-            int off = obtenerOffset(val);
-            text.append("    l.s " + reg + ", " + off + "($fp)\n");
+        if (esFraccionLiteral(val)) {
+            float valor = evaluarFraccionLiteral(val);
+            int bits = Float.floatToIntBits(valor);
+
+            text.append("    li $t9, 0x")
+                    .append(Integer.toHexString(bits))
+                    .append("\n");
+
+            text.append("    mtc1 $t9, ")
+                    .append(reg)
+                    .append("\n");
+
+            return;
         }
+
+        if (esFloatLiteral(val)) {
+            float valor = Float.parseFloat(val);
+            int bits = Float.floatToIntBits(valor);
+
+            text.append("    li $t9, 0x")
+                    .append(Integer.toHexString(bits))
+                    .append("\n");
+
+            text.append("    mtc1 $t9, ")
+                    .append(reg)
+                    .append("\n");
+
+            return;
+        }
+
+        int off = obtenerOffset(val);
+        text.append("    l.s ")
+                .append(reg)
+                .append(", ")
+                .append(off)
+                .append("($fp)\n");
+    }
+
+    private boolean esFraccionLiteral(String val) {
+        return val != null && val.matches("-?\\d+//-?\\d+");
     }
 
     private void guardarFloat(String reg, String dest) {
@@ -531,6 +629,11 @@ public class GeneradorMIPS {
     }
 
     // ── Offset en stack ───────────────────────────────────────
+    private void reiniciarFrameActual() {
+        offsetVars.clear();
+        tipoVars.clear();
+        offsetActual = 0;
+    }
 
     private int obtenerOffset(String nombre) {
         if (!offsetVars.containsKey(nombre)) {
@@ -549,19 +652,28 @@ public class GeneradorMIPS {
         return "float".equals(tipoVars.get(val));
     }
 
-    private boolean esFloatLiteral(String s) {
-        try {
-            Double.parseDouble(s);
-            return s.contains(".") || s.toLowerCase().contains("e");
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    private float evaluarFraccionLiteral(String s) {
+        String[] partes = s.split("//");
+
+        float numerador = Float.parseFloat(partes[0]);
+        float denominador = Float.parseFloat(partes[1]);
+
+        return numerador / denominador;
     }
 
     private boolean esEnteroLiteral(String s) {
         try {
             Integer.parseInt(s);
             return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean esFloatLiteral(String s) {
+        try {
+            Double.parseDouble(s);
+            return s.contains(".");
         } catch (NumberFormatException e) {
             return false;
         }
@@ -701,21 +813,29 @@ public class GeneradorMIPS {
     private void Escribir_llamada(String fuente, String dest) {
         String resto = fuente.substring("call ".length()).trim();
         String[] partes = resto.split(",", 2);
-
         String nombreFuncion = partes[0].trim();
 
-        String[] regsArgs = { "$a0", "$a1", "$a2", "$a3" };
+        String[] regsInt   = { "$a0", "$a1", "$a2", "$a3" };
+        String[] regsFloat = { "$f12", "$f14", "$f16", "$f18" };
 
-        for (int i = 0; i < parametrosPendientes.size() && i < regsArgs.length; i++) {
-            cargarInt(parametrosPendientes.get(i), regsArgs[i]);
+        int contInt = 0, contFloat = 0;
+
+        for (String param : parametrosPendientes) {
+            if (esFloat(param)) {
+                if (contFloat < regsFloat.length)
+                    cargarFloat(param, regsFloat[contFloat++]);
+            } else {
+                if (contInt < regsInt.length)
+                    cargarInt(param, regsInt[contInt++]);
+            }
         }
 
         parametrosPendientes.clear();
-
         text.append("    jal ").append(nombreFuncion).append("\n");
 
-        String tipoRetorno = tipoVars.getOrDefault(nombreFuncion, "int");
+        String tipoRetorno = tipoRetornoFunciones.getOrDefault(nombreFuncion, "int");
         tipoVars.put(dest, tipoRetorno);
+
         if ("float".equals(tipoRetorno)) {
             guardarFloat("$f0", dest);
         } else {
@@ -725,38 +845,44 @@ public class GeneradorMIPS {
 
     private void escribirReturn(String inst) {
         String valor = inst.substring("return ".length()).trim();
+        String tipo = obtenerTipoValor(valor);
 
-        if (esFloat(valor)) {
-            cargarFloat(valor, "$f0");   // retorno float en $f0
-        } else {
-            cargarInt(valor, "$v0");     // retorno int en $v0
+        if (funcionActualMips != null && !funcionActualMips.isEmpty() && !"main".equals(funcionActualMips)) {
+            tipoRetornoFunciones.put(funcionActualMips, tipo);
         }
 
-        text.append("    lw $ra, 0($fp)\n");
+        if ("float".equals(tipo)) {
+            cargarFloat(valor, "$f0");
+            emitirEpilogoFuncion();
+        } else {
+            cargarInt(valor, "$v0");
+            emitirEpilogoFuncion();
+        }
+    }
+
+    private void emitirEpilogoFuncion() {
         text.append("    move $sp, $fp\n");
-        text.append("    addiu $sp, $sp, 4\n");
+        text.append("    lw $fp, 0($sp)\n");
+        text.append("    lw $ra, 4($sp)\n");
+        text.append("    addiu $sp, $sp, 8\n");
         text.append("    jr $ra\n");
     }
 
     private void escribirParamDef(String inst) {
         String[] partes = inst.split("\\s+");
-
         if (partes.length < 3) {
-            text.append("    # ERROR param_def mal formado: ")
-                    .append(inst)
-                    .append("\n");
+            text.append("    # ERROR param_def mal formado: ").append(inst).append("\n");
             return;
         }
 
-        String tipo = partes[1].trim();
+        String tipo   = partes[1].trim();
         String nombre = partes[2].trim();
 
-        String[] registrosParametros = { "$a0", "$a1", "$a2", "$a3" };
+        String[] regsInt   = { "$a0", "$a1", "$a2", "$a3" };
+        String[] regsFloat = { "$f12", "$f14", "$f16", "$f18" };
 
-        if (indiceParametroActual >= registrosParametros.length) {
-            text.append("    # ERROR: demasiados parametros para ")
-                    .append(nombre)
-                    .append("\n");
+        if (indiceParametroActual >= regsInt.length) {
+            text.append("    # ERROR: demasiados parametros para ").append(nombre).append("\n");
             return;
         }
 
@@ -765,18 +891,18 @@ public class GeneradorMIPS {
         tipoVars.put(nombre, tipo);
 
         text.append("    addiu $sp, $sp, -4  # parametro ")
-                .append(nombre)
-                .append(" (")
-                .append(tipo)
-                .append(") @ ")
-                .append(offsetActual)
-                .append("($fp)\n");
+            .append(nombre).append(" (").append(tipo)
+            .append(") @ ").append(offsetActual).append("($fp)\n");
 
-        text.append("    sw ")
-                .append(registrosParametros[indiceParametroActual])
-                .append(", ")
-                .append(offsetActual)
-                .append("($fp)\n");
+        if ("float".equals(tipo)) {
+            text.append("    s.s ")
+                .append(regsFloat[indiceParametroActual])
+                .append(", ").append(offsetActual).append("($fp)\n");
+        } else {
+            text.append("    sw ")
+                .append(regsInt[indiceParametroActual])
+                .append(", ").append(offsetActual).append("($fp)\n");
+        }
 
         indiceParametroActual++;
     }
@@ -793,17 +919,9 @@ public class GeneradorMIPS {
         }
 
         else if ("string".equals(tipo)) {
-            String etiqueta = etiquetasCadenas.get(valor);
-
-            if (etiqueta != null) {
-                text.append("    la $a0, ").append(etiqueta).append("\n");
-                text.append("    li $v0, 4\n");
-                text.append("    syscall\n");
-            } else {
-                text.append("    # ERROR: string sin etiqueta: ")
-                        .append(valor)
-                        .append("\n");
-            }
+            cargarInt(valor, "$a0");
+            text.append("    li $v0, 4\n");
+            text.append("    syscall\n");
         }
 
         else if (esCharLiteral(valor)) {
@@ -869,4 +987,68 @@ public class GeneradorMIPS {
         // Reutiliza el método de cin
         escribirCin("cin " + destino);
     }
+
+    private String obtenerTipoValor(String valor) {
+        if (esCadenaLiteral(valor)) {
+            return "string";
+        }
+
+        if (esFloatLiteral(valor)) {
+            return "float";
+        }
+
+        if (esCharLiteral(valor)) {
+            return "char";
+        }
+
+        if ("true".equals(valor) || "false".equals(valor)) {
+            return "bool";
+        }
+
+        return tipoVars.getOrDefault(valor, "int");
+    }
+    private boolean esExponencialEnteroLiteral(String val) {
+    if (val == null) return false;
+
+    String s = val.toLowerCase();
+
+    if (!s.contains("e")) return false;
+
+    String[] partes = s.split("e");
+
+    if (partes.length != 2) return false;
+
+    try {
+        Integer.parseInt(partes[0]);
+        Integer.parseInt(partes[1]);
+        return true;
+    } catch (NumberFormatException e) {
+        return false;
+    }
+}
+
+private void emitirExponencialBase10(String val, String regDestino) {
+    String[] partes = val.toLowerCase().split("e");
+
+    int coeficiente = Integer.parseInt(partes[0]);
+    int exponente = Integer.parseInt(partes[1]);
+
+    String regBase = "$t6";
+    String regExp = "$t7";
+
+    String lblInicio = "exp10_loop_" + contadorEtiquetas++;
+    String lblFin = "exp10_end_" + contadorEtiquetas++;
+
+    text.append("    li ").append(regDestino).append(", ").append(coeficiente).append("\n");
+    text.append("    li ").append(regBase).append(", 10\n");
+    text.append("    li ").append(regExp).append(", ").append(exponente).append("\n");
+
+    text.append(lblInicio).append(":\n");
+    text.append("    beq ").append(regExp).append(", $zero, ").append(lblFin).append("\n");
+    text.append("    mul ").append(regDestino).append(", ").append(regDestino).append(", ").append(regBase).append("\n");
+    text.append("    addi ").append(regExp).append(", ").append(regExp).append(", -1\n");
+    text.append("    j ").append(lblInicio).append("\n");
+
+    text.append(lblFin).append(":\n");
+}
 }
