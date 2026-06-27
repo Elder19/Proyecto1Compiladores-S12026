@@ -3474,16 +3474,8 @@ void marcarCodigoInalcanzable(String motivo) {
 		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        String lexema = v.toString();
-        String[] partes = lexema.split("e");
+    RESULT = new Resultado(v.toString(), "int");
 
-        int base = Integer.parseInt(partes[0]);
-        int exponente = Integer.parseInt(partes[1]);
-
-        int valor = (int) Math.pow(base, exponente);
-
-        RESULT = new Resultado(String.valueOf(valor), "int");
-    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("literal_numerico",12, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
@@ -3496,16 +3488,8 @@ void marcarCodigoInalcanzable(String motivo) {
 		int vright = ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()).right;
 		Object v = (Object)((java_cup.runtime.Symbol) CUP$MyParser$stack.peek()).value;
 		
-        String lexema = v.toString();
-        String[] partes = lexema.split("//");
+    RESULT = new Resultado(v.toString(), "float");
 
-        float numerador = Float.parseFloat(partes[0]);
-        float denominador = Float.parseFloat(partes[1]);
-
-        float valor = numerador / denominador;
-
-        RESULT = new Resultado(String.valueOf(valor), "float");
-    
               CUP$MyParser$result = parser.getSymbolFactory().newSymbol("literal_numerico",12, ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$MyParser$stack.peek()), RESULT);
             }
           return CUP$MyParser$result;
