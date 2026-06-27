@@ -2,6 +2,8 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
+import java.util.Scanner;
+import java.util.List;
 
 /**
  * Clase principal del proyecto.
@@ -25,27 +27,35 @@ import java.util.*;
 public class Main {
 
     private static final String SEP = System.getProperty("path.separator");
+    private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) {
-        try {
-            limpiarArchivosAnteriores();
+private static boolean analisisEjecutado = false;
+private static String carpetaActual = "EjemplosPruebas";
+private static String ultimoArchivoMips = null;
+private static boolean huboErrores = false;
 
-            generarLexer("src/lexer/Lexer.flex");
-            generarParser("src/parser/Parser.cup");
+public static void main(String[] args) {
+    try {
+        limpiarArchivosAnteriores();
 
-            compilarProyecto();
-
-            ejecutarEjemplos("EjemplosPruebas");
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        generarLexer("src/lexer/Lexer.flex");
+        generarParser("src/parser/Parser.cup");
+        compilarProyecto();
+        opcionEjecutarAnalisis();
+        if (huboErrores) {
+            System.out.println("Se encontraron errores durante el analisis revise los resultados.");
+       
+        } else {
+            System.out.println("Analisis completado sin errores.");
         }
+        ejecutarMenu();
+    } catch (Exception e) {
+        e.printStackTrace();
     }
-
+}
     // ============================================================
     // LIMPIEZA DE ARCHIVOS GENERADOS
     // ============================================================
-
     /**
      * Elimina los archivos Java generados en compilaciones anteriores.
      */
@@ -187,7 +197,7 @@ public class Main {
 
         Class<?> tablaClass           = Class.forName("TablaSimbolos",    true, loader);
         Class<?> erroresSemanticosClass = Class.forName("ErroresSemanticos", true, loader);
-        Class<?> codigoIntermedioClass  = Class.forName("CodigoIntermedio",  true, loader); // ← nueva
+        Class<?> codigoIntermedioClass  = Class.forName("CodigoIntermedio",  true, loader); 
         Class<?> lexerClass           = Class.forName("Lexer",            true, loader);
         Class<?> parserClass          = Class.forName("MyParser",         true, loader);
         Class<?> symClass             = Class.forName("sym",              true, loader);
@@ -245,7 +255,6 @@ private static void procesarArchivo(
     erroresSemanticosClass.getMethod("limpiar").invoke(null);
     codigoIntermedioClass.getMethod("limpiar").invoke(null);
 
-    imprimirEncabezado(archivo.getName());
 
     List<?> erroresLexicos = limpiarLista(campoErroresLex, null);
 
@@ -257,18 +266,12 @@ private static void procesarArchivo(
             terminalNames
     );
 
-    mostrarResumenLexico(erroresLexicos);
-
     List<?> erroresSintacticos = realizarAnalisisSintactico(
             archivo,
             lexerClass,
             parserClass,
             erroresLexicos
     );
-
-    mostrarTablaSimbolos(tablaClass);
-
-    mostrarResumenSintactico(erroresSintacticos);
 
     // false = imprime solo un error por línea
     // true  = imprime todos los errores
@@ -299,8 +302,12 @@ private static void procesarArchivo(
                     || (boolean) erroresSemanticosClass
                             .getMethod("hayErrores")
                             .invoke(null);
+    
+    huboErrores = huboErrores || hayErrores;
+
 
     if (hayErrores) {
+       
         System.out.println("\n[ CÓDIGO INTERMEDIO ]");
         System.out.println("──────────────────────────────────────────────────────");
         System.out.println(" No se genera código intermedio por presencia de errores.");
@@ -312,7 +319,7 @@ private static void procesarArchivo(
     if (!hayErrores) {
         String nombreSinExt = archivo.getName().replace(".txt", "");
         String rutaMips = "generated/" + nombreSinExt + ".asm";
-
+        ultimoArchivoMips = rutaMips;
         Class<?> generadorClass = Class.forName("GeneradorMIPS", true, loader);
         // instanciar con la lista de instrucciones
         List<String> instrucciones = (List<String>) codigoIntermedioClass
@@ -673,10 +680,186 @@ private static void procesarArchivo(
 
         pb.start().waitFor();
     }
+  
+   
+
+private static void imprimirSeparador() {
+    System.out.println("──────────────────────────────────────────────");
+}
+
+private static void mostrarMenu() {
+    imprimirTitulo("COMPILADOR - PROYECTO FINAL");
+
+   
+    System.out.println("1. Ver errores");
+    System.out.println("2. Ver tabla de símbolos");
+    System.out.println("3. Ver código intermedio");
+    System.out.println("4. Ver código MIPS generado");
+    System.out.println("0. Salir");
+
+    System.out.println("──────────────────────────────────────────────");
+    System.out.print("Seleccione una opción: ");
+}
+
+private static void imprimirTitulo(String titulo) {
+    System.out.println();
+    System.out.println("------------------------------------------------");
+    System.out.printf (" %-44s %n", titulo);
+    System.out.println("------------------------------------------------");
+}
+
+private static void pausar() {
+    System.out.println();
+    System.out.print("Presione ENTER para continuar...");
+    scanner.nextLine();
+}
+private static void ejecutarMenu() {
+    boolean salir = false;
+   
+
+    while (!salir) {
+        mostrarMenu();
+         if (huboerrores) {
+        System.out.println("Se encontraron errores durante el análisis. Revise los resultados.");
+
+        opcion = "1"; // Forzar opción 1 si hubo errores
+        huboerrores = false;
+    } else {
+         String opcion = scanner.nextLine().trim();
+    }
+      
+        
+        try {
+            switch (opcion) {
+                    
+                case "1":
+                    opcionVerErrores();
+                    pausar();
+                    break;
+
+                case "2":
+                    opcionVerTablaSimbolos();
+                    pausar();
+                    break;
+
+                case "3":
+                    opcionVerCodigoIntermedio();
+                    pausar();
+                    break;
+
+                case "4":
+                    opcionVerCodigoMIPS();
+                    pausar();
+                    break;
+
+                case "0":
+                    imprimirTitulo("SALIENDO DEL COMPILADOR");
+                    salir = true;
+                    break;
+
+                default:
+                    System.out.println("Opción inválida.");
+                    pausar();
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Error ejecutando la opción: " + e.getMessage());
+            e.printStackTrace();
+            pausar();
+        }
+    }
+}
+private static void opcionEjecutarAnalisis() {
+
+    try {
+         huboErrores = false;
+         
+        analisisEjecutado = true;
+        ejecutarEjemplos(carpetaActual);
+
+
+        System.out.println();
+        System.out.println("Análisis ejecutado correctamente.");
+
+    } catch (Exception e) {
+        analisisEjecutado = false;
+
+        System.out.println();
+        System.out.println("Error al ejecutar el análisis:");
+        System.out.println(e.getMessage());
+    }
+}
+private static void opcionVerErrores() {
+    imprimirTitulo("ERRORES");
+
+    if (!analisisEjecutado) {
+        System.out.println("Primero ejecute la opción 1.");
+        return;
+    }
+
+    ErroresSemanticos.imprimir();
+}
+private static void opcionVerTablaSimbolos() {
+    imprimirTitulo("TABLA DE SÍMBOLOS");
+
+    if (!analisisEjecutado) {
+        System.out.println("Primero ejecute la opción 1.");
+        return;
+    }
+
+    TablaSimbolos.imprimir();
+}
+private static void opcionVerCodigoIntermedio() {
+    imprimirTitulo("CÓDIGO INTERMEDIO");
+
+    if (!analisisEjecutado) {
+        System.out.println("Primero ejecute la opción 1.");
+        return;
+    }
+
+    List<String> instrucciones = CodigoIntermedio.getInstrucciones();
+
+    if (instrucciones.isEmpty()) {
+        System.out.println("No se generó código intermedio.");
+        return;
+    }
+
+    int num = 1;
+    for (String inst : instrucciones) {
+        System.out.printf("%3d.  %s%n", num++, inst);
+    }
+}
+private static void opcionVerCodigoMIPS() throws Exception {
+    imprimirTitulo("CÓDIGO MIPS GENERADO");
+
+    if (!analisisEjecutado) {
+        System.out.println("Primero ejecute la opción 1.");
+        return;
+    }
+
+    if (ultimoArchivoMips == null) {
+        System.out.println("No hay archivo MIPS generado.");
+        return;
+    }
+
+    File archivo = new File(ultimoArchivoMips);
+
+    if (!archivo.exists()) {
+        System.out.println("No se encontró el archivo: " + ultimoArchivoMips);
+        return;
+    }
+
+    try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+        String linea;
+        while ((linea = br.readLine()) != null) {
+            System.out.println(linea);
+        }
+    }
+}
 }
 
 /*
- 
+
 
     cd Proyecto
 
