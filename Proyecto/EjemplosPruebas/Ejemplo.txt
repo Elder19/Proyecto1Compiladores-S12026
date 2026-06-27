@@ -1,8 +1,8 @@
 empty ~ __main__ <| |> |:
     int ~ base <- 2 !
     int ~ exp <- 3 !
-    int ~ resultado 
-    0
+    int ~ resultado !
+    
     resultado <- base ^ exp !
     cout <| resultado |> !
 :|
