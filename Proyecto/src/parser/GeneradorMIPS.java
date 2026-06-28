@@ -502,26 +502,38 @@ public class GeneradorMIPS {
                         return;
                     }
 
-                    if (flt) {// si alguno de los operandos es float, se realiza la operación como flotante
+                    if (flt) {
                         cargarFloat(izq, "$f0");
                         cargarFloat(der, "$f1");
-                        String mips;
+
                         switch (opArit.trim()) {
                             case "+":
-                                mips = "add.s";// suma flotante
+                                text.append("    add.s $f2, $f0, $f1\n");
                                 break;
+
                             case "-":
-                                mips = "sub.s";// resta flotante
+                                text.append("    sub.s $f2, $f0, $f1\n");
                                 break;
+
                             case "*":
-                                mips = "mul.s";// multiplicación flotante
+                                text.append("    mul.s $f2, $f0, $f1\n");
                                 break;
-                            default:
-                                mips = "div.s";// división flotante
+
+                            case "/":
+                                text.append("    div.s $f2, $f0, $f1\n");
+                                break;
+
+                            case "%":
+                                // float modulo:
+                                // residuo = izq - trunc(izq / der) * der
+                                text.append("    div.s $f2, $f0, $f1\n");       // f2 = izq / der
+                                text.append("    trunc.w.s $f3, $f2\n");        // f3 = trunc(f2)
+                                text.append("    cvt.s.w $f3, $f3\n");          // f3 = float(f3)
+                                text.append("    mul.s $f4, $f3, $f1\n");       // f4 = trunciente * der
+                                text.append("    sub.s $f2, $f0, $f4\n");       // f2 = izq - f4
                                 break;
                         }
-                        text.append("    ").append(mips).append(" $f2, $f0, $f1\n");// realiza la operación flotante
-                                                                                    // y guarda el resultado en $f2
+
                         guardarFloat("$f2", dest);
                     } else {
                         cargarInt(izq, "$t0");

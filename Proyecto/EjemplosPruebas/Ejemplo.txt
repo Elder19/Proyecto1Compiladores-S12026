@@ -1,8 +1,91 @@
-empty ~ __main__ <| |> |:
-    int ~ base <- 2 !
-    int ~ exp <- 3 !
-    int ~ resultado !
-    
-    resultado <- base ^ exp !
-    cout <| resultado |> !
+int~suma <| int~a, int~b |> |:
+    return ~ a + b!
+:|
+
+int~multiplicar <| int~a, int~b |> |:
+    return ~ a * b!
+:|
+
+float~promedioFlotante <| float~x, float~y, float~z |> |:
+    float~total!
+    total <- x + y!
+    total <- total + z!
+    return ~ total!
+:|
+
+float~escalar <| float~v, int~factor |> |:
+    float~resultado!
+    resultado <- v + v!
+    return ~ resultado!
+:|
+
+empty~__main__ <| |> |:
+    int~arregloInt<<2>><<3>>!
+    float~arregloFloat<<2>><<2>>!
+
+    int~a <- 10!
+    int~b <- 20!
+    int~c <- 30!
+
+    arregloInt<<0>><<0>> <- suma<|a, b|>!
+    arregloInt<<0>><<1>> <- suma<|b, c|>!
+    arregloInt<<0>><<2>> <- multiplicar<|a, b|>!
+    arregloInt<<1>><<0>> <- multiplicar<|b, c|>!
+    arregloInt<<1>><<1>> <- suma<|multiplicar<|a,b|>, suma<|b,c|>|>!
+    arregloInt<<1>><<2>> <- multiplicar<|suma<|a,b|>, suma<|b,c|>|>!
+
+    cout<|arregloInt<<0>><<0>>|>!
+    cout<|arregloInt<<0>><<1>>|>!
+    cout<|arregloInt<<0>><<2>>|>!
+    cout<|arregloInt<<1>><<0>>|>!
+    cout<|arregloInt<<1>><<1>>|>!
+    cout<|arregloInt<<1>><<2>>|>!
+
+    float~x <- 1.5!
+    float~y <- 2.5!
+    float~z <- 3.5!
+
+    arregloFloat<<0>><<0>> <- promedioFlotante<|x, y, z|>!
+    arregloFloat<<0>><<1>> <- promedioFlotante<|y, z, x|>!
+    arregloFloat<<1>><<0>> <- promedioFlotante<|z, x, y|>!
+    arregloFloat<<1>><<1>> <- promedioFlotante<|x, x, x|>!
+
+    cout<|arregloFloat<<0>><<0>>|>!
+    cout<|arregloFloat<<0>><<1>>|>!
+    cout<|arregloFloat<<1>><<0>>|>!
+    cout<|arregloFloat<<1>><<1>>|>!
+
+    int~resultadoInt <- suma<|multiplicar<|a,b|>, multiplicar<|b,c|>|> + suma<|a,c|>!
+    cout<|resultadoInt|>!
+
+    float~resultadoFloat <- promedioFlotante<|x,y,z|> + promedioFlotante<|z,y,x|>!
+    cout<|resultadoFloat|>!
+
+    int~contador <- 0!
+    do |:
+        contador <- contador + 1!
+        cout<|contador|>!
+    :| while <| less_t<|contador, 5|> |>!
+
+    int~i <- 0!
+    do |:
+        int~fila <- arregloInt<<0>><<i>>!
+        cout<|fila|>!
+        i <- i + 1!
+    :| while <| less_t<|i, 3|> |>!
+
+    if <| equal<|arregloInt<<0>><<0>>, 30|> |> |: 
+        cout<|arregloInt<<1>><<1>>|>!
+    :|
+
+    int~sw <- arregloInt<<0>><<2>>!
+    switch <|sw|> |:
+        case ~ 200 :
+            cout<|arregloInt<<1>><<0>>|>!
+        break!
+        case ~ 500 :
+            cout<|arregloInt<<1>><<2>>|>!
+        break!
+    :|
+
 :|

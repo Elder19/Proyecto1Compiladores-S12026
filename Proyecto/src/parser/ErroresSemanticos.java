@@ -139,20 +139,25 @@ public class ErroresSemanticos {
         return "error";
     }
 
-    // El módulo solo permite enteros.
+    // El módulo permite int % int y float % float.
+    // No se permite mezclar int con float porque el lenguaje es de tipado fuerte.
     if ("%".equals(op)) {
-        if (!"int".equals(t1)) {
-            agregar(
-                "Error semántico en línea " + linea + ", columna " + columna +
-                ": el operador '%' solo permite operandos de tipo int. Se recibió '" +
-                t1 + "'."
-            );
-            return "error";
+        if ("int".equals(t1)) {
+            return "int";
         }
 
-        return "int";
-    }
+        if ("float".equals(t1)) {
+            return "float";
+        }
 
+        agregar(
+            "Error semántico en línea " + linea + ", columna " + columna +
+            ": el operador '%' solo permite operandos int o float. Se recibió '" +
+            t1 + "'."
+        );
+
+        return "error";
+    }
     // División normal:
     // int / int -> int
     // float / float -> float

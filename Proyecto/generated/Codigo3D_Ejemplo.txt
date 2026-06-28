@@ -1,15 +1,323 @@
-  1.  main:
-  2.  t1 = 2
-  3.  var int base
-  4.  base = t1
-  5.  t2 = 3
-  6.  var int exp
-  7.  exp = t2
-  8.  var int resultado
-  9.  t3 = base
- 10.  t4 = exp
- 11.  t5 = t3 ^ t4
- 12.  resultado = t5
- 13.  t6 = resultado
- 14.  print t6
- 15.  main_end:
+  1.  func int suma:
+  2.  param_def int a
+  3.  param_def int b
+  4.  t1 = a
+  5.  t2 = b
+  6.  t3 = t1 + t2
+  7.  return t3
+  8.  end func suma
+  9.  func int multiplicar:
+ 10.  param_def int a
+ 11.  param_def int b
+ 12.  t4 = a
+ 13.  t5 = b
+ 14.  t6 = t4 * t5
+ 15.  return t6
+ 16.  end func multiplicar
+ 17.  func float promedioFlotante:
+ 18.  param_def float x
+ 19.  param_def float y
+ 20.  param_def float z
+ 21.  var float total
+ 22.  t7 = x
+ 23.  t8 = y
+ 24.  t9 = t7 + t8
+ 25.  total = t9
+ 26.  t10 = total
+ 27.  t11 = z
+ 28.  t12 = t10 + t11
+ 29.  total = t12
+ 30.  t13 = total
+ 31.  return t13
+ 32.  end func promedioFlotante
+ 33.  func float escalar:
+ 34.  param_def float v
+ 35.  param_def int factor
+ 36.  var float resultado
+ 37.  t14 = v
+ 38.  t15 = v
+ 39.  t16 = t14 + t15
+ 40.  resultado = t16
+ 41.  t17 = resultado
+ 42.  return t17
+ 43.  end func escalar
+ 44.  main:
+ 45.  var int[] arregloInt 2,3
+ 46.  var float[] arregloFloat 2,2
+ 47.  t18 = 10
+ 48.  var int a
+ 49.  a = t18
+ 50.  t19 = 20
+ 51.  var int b
+ 52.  b = t19
+ 53.  t20 = 30
+ 54.  var int c
+ 55.  c = t20
+ 56.  t21 = 0
+ 57.  t22 = 0
+ 58.  t23 = a
+ 59.  t24 = b
+ 60.  param t23
+ 61.  param t24
+ 62.  t25 = call suma, 2
+ 63.  arregloInt[t21][t22] = t25
+ 64.  t26 = 0
+ 65.  t27 = 1
+ 66.  t28 = b
+ 67.  t29 = c
+ 68.  param t28
+ 69.  param t29
+ 70.  t30 = call suma, 2
+ 71.  arregloInt[t26][t27] = t30
+ 72.  t31 = 0
+ 73.  t32 = 2
+ 74.  t33 = a
+ 75.  t34 = b
+ 76.  param t33
+ 77.  param t34
+ 78.  t35 = call multiplicar, 2
+ 79.  arregloInt[t31][t32] = t35
+ 80.  t36 = 1
+ 81.  t37 = 0
+ 82.  t38 = b
+ 83.  t39 = c
+ 84.  param t38
+ 85.  param t39
+ 86.  t40 = call multiplicar, 2
+ 87.  arregloInt[t36][t37] = t40
+ 88.  t41 = 1
+ 89.  t42 = 1
+ 90.  t43 = a
+ 91.  t44 = b
+ 92.  param t43
+ 93.  param t44
+ 94.  t45 = call multiplicar, 2
+ 95.  t46 = b
+ 96.  t47 = c
+ 97.  param t46
+ 98.  param t47
+ 99.  t48 = call suma, 2
+100.  param t45
+101.  param t48
+102.  t49 = call suma, 2
+103.  arregloInt[t41][t42] = t49
+104.  t50 = 1
+105.  t51 = 2
+106.  t52 = a
+107.  t53 = b
+108.  param t52
+109.  param t53
+110.  t54 = call suma, 2
+111.  t55 = b
+112.  t56 = c
+113.  param t55
+114.  param t56
+115.  t57 = call suma, 2
+116.  param t54
+117.  param t57
+118.  t58 = call multiplicar, 2
+119.  arregloInt[t50][t51] = t58
+120.  t59 = 0
+121.  t60 = 0
+122.  t61 = arregloInt[t59][t60]
+123.  print t61
+124.  t62 = 0
+125.  t63 = 1
+126.  t64 = arregloInt[t62][t63]
+127.  print t64
+128.  t65 = 0
+129.  t66 = 2
+130.  t67 = arregloInt[t65][t66]
+131.  print t67
+132.  t68 = 1
+133.  t69 = 0
+134.  t70 = arregloInt[t68][t69]
+135.  print t70
+136.  t71 = 1
+137.  t72 = 1
+138.  t73 = arregloInt[t71][t72]
+139.  print t73
+140.  t74 = 1
+141.  t75 = 2
+142.  t76 = arregloInt[t74][t75]
+143.  print t76
+144.  t77 = 1.5
+145.  var float x
+146.  x = t77
+147.  t78 = 2.5
+148.  var float y
+149.  y = t78
+150.  t79 = 3.5
+151.  var float z
+152.  z = t79
+153.  t80 = 0
+154.  t81 = 0
+155.  t82 = x
+156.  t83 = y
+157.  t84 = z
+158.  param t82
+159.  param t83
+160.  param t84
+161.  t85 = call promedioFlotante, 3
+162.  arregloFloat[t80][t81] = t85
+163.  t86 = 0
+164.  t87 = 1
+165.  t88 = y
+166.  t89 = z
+167.  t90 = x
+168.  param t88
+169.  param t89
+170.  param t90
+171.  t91 = call promedioFlotante, 3
+172.  arregloFloat[t86][t87] = t91
+173.  t92 = 1
+174.  t93 = 0
+175.  t94 = z
+176.  t95 = x
+177.  t96 = y
+178.  param t94
+179.  param t95
+180.  param t96
+181.  t97 = call promedioFlotante, 3
+182.  arregloFloat[t92][t93] = t97
+183.  t98 = 1
+184.  t99 = 1
+185.  t100 = x
+186.  t101 = x
+187.  t102 = x
+188.  param t100
+189.  param t101
+190.  param t102
+191.  t103 = call promedioFlotante, 3
+192.  arregloFloat[t98][t99] = t103
+193.  t104 = 0
+194.  t105 = 0
+195.  t106 = arregloFloat[t104][t105]
+196.  print t106
+197.  t107 = 0
+198.  t108 = 1
+199.  t109 = arregloFloat[t107][t108]
+200.  print t109
+201.  t110 = 1
+202.  t111 = 0
+203.  t112 = arregloFloat[t110][t111]
+204.  print t112
+205.  t113 = 1
+206.  t114 = 1
+207.  t115 = arregloFloat[t113][t114]
+208.  print t115
+209.  t116 = a
+210.  t117 = b
+211.  param t116
+212.  param t117
+213.  t118 = call multiplicar, 2
+214.  t119 = b
+215.  t120 = c
+216.  param t119
+217.  param t120
+218.  t121 = call multiplicar, 2
+219.  param t118
+220.  param t121
+221.  t122 = call suma, 2
+222.  t123 = a
+223.  t124 = c
+224.  param t123
+225.  param t124
+226.  t125 = call suma, 2
+227.  t126 = t122 + t125
+228.  var int resultadoInt
+229.  resultadoInt = t126
+230.  t127 = resultadoInt
+231.  print t127
+232.  t128 = x
+233.  t129 = y
+234.  t130 = z
+235.  param t128
+236.  param t129
+237.  param t130
+238.  t131 = call promedioFlotante, 3
+239.  t132 = z
+240.  t133 = y
+241.  t134 = x
+242.  param t132
+243.  param t133
+244.  param t134
+245.  t135 = call promedioFlotante, 3
+246.  t136 = t131 + t135
+247.  var float resultadoFloat
+248.  resultadoFloat = t136
+249.  t137 = resultadoFloat
+250.  print t137
+251.  t138 = 0
+252.  var int contador
+253.  contador = t138
+254.  do_start_1:
+255.  t139 = contador
+256.  t140 = 1
+257.  t141 = t139 + t140
+258.  contador = t141
+259.  t142 = contador
+260.  print t142
+261.  t143 = contador
+262.  t144 = 5
+263.  t145 = t143 < t144
+264.  if_true t145 goto do_start_1
+265.  do_end_1:
+266.  t146 = 0
+267.  var int i
+268.  i = t146
+269.  do_start_2:
+270.  t147 = 0
+271.  t148 = i
+272.  t149 = arregloInt[t147][t148]
+273.  var int fila
+274.  fila = t149
+275.  t150 = fila
+276.  print t150
+277.  t151 = i
+278.  t152 = 1
+279.  t153 = t151 + t152
+280.  i = t153
+281.  t154 = i
+282.  t155 = 3
+283.  t156 = t154 < t155
+284.  if_true t156 goto do_start_2
+285.  do_end_2:
+286.  t157 = 0
+287.  t158 = 0
+288.  t159 = arregloInt[t157][t158]
+289.  t160 = 30
+290.  t161 = t159 == t160
+291.  if_false t161 goto if_else_1
+292.  t162 = 1
+293.  t163 = 1
+294.  t164 = arregloInt[t162][t163]
+295.  print t164
+296.  goto if_end_1
+297.  if_else_1:
+298.  if_end_1:
+299.  t165 = 0
+300.  t166 = 2
+301.  t167 = arregloInt[t165][t166]
+302.  var int sw
+303.  sw = t167
+304.  t168 = sw
+305.  switch_case_1:
+306.  t169 = t168 == 200
+307.  if_false t169 goto switch_case_2
+308.  t170 = 1
+309.  t171 = 0
+310.  t172 = arregloInt[t170][t171]
+311.  print t172
+312.  goto switch_end_1
+313.  switch_case_2:
+314.  t173 = t168 == 500
+315.  if_false t173 goto switch_case_3
+316.  t174 = 1
+317.  t175 = 2
+318.  t176 = arregloInt[t174][t175]
+319.  print t176
+320.  goto switch_end_1
+321.  switch_case_3:
+322.  switch_end_1:
+323.  main_end:
