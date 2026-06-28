@@ -26,7 +26,9 @@ public class GeneradorMIPS {
     private int contadorLabelsMips = 0;
     // contador de temporales para generar etiquetas únicas
     private java.util.List<String> parametrosPendientes = new java.util.ArrayList<>();// contador de parametros
-    private int indiceParametroActual = 0; // funciones
+    private int indiceParametroIntActual = 0;
+    private int indiceParametroFloatActual = 0;
+    private int indiceParametroExtraActual = 0;
 
     private HashMap<String, String> tipoRetornoFunciones = new HashMap<>();
     private String funcionActualMips = "";
@@ -191,7 +193,9 @@ public class GeneradorMIPS {
             funcionActualMips = nombreFuncion;
             tipoRetornoFunciones.put(nombreFuncion, tipoFuncion);
 
-            indiceParametroActual = 0;
+            indiceParametroIntActual = 0;
+            indiceParametroFloatActual = 0;
+            indiceParametroExtraActual = 0;
             reiniciarFrameActual();
             // Generar el código MIPS para la declaración de la función
             // incluyendo la reserva de espacio en el stack y el almacenamiento de los
@@ -214,9 +218,10 @@ public class GeneradorMIPS {
 
             if (etiqueta.equals("main")) {
                 funcionActualMips = "main";
-                indiceParametroActual = 0;
+                indiceParametroIntActual = 0;
+                indiceParametroFloatActual = 0;
+                indiceParametroExtraActual = 0;
                 reiniciarFrameActual();
-
                 text.append("\nmain:\n");
                 text.append("    move $fp, $sp\n");
             } else if (etiqueta.equals("main_end")) {
@@ -370,6 +375,15 @@ public class GeneradorMIPS {
                 etiquetasCadenas.put(dest, etiqueta);
 
                 text.append("    la $t0, ").append(etiqueta).append("\n");
+                guardarInt("$t0", dest);
+
+                return;
+            }
+            // ── asignación de char literal: t1 = 'h' ─────────
+            if (esCharLiteral(fuente)) {
+                tipoVars.put(dest, "char");
+
+                cargarInt(fuente, "$t0");
                 guardarInt("$t0", dest);
 
                 return;
@@ -1026,20 +1040,49 @@ public class GeneradorMIPS {
         String[] regsInt = { "$a0", "$a1", "$a2", "$a3" };
         String[] regsFloat = { "$f12", "$f14", "$f16", "$f18" };
 
-        int contInt = 0, contFloat = 0;
+        int contInt = 0;
+        int contFloat = 0;
+
+        java.util.List<String> parametrosExtra = new java.util.ArrayList<>();
 
         for (String param : parametrosPendientes) {
             if (esFloat(param)) {
-                if (contFloat < regsFloat.length)
-                    cargarFloat(param, regsFloat[contFloat++]);
+                if (contFloat < regsFloat.length) {
+                    cargarFloat(param, regsFloat[contFloat]);
+                    contFloat++;
+                } else {
+                    parametrosExtra.add(param);
+                }
             } else {
-                if (contInt < regsInt.length)
-                    cargarInt(param, regsInt[contInt++]);
+                if (contInt < regsInt.length) {
+                    cargarInt(param, regsInt[contInt]);
+                    contInt++;
+                } else {
+                    parametrosExtra.add(param);
+                }
             }
         }
 
+        /*
+         * Los parámetros extra se apilan de derecha a izquierda.
+         * Así el primer parámetro extra queda en 8($fp) dentro de la función.
+         */
+        for (int i = parametrosExtra.size() - 1; i >= 0; i--) {
+            apilarParametroExtra(parametrosExtra.get(i));
+        }
+
         parametrosPendientes.clear();
+
         text.append("    jal ").append(nombreFuncion).append("\n");
+
+        /*
+         * Después de la llamada, el llamador limpia los parámetros extra.
+         */
+        if (!parametrosExtra.isEmpty()) {
+            text.append("    addiu $sp, $sp, ")
+                    .append(parametrosExtra.size() * 4)
+                    .append("\n");
+        }
 
         String tipoRetorno = tipoRetornoFunciones.getOrDefault(nombreFuncion, "int");
         tipoVars.put(dest, tipoRetorno);
@@ -1091,6 +1134,7 @@ public class GeneradorMIPS {
     // permitidos.
     private void escribirParamDef(String inst) {
         String[] partes = inst.split("\\s+");
+
         if (partes.length < 3) {
             text.append("    # ERROR param_def mal formado: ").append(inst).append("\n");
             return;
@@ -1099,35 +1143,68 @@ public class GeneradorMIPS {
         String tipo = partes[1].trim();
         String nombre = partes[2].trim();
 
-        String[] regsInt = { "$a0", "$a1", "$a2", "$a3" };// registros para parámetros enteros
-        String[] regsFloat = { "$f12", "$f14", "$f16", "$f18" };// registros para parámetros flotantes
-
-        if (indiceParametroActual >= regsInt.length) {
-            text.append("    # ERROR: demasiados parametros para ").append(nombre).append("\n");
-            return;
-        }
+        String[] regsInt = { "$a0", "$a1", "$a2", "$a3" };
+        String[] regsFloat = { "$f12", "$f14", "$f16", "$f18" };
 
         offsetActual -= 4;
-        offsetVars.put(nombre, offsetActual);
+        int offsetLocal = offsetActual;
+
+        offsetVars.put(nombre, offsetLocal);
         tipoVars.put(nombre, tipo);
-        // Se genera el código MIPS para ajustar el puntero de pila ($sp) hacia abajo
-        // para reservar espacio para el parámetro \
-        // y se indica el tipo y nombre del parámetro junto con su offset en el stack.
+
         text.append("    addiu $sp, $sp, -4  # parametro ")
-                .append(nombre).append(" (").append(tipo)
-                .append(") @ ").append(offsetActual).append("($fp)\n");
+                .append(nombre)
+                .append(" (")
+                .append(tipo)
+                .append(") @ ")
+                .append(offsetLocal)
+                .append("($fp)\n");
 
         if ("float".equals(tipo)) {
-            text.append("    s.s ")
-                    .append(regsFloat[indiceParametroActual])
-                    .append(", ").append(offsetActual).append("($fp)\n");
-        } else {
-            text.append("    sw ")
-                    .append(regsInt[indiceParametroActual])
-                    .append(", ").append(offsetActual).append("($fp)\n");
-        }
+            if (indiceParametroFloatActual < regsFloat.length) {
+                text.append("    s.s ")
+                        .append(regsFloat[indiceParametroFloatActual])
+                        .append(", ")
+                        .append(offsetLocal)
+                        .append("($fp)\n");
 
-        indiceParametroActual++;
+                indiceParametroFloatActual++;
+            } else {
+                int offsetExtra = 8 + (indiceParametroExtraActual * 4);
+
+                text.append("    l.s $f0, ")
+                        .append(offsetExtra)
+                        .append("($fp)\n");
+
+                text.append("    s.s $f0, ")
+                        .append(offsetLocal)
+                        .append("($fp)\n");
+
+                indiceParametroExtraActual++;
+            }
+        } else {
+            if (indiceParametroIntActual < regsInt.length) {
+                text.append("    sw ")
+                        .append(regsInt[indiceParametroIntActual])
+                        .append(", ")
+                        .append(offsetLocal)
+                        .append("($fp)\n");
+
+                indiceParametroIntActual++;
+            } else {
+                int offsetExtra = 8 + (indiceParametroExtraActual * 4);
+
+                text.append("    lw $t0, ")
+                        .append(offsetExtra)
+                        .append("($fp)\n");
+
+                text.append("    sw $t0, ")
+                        .append(offsetLocal)
+                        .append("($fp)\n");
+
+                indiceParametroExtraActual++;
+            }
+        }
     }
 
     // Maneja la escritura de instrucciones de entrada y salida, generando el código
@@ -1148,6 +1225,10 @@ public class GeneradorMIPS {
         else if ("string".equals(tipo)) {
             cargarInt(valor, "$a0");
             text.append("    li $v0, 4\n");
+            text.append("    syscall\n");
+        } else if ("char".equals(tipo)) {
+            cargarInt(valor, "$a0");
+            text.append("    li $v0, 11\n");
             text.append("    syscall\n");
         }
 
@@ -1315,5 +1396,17 @@ public class GeneradorMIPS {
             }
         }
         return false;
+    }
+
+    private void apilarParametroExtra(String param) {
+        if (esFloat(param)) {
+            cargarFloat(param, "$f0");
+            text.append("    addiu $sp, $sp, -4\n");
+            text.append("    s.s $f0, 0($sp)\n");
+        } else {
+            cargarInt(param, "$t0");
+            text.append("    addiu $sp, $sp, -4\n");
+            text.append("    sw $t0, 0($sp)\n");
+        }
     }
 }
